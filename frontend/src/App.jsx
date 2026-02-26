@@ -14,6 +14,7 @@ import Profile from './pages/Profile';
 // Components
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
+import Footer from './components/Footer';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
@@ -66,6 +67,8 @@ function App() {
             } />
           </Routes>
         </main>
+
+        <Footer />
 
         {/* Mobile bottom nav */}
         <BottomNav />
