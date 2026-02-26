@@ -83,6 +83,7 @@ router.post('/register', registerRules, async (req, res) => {
 
 // ── POST /api/auth/login ─────────────────────
 router.post('/login', loginRules, async (req, res) => {
+    console.log(`🔑 Login attempt for: ${req.body.email}`);
     if (!validate(req, res)) return;
 
     const { email, password } = req.body;

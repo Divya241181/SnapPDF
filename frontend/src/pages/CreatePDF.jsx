@@ -90,8 +90,21 @@ const CreatePDF = () => {
     }, []);
 
     const handleWebcamError = useCallback((err) => {
-        setError('Camera access denied or not available. Please check permissions.');
+        let errorMsg = 'Camera access denied or not available.';
+
+        // Check for insecure context (Standard browsers block camera over HTTP)
+        if (!window.isSecureContext) {
+            errorMsg = '🔴 Camera requires a SECURE connection (HTTPS). Browsers block camera access over plain HTTP (192.168.x.x).';
+            if (/Android/i.test(navigator.userAgent)) {
+                errorMsg += ' TIP: On Android Chrome, you can bypass this in chrome://flags under "Unsafely treat insecure origin as secure".';
+            }
+        } else {
+            errorMsg += ' Please ensure you have granted camera permissions in your browser settings.';
+        }
+
+        setError(errorMsg);
         setMode('upload');
+        console.error('Webcam Error:', err);
     }, []);
 
     const removeImage = (id) => {

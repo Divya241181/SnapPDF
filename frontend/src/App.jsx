@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreatePDF from './pages/CreatePDF';
+import Profile from './pages/Profile';
 
 // Components
 import Navbar from './components/Navbar';
@@ -59,6 +60,9 @@ function App() {
             } />
             <Route path="/create" element={
               <ProtectedRoute><CreatePDF /></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute><Profile /></ProtectedRoute>
             } />
           </Routes>
         </main>

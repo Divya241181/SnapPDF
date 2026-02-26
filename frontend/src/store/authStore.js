@@ -57,6 +57,19 @@ const useAuthStore = create((set) => ({
         }
     },
 
+    updateProfile: async (formData) => {
+        try {
+            // formData should be a FormData object for file upload
+            const res = await axios.put('/api/user/profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            set({ user: res.data });
+            return { success: true, user: res.data };
+        } catch (err) {
+            return { success: false, msg: err.response?.data?.msg || 'Profile update failed' };
+        }
+    },
+
     logout: () => {
         localStorage.removeItem('token');
         delete axios.defaults.headers.common['Authorization'];

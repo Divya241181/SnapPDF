@@ -30,20 +30,23 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
 
+        // Check if origin is localhost or private IP range
+        const isLocal = origin.includes('localhost') ||
+            origin.includes('127.0.0.1') ||
+            /^http:\/\/(192\.168|10|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(origin);
+
         const isAllowed = allowedOrigins.some(pattern => {
-            if (pattern.includes('^')) { // It's a regex string
-                return new RegExp(pattern).test(origin);
-            }
+            if (pattern.includes('^')) return new RegExp(pattern).test(origin);
             return pattern === origin;
         });
 
-        if (isAllowed || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        if (isAllowed || isLocal) {
             return callback(null, true);
         }
 
+        console.log(`⚠️ CORS Rejected: ${origin}`);
         callback(new Error('CORS: Origin not allowed'));
     },
     credentials: true
