@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 import { FileText, Download, Trash2, Eye, Plus, Search } from 'lucide-react';
+import API_URL from '../config';
 
 const Dashboard = () => {
     const { user } = useAuthStore();
@@ -12,7 +13,7 @@ const Dashboard = () => {
 
     const fetchPdfs = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/pdfs');
+            const res = await axios.get(`${API_URL}/api/pdfs`);
             setPdfs(res.data);
         } catch (err) {
             console.error(err);
@@ -26,7 +27,7 @@ const Dashboard = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this PDF?')) {
             try {
-                await axios.delete(`http://localhost:5000/api/pdfs/${id}`);
+                await axios.delete(`${API_URL}/api/pdfs/${id}`);
                 setPdfs(pdfs.filter(pdf => pdf._id !== id));
             } catch (err) {
                 console.error(err);
@@ -94,20 +95,16 @@ const Dashboard = () => {
                         )}
                     </div>
                 ) : (
-                    /* Mobile: 1 col list cards. sm: 2 col. lg: 3 col. xl: 4 col */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {filteredPdfs.map(pdf => (
                             <div key={pdf._id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                {/* Thumbnail */}
                                 <div className="h-36 bg-slate-100 flex items-center justify-center relative overflow-hidden">
                                     {pdf.thumbnailUrl ? (
-                                        <img src={`http://localhost:5000${pdf.thumbnailUrl}`} alt={pdf.filename} className="w-full h-full object-cover" />
+                                        <img src={`${API_URL}${pdf.thumbnailUrl}`} alt={pdf.filename} className="w-full h-full object-cover" />
                                     ) : (
                                         <FileText className="w-14 h-14 text-slate-300" />
                                     )}
                                 </div>
-
-                                {/* Info */}
                                 <div className="p-3 border-t border-slate-100">
                                     <h4 className="font-semibold text-slate-900 truncate mb-1 text-sm" title={pdf.filename}>
                                         {pdf.filename}
@@ -116,30 +113,25 @@ const Dashboard = () => {
                                         <span>{new Date(pdf.createdAt).toLocaleDateString()}</span>
                                         <span>{formatBytes(pdf.fileSize)} · {pdf.pageCount} pg</span>
                                     </div>
-
-                                    {/* Actions — always visible (mobile-friendly) */}
                                     <div className="flex items-center gap-2 border-t border-slate-100 pt-3">
                                         <a
-                                            href={`http://localhost:5000${pdf.fileUrl}`}
+                                            href={`${API_URL}${pdf.fileUrl}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                                            title="View"
                                         >
                                             <Eye className="w-3.5 h-3.5" /> View
                                         </a>
                                         <a
-                                            href={`http://localhost:5000${pdf.fileUrl}`}
+                                            href={`${API_URL}${pdf.fileUrl}`}
                                             download
                                             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                                            title="Download"
                                         >
                                             <Download className="w-3.5 h-3.5" /> Download
                                         </a>
                                         <button
                                             onClick={() => handleDelete(pdf._id)}
                                             className="flex items-center justify-center p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                            title="Delete"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>

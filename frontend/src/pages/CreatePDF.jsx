@@ -5,6 +5,7 @@ import imageCompression from 'browser-image-compression';
 import axios from 'axios';
 import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle } from 'lucide-react';
 import Webcam from "react-webcam";
+import API_URL from '../config';
 
 // ─────────────────────────────────────────────
 // Converts any image (blob/file/dataURL) to a
@@ -135,7 +136,7 @@ const CreatePDF = () => {
                 formData.append('filename', pdfFilename);
                 formData.append('pageCount', String(images.length));
                 formData.append('fileSize', String(blob.size));
-                await axios.post('http://localhost:5000/api/pdfs', formData);
+                await axios.post(`${API_URL}/api/pdfs`, formData);
             } catch (backendErr) {
                 // Don't block the user — PDF already downloaded
                 console.warn('Backend save failed (PDF still downloaded):', backendErr.message);
