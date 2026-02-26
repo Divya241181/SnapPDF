@@ -1,0 +1,8 @@
+# Root .gitignore
+node_modules/
+mongodata/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
