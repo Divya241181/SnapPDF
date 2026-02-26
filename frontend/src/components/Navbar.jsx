@@ -24,7 +24,7 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link to="/" onClick={close} className="flex-shrink-0 flex items-center font-bold text-xl text-blue-600 gap-2">
                         <FileText className="w-7 h-7" />
-                        <span>PDF Maker</span>
+                        <span>SnapPDF</span>
                     </Link>
 
                     {/* Desktop Nav */}

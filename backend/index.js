@@ -30,9 +30,20 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (mobile apps, Postman, curl)
+        // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
+
+        const isAllowed = allowedOrigins.some(pattern => {
+            if (pattern.includes('^')) { // It's a regex string
+                return new RegExp(pattern).test(origin);
+            }
+            return pattern === origin;
+        });
+
+        if (isAllowed || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            return callback(null, true);
+        }
+
         callback(new Error('CORS: Origin not allowed'));
     },
     credentials: true
@@ -98,4 +109,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server started on port ${PORT}`));

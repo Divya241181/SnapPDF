@@ -1,27 +1,24 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
-import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Webcam from "react-webcam";
-import API_URL from '../config';
 
 // ─────────────────────────────────────────────
 // Converts any image (blob/file/dataURL) to a
 // clean JPEG Uint8Array via the Canvas API.
-// This handles WebP, HEIC-after-decompress, PNG,
-// JPEG etc. — guarantees pdf-lib compatibility.
 // ─────────────────────────────────────────────
 const toJpegBytes = (src) =>
     new Promise((resolve, reject) => {
         const img = new Image();
+        img.crossOrigin = "anonymous";
         img.onload = () => {
             const canvas = document.createElement('canvas');
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
             const ctx = canvas.getContext('2d');
-            // White background (in case of transparent PNGs)
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0);
@@ -31,8 +28,7 @@ const toJpegBytes = (src) =>
                 resolve(new Uint8Array(arrayBuffer));
             }, 'image/jpeg', 0.92);
         };
-        img.onerror = reject;
-        // src can be an object URL or a data URI
+        img.onerror = () => reject(new Error('Failed to load image for PDF embedding'));
         img.src = src;
     });
 
@@ -40,13 +36,24 @@ const CreatePDF = () => {
     const navigate = useNavigate();
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState(''); // progress message
+    const [status, setStatus] = useState('');
     const [error, setError] = useState('');
     const [mode, setMode] = useState('upload');
     const [filename, setFilename] = useState('New_Document.pdf');
 
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
+
+    // Cleanup object URLs on unmount
+    useEffect(() => {
+        return () => {
+            images.forEach(img => {
+                if (img.preview.startsWith('blob:')) {
+                    URL.revokeObjectURL(img.preview);
+                }
+            });
+        };
+    }, [images]);
 
     // ── Upload handler ─────────────────────────
     const handleImageUpload = async (e) => {
@@ -61,10 +68,11 @@ const CreatePDF = () => {
                 files.map(async (file) => {
                     const compressed = await imageCompression(file, options);
                     const preview = URL.createObjectURL(compressed);
-                    return { id: Date.now() + Math.random(), preview };
+                    return { id: Math.random().toString(36).substr(2, 9), preview };
                 })
             );
             setImages((prev) => [...prev, ...processedImages]);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (err) {
             setError('Failed to process images: ' + err.message);
         } finally {
@@ -77,11 +85,30 @@ const CreatePDF = () => {
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
-            setImages((prev) => [...prev, { id: Date.now(), preview: imageSrc }]);
+            setImages((prev) => [...prev, { id: 'cam-' + Date.now(), preview: imageSrc }]);
         }
     }, []);
 
-    const removeImage = (id) => setImages(images.filter((img) => img.id !== id));
+    const handleWebcamError = useCallback((err) => {
+        setError('Camera access denied or not available. Please check permissions.');
+        setMode('upload');
+    }, []);
+
+    const removeImage = (id) => {
+        const imgToRemove = images.find(img => img.id === id);
+        if (imgToRemove && imgToRemove.preview.startsWith('blob:')) {
+            URL.revokeObjectURL(imgToRemove.preview);
+        }
+        setImages(images.filter((img) => img.id !== id));
+    };
+
+    const movePage = (index, direction) => {
+        const newImages = [...images];
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= newImages.length) return;
+        [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
+        setImages(newImages);
+    };
 
     // ── Generate PDF ───────────────────────────
     const generatePDF = async () => {
@@ -96,8 +123,6 @@ const CreatePDF = () => {
             for (let i = 0; i < images.length; i++) {
                 setStatus(`Embedding page ${i + 1} of ${images.length}…`);
                 const img = images[i];
-
-                // Convert to clean JPEG bytes via canvas – handles any format
                 const jpegBytes = await toJpegBytes(img.preview);
                 const embeddedImage = await pdfDoc.embedJpg(jpegBytes);
 
@@ -115,9 +140,9 @@ const CreatePDF = () => {
             setStatus('Saving PDF…');
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            const pdfFilename = filename.endsWith('.pdf') ? filename : filename + '.pdf';
+            let pdfFilename = filename.trim() || 'Document';
+            if (!pdfFilename.toLowerCase().endsWith('.pdf')) pdfFilename += '.pdf';
 
-            // ── Trigger download locally (always works) ──
             const downloadUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = downloadUrl;
@@ -125,9 +150,8 @@ const CreatePDF = () => {
             document.body.appendChild(a);
             a.click();
             a.remove();
-            URL.revokeObjectURL(downloadUrl);
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
 
-            // ── Save metadata to backend ──
             setStatus('Saving to your library…');
             try {
                 const file = new File([blob], pdfFilename, { type: 'application/pdf' });
@@ -136,10 +160,9 @@ const CreatePDF = () => {
                 formData.append('filename', pdfFilename);
                 formData.append('pageCount', String(images.length));
                 formData.append('fileSize', String(blob.size));
-                await axios.post(`${API_URL}/api/pdfs`, formData);
+                await axios.post('/api/pdfs', formData);
             } catch (backendErr) {
-                // Don't block the user — PDF already downloaded
-                console.warn('Backend save failed (PDF still downloaded):', backendErr.message);
+                console.warn('Backend save failed:', backendErr.message);
             }
 
             setStatus('Done!');
@@ -154,8 +177,6 @@ const CreatePDF = () => {
 
     return (
         <div className="max-w-4xl mx-auto py-4 sm:py-8">
-
-            {/* Header + Mode Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Create New PDF</h1>
@@ -177,7 +198,6 @@ const CreatePDF = () => {
                 </div>
             </div>
 
-            {/* Error Banner */}
             {error && (
                 <div className="mb-4 flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium">
                     <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -185,7 +205,6 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            {/* Status Banner */}
             {loading && status && (
                 <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm font-medium">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
@@ -193,7 +212,6 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            {/* Upload / Camera Panel */}
             <div className="glass-panel p-4 sm:p-6 mb-6">
                 {mode === 'upload' ? (
                     <div
@@ -223,6 +241,7 @@ const CreatePDF = () => {
                                 screenshotFormat="image/jpeg"
                                 screenshotQuality={0.92}
                                 videoConstraints={{ facingMode: "environment" }}
+                                onUserMediaError={handleWebcamError}
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
@@ -241,7 +260,6 @@ const CreatePDF = () => {
                 )}
             </div>
 
-            {/* Selected Pages */}
             {images.length > 0 && (
                 <div className="glass-panel p-4 sm:p-6">
                     <div className="flex flex-col gap-3 mb-5">
@@ -272,20 +290,38 @@ const CreatePDF = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                         {images.map((img, index) => (
-                            <div key={img.id} className="relative rounded-lg overflow-hidden border border-slate-200 aspect-[3/4] bg-slate-100">
+                            <div key={img.id} className="group relative rounded-lg overflow-hidden border border-slate-200 aspect-[3/4] bg-slate-100">
                                 <img src={img.preview} alt={`Page ${index + 1}`} className="w-full h-full object-cover" />
                                 <div className="absolute top-1 left-1 bg-black/60 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-md">
                                     {index + 1}
                                 </div>
                                 <button
                                     onClick={() => removeImage(img.id)}
-                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow"
+                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md opacity-0 group-hover:opacity-100"
                                     aria-label="Remove page"
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>
+
+                                {/* Reordering Controls */}
+                                <div className="absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        disabled={index === 0}
+                                        onClick={() => movePage(index, -1)}
+                                        className="text-white hover:text-blue-300 disabled:opacity-30"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        disabled={index === images.length - 1}
+                                        onClick={() => movePage(index, 1)}
+                                        className="text-white hover:text-blue-300 disabled:opacity-30"
+                                    >
+                                        <ChevronRight className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
