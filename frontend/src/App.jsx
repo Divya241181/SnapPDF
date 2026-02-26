@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './store/authStore';
+import useThemeStore from './store/themeStore';
 
 // Pages
 import Landing from './pages/Landing';
@@ -17,7 +18,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
   );
@@ -28,14 +29,23 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const { loadUser } = useAuthStore();
+  const { theme } = useThemeStore();
 
   useEffect(() => {
     loadUser();
   }, [loadUser]);
 
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   return (
     <Router>
-      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-300">
         <Navbar />
 
         {/* pb-20 on mobile to avoid bottom nav overlap */}

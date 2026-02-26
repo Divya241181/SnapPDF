@@ -32,15 +32,15 @@ const Register = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-            <div className="glass-panel w-full max-w-md p-8 md:p-10">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 transition-colors duration-300">
+            <div className="glass-panel w-full max-w-md p-8 md:p-10 transition-colors">
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-extrabold text-slate-900">Create Account</h2>
-                    <p className="text-slate-600 mt-2">Sign up to start creating PDFs</p>
+                    <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white transition-colors">Create Account</h2>
+                    <p className="text-slate-600 dark:text-slate-400 mt-2 transition-colors">Sign up to start creating PDFs</p>
                 </div>
 
                 {error && (
-                    <div className="bg-rose-50 text-rose-500 p-3 rounded-lg mb-6 border border-rose-100 flex items-center font-medium">
+                    <div className="bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400 p-3 rounded-lg mb-6 border border-rose-100 dark:border-rose-900/50 flex items-center font-medium transition-colors text-sm">
                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
                         {error}
                     </div>
@@ -48,7 +48,7 @@ const Register = () => {
 
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Username <span className="text-rose-500">*</span></label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Username <span className="text-rose-500">*</span></label>
                         <input
                             type="text"
                             name="username"
@@ -60,7 +60,7 @@ const Register = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Email Address <span className="text-rose-500">*</span></label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Email Address <span className="text-rose-500">*</span></label>
                         <input
                             type="email"
                             name="email"
@@ -72,7 +72,7 @@ const Register = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Password <span className="text-rose-500">*</span></label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Password <span className="text-rose-500">*</span></label>
                         <input
                             type="password"
                             name="password"
@@ -84,7 +84,7 @@ const Register = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Profession (Optional)</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Profession (Optional)</label>
                         <input
                             type="text"
                             name="profession"
@@ -100,8 +100,8 @@ const Register = () => {
                     </button>
                 </form>
 
-                <p className="mt-8 text-center text-slate-600">
-                    Already have an account? <Link to="/login" className="text-blue-600 hover:text-blue-500 font-semibold">Log in</Link>
+                <p className="mt-8 text-center text-slate-600 dark:text-slate-400 transition-colors">
+                    Already have an account? <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-semibold transition-colors">Log in</Link>
                 </p>
             </div>
         </div>

@@ -50,28 +50,28 @@ const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Welcome, {user?.username} 👋</h1>
-                    <p className="text-slate-600 mt-1 text-sm sm:text-base">Manage all your generated PDFs here.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white transition-colors">Welcome, {user?.username} 👋</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">Manage all your generated PDFs here.</p>
                 </div>
                 <Link to="/create" className="btn-primary w-full sm:w-auto justify-center">
                     <Plus className="w-5 h-5" /> Create New PDF
                 </Link>
             </div>
 
-            <div className="glass-panel p-4 sm:p-6">
+            <div className="glass-panel p-4 sm:p-6 transition-colors">
                 {/* Toolbar */}
                 <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-6 gap-3">
-                    <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                    <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                         <FileText className="text-blue-500 w-5 h-5" /> My Documents
                     </h2>
                     <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                         <input
                             type="text"
                             placeholder="Search PDFs..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white text-sm transition-all"
                         />
                     </div>
                 </div>
@@ -81,10 +81,10 @@ const Dashboard = () => {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                     </div>
                 ) : filteredPdfs.length === 0 ? (
-                    <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                        <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900 mb-2">No PDFs found</h3>
-                        <p className="text-slate-500 mb-6 text-sm">
+                    <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950/50">
+                        <FileText className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">No PDFs found</h3>
+                        <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
                             {search ? 'Try adjusting your search.' : "You haven't created any PDFs yet. Get started now!"}
                         </p>
                         {!search && (
@@ -97,33 +97,33 @@ const Dashboard = () => {
                     /* Mobile: 1 col list cards. sm: 2 col. lg: 3 col. xl: 4 col */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {filteredPdfs.map(pdf => (
-                            <div key={pdf._id} className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div key={pdf._id} className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all duration-300">
                                 {/* Thumbnail */}
-                                <div className="h-36 bg-slate-100 flex items-center justify-center relative overflow-hidden">
+                                <div className="h-36 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
                                     {pdf.thumbnailUrl ? (
                                         <img src={`${axios.defaults.baseURL}${pdf.thumbnailUrl}`} alt={pdf.filename} className="w-full h-full object-cover" />
                                     ) : (
-                                        <FileText className="w-14 h-14 text-slate-300" />
+                                        <FileText className="w-14 h-14 text-slate-300 dark:text-slate-600" />
                                     )}
                                 </div>
 
                                 {/* Info */}
-                                <div className="p-3 border-t border-slate-100">
-                                    <h4 className="font-semibold text-slate-900 truncate mb-1 text-sm" title={pdf.filename}>
+                                <div className="p-3 border-t border-slate-100 dark:border-slate-800">
+                                    <h4 className="font-semibold text-slate-900 dark:text-white truncate mb-1 text-sm" title={pdf.filename}>
                                         {pdf.filename}
                                     </h4>
-                                    <div className="flex justify-between items-center text-xs text-slate-500 mb-3">
+                                    <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-3">
                                         <span>{new Date(pdf.createdAt).toLocaleDateString()}</span>
                                         <span>{formatBytes(pdf.fileSize)} · {pdf.pageCount} pg</span>
                                     </div>
 
                                     {/* Actions — always visible (mobile-friendly) */}
-                                    <div className="flex items-center gap-2 border-t border-slate-100 pt-3">
+                                    <div className="flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
                                         <a
                                             href={`${axios.defaults.baseURL}${pdf.fileUrl}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                                             title="View"
                                         >
                                             <Eye className="w-3.5 h-3.5" /> View
@@ -138,7 +138,7 @@ const Dashboard = () => {
                                         </a>
                                         <button
                                             onClick={() => handleDelete(pdf._id)}
-                                            className="flex items-center justify-center p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                            className="flex items-center justify-center p-1.5 text-rose-400 dark:text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
                                             title="Delete"
                                         >
                                             <Trash2 className="w-4 h-4" />

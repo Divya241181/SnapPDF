@@ -176,21 +176,21 @@ const CreatePDF = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-4 sm:py-8">
+        <div className="max-w-4xl mx-auto py-4 sm:py-8 transition-colors duration-300">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Create New PDF</h1>
-                    <p className="text-slate-600 mt-1 text-sm sm:text-base">Upload images or use your camera.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white transition-colors">Create New PDF</h1>
+                    <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">Upload images or use your camera.</p>
                 </div>
-                <div className="flex w-full sm:w-auto bg-slate-100 p-1 rounded-xl gap-1">
+                <div className="flex w-full sm:w-auto bg-slate-100 dark:bg-slate-800 p-1 rounded-xl gap-1 transition-colors">
                     <button
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'upload' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'upload' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
                         onClick={() => setMode('upload')}
                     >
                         <UploadCloud className="w-4 h-4" /> Upload
                     </button>
                     <button
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'camera' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'camera' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
                         onClick={() => setMode('camera')}
                     >
                         <Camera className="w-4 h-4" /> Scan
@@ -199,23 +199,23 @@ const CreatePDF = () => {
             </div>
 
             {error && (
-                <div className="mb-4 flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-medium">
+                <div className="mb-4 flex items-start gap-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-400 px-4 py-3 rounded-xl text-sm font-medium transition-colors">
                     <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
                     <span>{error}</span>
                 </div>
             )}
 
             {loading && status && (
-                <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl text-sm font-medium">
+                <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-colors">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
                     <span>{status}</span>
                 </div>
             )}
 
-            <div className="glass-panel p-4 sm:p-6 mb-6">
+            <div className="glass-panel p-4 sm:p-6 mb-6 transition-colors">
                 {mode === 'upload' ? (
                     <div
-                        className="border-2 border-dashed border-blue-300 rounded-xl p-8 sm:p-14 text-center bg-blue-50/50 hover:bg-blue-50 active:bg-blue-100 transition-colors cursor-pointer select-none"
+                        className="border-2 border-dashed border-blue-300 dark:border-blue-900/50 rounded-xl p-8 sm:p-14 text-center bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20 active:bg-blue-100 dark:active:bg-blue-950/30 transition-colors cursor-pointer select-none"
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <input
@@ -226,15 +226,15 @@ const CreatePDF = () => {
                             ref={fileInputRef}
                             onChange={handleImageUpload}
                         />
-                        <UploadCloud className="w-12 h-12 sm:w-16 sm:h-16 text-blue-400 mx-auto mb-4" />
-                        <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-1">
+                        <UploadCloud className="w-12 h-12 sm:w-16 sm:h-16 text-blue-400 dark:text-blue-600 mx-auto mb-4" />
+                        <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
                             {loading ? 'Processing…' : 'Tap to select images'}
                         </h3>
-                        <p className="text-sm text-slate-500">JPG, PNG, WebP — all supported</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">JPG, PNG, WebP — all supported</p>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-4">
-                        <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-slate-800 bg-black w-full max-w-sm aspect-[3/4]">
+                        <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-slate-800 dark:border-slate-700 bg-black w-full max-w-sm aspect-[3/4]">
                             <Webcam
                                 audio={false}
                                 ref={webcamRef}
@@ -248,24 +248,24 @@ const CreatePDF = () => {
                         </div>
                         <button
                             onClick={capture}
-                            className="w-20 h-20 bg-white rounded-full border-4 border-slate-300 flex items-center justify-center shadow-2xl active:scale-90 transition-transform"
+                            className="w-20 h-20 bg-white dark:bg-slate-800 rounded-full border-4 border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-2xl active:scale-90 transition-all"
                             aria-label="Capture photo"
                         >
-                            <div className="w-14 h-14 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center">
+                            <div className="w-14 h-14 bg-blue-600 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center">
                                 <Camera className="w-6 h-6 text-white" />
                             </div>
                         </button>
-                        <p className="text-sm text-slate-500">Tap to capture a page</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Tap to capture a page</p>
                     </div>
                 )}
             </div>
 
             {images.length > 0 && (
-                <div className="glass-panel p-4 sm:p-6">
+                <div className="glass-panel p-4 sm:p-6 transition-colors">
                     <div className="flex flex-col gap-3 mb-5">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold flex items-center gap-2">
-                                <span className="bg-blue-100 text-blue-600 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                                <span className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
                                     {images.length}
                                 </span>
                                 Pages Selected
@@ -292,7 +292,7 @@ const CreatePDF = () => {
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                         {images.map((img, index) => (
-                            <div key={img.id} className="group relative rounded-lg overflow-hidden border border-slate-200 aspect-[3/4] bg-slate-100">
+                            <div key={img.id} className="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-slate-100 dark:bg-slate-800 transition-colors">
                                 <img src={img.preview} alt={`Page ${index + 1}`} className="w-full h-full object-cover" />
                                 <div className="absolute top-1 left-1 bg-black/60 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-md">
                                     {index + 1}
@@ -326,7 +326,7 @@ const CreatePDF = () => {
                         ))}
                     </div>
 
-                    <p className="mt-4 text-xs text-slate-400 flex items-center gap-1">
+                    <p className="mt-4 text-xs text-slate-400 flex items-center gap-1 transition-colors">
                         <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                         PDF will download automatically, then save to your library.
                     </p>
