@@ -10,18 +10,18 @@ const Footer = () => {
         product: [
             { name: 'Dashboard', path: '/dashboard' },
             { name: 'Create PDF', path: '/create' },
-            { name: 'Features', path: '/#features' },
-            { name: 'Security', path: '/#security' },
+            { name: 'Features', path: '/features' },
+            { name: 'Security', path: '/security' },
         ],
         company: [
-            { name: 'About Us', path: '/#about' },
-            { name: 'Our Mission', path: '/#mission' },
-            { name: 'Contact', path: '#' },
+            { name: 'About Us', path: '/about' },
+            { name: 'Our Mission', path: '/mission' },
+            { name: 'Contact Us', path: '/contact' },
         ],
         support: [
-            { name: 'Privacy Policy', path: '#' },
-            { name: 'Terms of Service', path: '#' },
-            { name: 'Documentation', path: '#' },
+            { name: 'Privacy Policy', path: '/privacy' },
+            { name: 'Terms of Service', path: '/terms' },
+            { name: 'Documentation', path: '/docs' },
         ]
     };
 
