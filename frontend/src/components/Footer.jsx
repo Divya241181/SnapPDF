@@ -31,10 +31,10 @@ const Footer = () => {
     return (
         <footer className="relative mt-20 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+                <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 mb-16">
 
                     {/* Brand Section */}
-                    <div className="lg:col-span-4 space-y-6">
+                    <div className="col-span-2 lg:col-span-4 space-y-6">
                         <Link to="/" className="flex items-center gap-2 group w-fit">
                             <img
                                 src={theme === 'dark' ? logoDark : logoLight}
@@ -64,7 +64,7 @@ const Footer = () => {
                     </div>
 
                     {/* Links Sections */}
-                    <div className="lg:col-span-2">
+                    <div className="col-span-1 lg:col-span-2">
                         <h4 className="text-slate-900 dark:text-white font-bold mb-6">Product</h4>
                         <ul className="space-y-4">
                             {footerLinks.product.map((link, i) => (
@@ -77,7 +77,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    <div className="lg:col-span-2">
+                    <div className="col-span-1 lg:col-span-2">
                         <h4 className="text-slate-900 dark:text-white font-bold mb-6">Company</h4>
                         <ul className="space-y-4">
                             {footerLinks.company.map((link, i) => (
@@ -90,7 +90,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    <div className="lg:col-span-2">
+                    <div className="col-span-1 lg:col-span-2">
                         <h4 className="text-slate-900 dark:text-white font-bold mb-6">Support</h4>
                         <ul className="space-y-4">
                             {footerLinks.support.map((link, i) => (
@@ -104,15 +104,15 @@ const Footer = () => {
                     </div>
 
                     {/* Newsletter / Contact Section */}
-                    <div className="lg:col-span-2">
+                    <div className="col-span-1 lg:col-span-2">
                         <h4 className="text-slate-900 dark:text-white font-bold mb-6">Contact</h4>
                         <div className="space-y-4">
                             <a href="mailto:support@snappdf.com" className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
                                 <Mail className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm">support@snappdf.com</span>
+                                <span className="text-sm truncate sm:whitespace-normal">support@snappdf.com</span>
                             </a>
                             <div className="pt-2">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                                     <Shield className="w-3 h-3" /> System Operational
                                 </div>
                             </div>

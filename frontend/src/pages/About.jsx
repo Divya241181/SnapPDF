@@ -132,19 +132,21 @@ const About = () => {
                             name: 'Prathamsinh Parmar',
                             dept: 'Information Technology',
                             role: 'Full Stack Developer',
-                            avatar: PrathamImg
+                            avatar: PrathamImg,
+                            color: 'from-blue-600/10 border-blue-500/20'
                         },
                         {
                             name: 'Divya Patel',
                             dept: 'Cyber Security',
                             role: 'Security Engineer',
-                            avatar: DivyaImg
+                            avatar: DivyaImg,
+                            color: 'from-indigo-600/10 border-indigo-500/20'
                         }
                     ].map((person, i) => (
                         <motion.div
                             key={i}
                             whileHover={{ y: -5 }}
-                            className="glass-panel p-6 sm:p-8 flex flex-col items-center text-center group"
+                            className={`glass-panel p-6 sm:p-8 flex flex-col items-center text-center group bg-gradient-to-br ${person.color} border-2`}
                         >
                             <div className="relative mb-4">
                                 <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
