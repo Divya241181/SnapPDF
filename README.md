@@ -1,4 +1,4 @@
-# 📄 PDF Maker — Online PDF Creator Web App
+# 📄 SnapPDF — Create PDFs Instantly On Web
 
 A **mobile-first** full-stack web app to create PDF documents from uploaded images or live camera scans. Users can register, log in, manage a personal PDF library, and generate PDFs entirely in the browser using `pdf-lib`.
 
