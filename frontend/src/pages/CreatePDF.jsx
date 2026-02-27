@@ -54,6 +54,7 @@ const CreatePDF = () => {
     const [status, setStatus] = useState('');
     const [error, setError] = useState('');
     const [mode, setMode] = useState('upload');
+    const [isDragging, setIsDragging] = useState(false);
     const [filename, setFilename] = useState('New_Document.pdf');
     const [generatedBlob, setGeneratedBlob] = useState(null);
     const [isGenerated, setIsGenerated] = useState(false);
@@ -78,10 +79,9 @@ const CreatePDF = () => {
         };
     }, []);
 
-    // ── Upload handler ─────────────────────────
-    const handleImageUpload = async (e) => {
-        const files = Array.from(e.target.files);
-        if (!files.length) return;
+    // ── Shared file processor ──────────────────
+    const processFiles = async (files) => {
+        if (!files || files.length === 0) return;
         setError('');
         setLoading(true);
 
@@ -90,7 +90,7 @@ const CreatePDF = () => {
             const options = {
                 maxSizeMB: 1.0,
                 maxWidthOrHeight: 1920,
-                useWebWorker: false, // More stable on some mobile browsers
+                useWebWorker: false,
                 fileType: 'image/jpeg'
             };
 
@@ -98,7 +98,6 @@ const CreatePDF = () => {
                 setStatus(`Processing image ${i + 1} of ${files.length}…`);
                 const file = files[i];
 
-                // Validate file
                 if (!file.type.startsWith('image/')) {
                     console.warn(`Skipping non-image file: ${file.name}`);
                     continue;
@@ -110,7 +109,6 @@ const CreatePDF = () => {
                     processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
                 } catch (compErr) {
                     console.error(`Compression failed for ${file.name}:`, compErr);
-                    // Fallback to original if compression fails but it's an image
                     const preview = URL.createObjectURL(file);
                     processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
                 }
@@ -119,14 +117,37 @@ const CreatePDF = () => {
             if (processedImages.length > 0) {
                 setImages((prev) => [...prev, ...processedImages]);
             }
-            if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (err) {
-            console.error('Image upload error:', err);
+            console.error('File process error:', err);
             setError('Failed to process images: ' + (err?.message || 'Check file format or size'));
         } finally {
             setLoading(false);
             setStatus('');
         }
+    };
+
+    // ── Interaction handlers ────────────────────
+    const handleImageUpload = (e) => {
+        const files = Array.from(e.target.files);
+        processFiles(files);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = Array.from(e.dataTransfer.files);
+        processFiles(files);
     };
 
     // ── Camera capture  ────────────────────────
@@ -296,12 +317,24 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            <div className="glass-panel p-4 sm:p-6 mb-6 transition-colors">
+            <div className={`glass-panel p-4 sm:p-6 mb-6 transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-4 ring-blue-500/50 border-blue-500 scale-[1.01] shadow-2xl' : ''}`}>
                 {mode === 'upload' ? (
                     <div
-                        className="border-2 border-dashed border-blue-300 dark:border-blue-900/50 rounded-xl p-8 sm:p-14 text-center bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20 active:bg-blue-100 dark:active:bg-blue-950/30 transition-colors cursor-pointer select-none"
+                        className={`border-2 border-dashed rounded-xl p-8 sm:p-14 text-center transition-all cursor-pointer select-none relative ${isDragging
+                                ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-900/40 scale-95'
+                                : 'border-blue-300 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20'
+                            }`}
                         onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
                     >
+                        {isDragging && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-blue-500/10 backdrop-blur-[2px] rounded-xl pointer-events-none z-10">
+                                <UploadCloud className="w-20 h-20 text-blue-600 animate-bounce" />
+                                <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-400 mt-2">Drop to Upload</h2>
+                            </div>
+                        )}
                         <input
                             type="file"
                             multiple
@@ -310,11 +343,11 @@ const CreatePDF = () => {
                             ref={fileInputRef}
                             onChange={handleImageUpload}
                         />
-                        <UploadCloud className="w-12 h-12 sm:w-16 sm:h-16 text-blue-400 dark:text-blue-600 mx-auto mb-4" />
-                        <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                            {loading ? 'Processing…' : 'Tap to select images'}
+                        <UploadCloud className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 transition-transform duration-300 ${isDragging ? 'scale-110 opacity-0' : 'text-blue-400 dark:text-blue-600'}`} />
+                        <h3 className={`text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1 transition-opacity ${isDragging ? 'opacity-0' : ''}`}>
+                            {loading ? 'Processing…' : 'Tap or Drag & Drop images'}
                         </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">JPG, PNG, WebP — all supported</p>
+                        <p className={`text-sm text-slate-500 dark:text-slate-400 transition-opacity ${isDragging ? 'opacity-0' : ''}`}>JPG, PNG, WebP — all supported</p>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-4">
@@ -369,8 +402,8 @@ const CreatePDF = () => {
                                     onClick={handleDownload}
                                     disabled={!isGenerated || loading}
                                     className={`py-2 px-4 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all duration-200 ${isGenerated
-                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-95'
-                                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-95'
+                                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
                                         }`}
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
