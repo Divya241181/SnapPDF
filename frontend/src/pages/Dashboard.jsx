@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
-import { FileText, Download, Trash2, Eye, Plus, Search } from 'lucide-react';
+import { FileText, Download, Trash2, Eye, Plus, Search, Share2 } from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useAuthStore();
@@ -31,6 +31,55 @@ const Dashboard = () => {
             } catch (err) {
                 console.error(err);
             }
+        }
+    };
+
+    const handleShare = async (pdf) => {
+        const baseUrl = axios.defaults.baseURL;
+        const fullUrl = `${baseUrl}${pdf.fileUrl}`;
+
+        const shareData = {
+            title: pdf.filename,
+            text: `Check out this PDF: ${pdf.filename}`,
+            url: fullUrl,
+        };
+
+        // Try Native Share (Requires HTTPS/Localhost)
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                return;
+            } catch (err) {
+                if (err.name !== 'AbortError') console.error('Share failed:', err);
+                else return; // User cancelled
+            }
+        }
+
+        // Fallback for HTTP/Local Network testing
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(fullUrl);
+                alert('Success! Share link copied. 📋\n\nNote: Native mobile sharing usually requires a secure (HTTPS) connection.');
+            } else {
+                // Secondary Fallback for insecure contexts (HTTP mobile)
+                const textArea = document.createElement("textarea");
+                textArea.value = fullUrl;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) {
+                    alert('Link copied to clipboard! 📋');
+                } else {
+                    prompt('Sharing link (Manual Copy):', fullUrl);
+                }
+            }
+        } catch (err) {
+            prompt('Copy this link to share:', fullUrl);
         }
     };
 
@@ -152,6 +201,13 @@ const Dashboard = () => {
                                         >
                                             <Download className="w-3.5 h-3.5" /> Download
                                         </a>
+                                        <button
+                                            onClick={() => handleShare(pdf)}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-500/30"
+                                            title="Share"
+                                        >
+                                            <Share2 className="w-3.5 h-3.5" /> Share
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(pdf._id)}
                                             className="flex items-center justify-center p-1.5 text-rose-400 dark:text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"

@@ -82,20 +82,45 @@ const CreatePDF = () => {
         if (!files.length) return;
         setError('');
         setLoading(true);
-        setStatus(`Compressing ${files.length} image(s)…`);
+
+        const processedImages = [];
         try {
-            const options = { maxSizeMB: 1.5, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/jpeg' };
-            const processedImages = await Promise.all(
-                files.map(async (file) => {
+            const options = {
+                maxSizeMB: 1.0,
+                maxWidthOrHeight: 1920,
+                useWebWorker: false, // More stable on some mobile browsers
+                fileType: 'image/jpeg'
+            };
+
+            for (let i = 0; i < files.length; i++) {
+                setStatus(`Processing image ${i + 1} of ${files.length}…`);
+                const file = files[i];
+
+                // Validate file
+                if (!file.type.startsWith('image/')) {
+                    console.warn(`Skipping non-image file: ${file.name}`);
+                    continue;
+                }
+
+                try {
                     const compressed = await imageCompression(file, options);
                     const preview = URL.createObjectURL(compressed);
-                    return { id: Math.random().toString(36).substr(2, 9), preview };
-                })
-            );
-            setImages((prev) => [...prev, ...processedImages]);
+                    processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
+                } catch (compErr) {
+                    console.error(`Compression failed for ${file.name}:`, compErr);
+                    // Fallback to original if compression fails but it's an image
+                    const preview = URL.createObjectURL(file);
+                    processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
+                }
+            }
+
+            if (processedImages.length > 0) {
+                setImages((prev) => [...prev, ...processedImages]);
+            }
             if (fileInputRef.current) fileInputRef.current.value = '';
         } catch (err) {
-            setError('Failed to process images: ' + err.message);
+            console.error('Image upload error:', err);
+            setError('Failed to process images: ' + (err?.message || 'Check file format or size'));
         } finally {
             setLoading(false);
             setStatus('');
