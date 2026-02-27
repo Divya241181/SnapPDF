@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import ThemeToggle from './ThemeToggle';
 import { Menu, X, LayoutDashboard, PlusCircle, LogOut, LogIn, UserPlus, User } from 'lucide-react';
-import logo from '../assets/SnapPDF Logo.png';
+import logoLight from '../assets/SnapPDF Logo.png';
+import logoDark from '../assets/SnapPDF Logo Dark.png';
+import useThemeStore from '../store/themeStore';
 
 const Navbar = () => {
     const { isAuthenticated, user, logout } = useAuthStore();
+    const { theme } = useThemeStore();
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -27,9 +30,9 @@ const Navbar = () => {
                     <Link to="/" onClick={close} className="flex items-center gap-2 group">
                         <div className="relative">
                             <img
-                                src={logo}
+                                src={theme === 'dark' ? logoDark : logoLight}
                                 alt="SnapPDF"
-                                className="h-9 w-auto sm:h-11 object-contain transition-all duration-300 group-hover:scale-105 dark:brightness-110 dark:contrast-125"
+                                className={`${theme === 'dark' ? 'h-10 sm:h-12' : 'h-9 sm:h-11'} w-auto object-contain transition-all duration-300 group-hover:scale-105`}
                             />
                         </div>
                     </Link>

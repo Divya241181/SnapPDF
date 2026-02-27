@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Github, Heart, Globe, Shield, Terminal } from 'lucide-react';
-import logo from '../assets/SnapPDF Logo.png';
+import logoLight from '../assets/SnapPDF Logo.png';
+import logoDark from '../assets/SnapPDF Logo Dark.png';
+import useThemeStore from '../store/themeStore';
 
 const Footer = () => {
+    const { theme } = useThemeStore();
     const currentYear = new Date().getFullYear();
 
     const footerLinks = {
@@ -34,9 +37,9 @@ const Footer = () => {
                     <div className="lg:col-span-4 space-y-6">
                         <Link to="/" className="flex items-center gap-2 group w-fit">
                             <img
-                                src={logo}
+                                src={theme === 'dark' ? logoDark : logoLight}
                                 alt="SnapPDF"
-                                className="h-10 w-auto object-contain transition-transform group-hover:scale-105 dark:brightness-110"
+                                className={`${theme === 'dark' ? 'h-11' : 'h-10'} w-auto object-contain transition-transform group-hover:scale-105`}
                             />
                         </Link>
                         <p className="text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
