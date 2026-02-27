@@ -1,6 +1,8 @@
 import React from 'react';
 import { Users, Target, Award, History, CheckCircle2, Cpu, Terminal } from 'lucide-react';
 import { motion } from 'framer-motion';
+import PrathamImg from '../assets/Pratham.jpeg';
+import DivyaImg from '../assets/Divya.jpg';
 
 const About = () => {
     const fadeIn = {
@@ -120,22 +122,48 @@ const About = () => {
                         <Users className="w-8 h-8 text-blue-600" /> Leadership & Team
                     </h2>
                     <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        SnapPDF is built by a global team of specialists dedicated to document processing, cybersecurity, and UX design.
+                        SnapPDF is built by a dedicated team of experts focused on creating the best document management experience.
                     </p>
                 </motion.div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                     {[
-                        { name: 'Dr. Jane Smith', role: 'Chief Technical Officer', icon: <Cpu className="w-12 h-12" /> },
-                        { name: 'Alex Rivera', role: 'Head of Operations', icon: <Award className="w-12 h-12" /> },
-                        { name: 'Marcus Chen', role: 'Lead Architect', icon: <Terminal className="w-12 h-12" /> }
+                        {
+                            name: 'Prathamsinh Parmar',
+                            dept: 'Information Technology',
+                            role: 'Full Stack Developer',
+                            avatar: PrathamImg
+                        },
+                        {
+                            name: 'Divya Patel',
+                            dept: 'Cyber Security',
+                            role: 'Security Engineer',
+                            avatar: DivyaImg
+                        }
                     ].map((person, i) => (
-                        <div key={i} className="glass-panel p-8 flex flex-col items-center text-center">
-                            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-6">
-                                {person.icon}
+                        <motion.div
+                            key={i}
+                            whileHover={{ y: -5 }}
+                            className="glass-panel p-6 sm:p-8 flex flex-col items-center text-center group"
+                        >
+                            <div className="relative mb-4">
+                                <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                                <img
+                                    src={person.avatar}
+                                    alt={person.name}
+                                    className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl relative z-10 object-cover"
+                                />
                             </div>
-                            <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-1">{person.name}</h4>
-                            <p className="text-blue-600 dark:text-blue-400 font-medium text-sm uppercase tracking-wider">{person.role}</p>
-                        </div>
+                            <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {person.name}
+                            </h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 font-medium italic">
+                                {person.dept}
+                            </p>
+                            <div className="px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-[10px] uppercase tracking-widest border border-blue-100 dark:border-blue-800">
+                                {person.role}
+                            </div>
+                        </motion.div>
                     ))}
                 </div>
             </section>

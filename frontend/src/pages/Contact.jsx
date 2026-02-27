@@ -42,7 +42,7 @@ const Contact = () => {
                                 <Phone className="w-6 h-6" />
                             </div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">Call Us</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">+1 (888) SNAP-PDF</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">+91 8238075291</p>
                         </motion.div>
                     </div>
 
@@ -54,8 +54,8 @@ const Contact = () => {
                             <div className="flex gap-4">
                                 <div className="text-slate-400 mt-1"><Globe className="w-5 h-5" /></div>
                                 <div>
-                                    <p className="text-slate-900 dark:text-white font-semibold">San Francisco Tech Hub</p>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm">123 innovation Drive, Suite 500<br />San Francisco, CA 94103, USA</p>
+                                    <p className="text-slate-900 dark:text-white font-semibold">KPGU</p>
+                                    <p className="text-slate-500 dark:text-slate-400 text-sm">Emerging Technologies Department<br />Vadodara, Gujarat, India</p>
                                 </div>
                             </div>
                             <div className="flex gap-4">
