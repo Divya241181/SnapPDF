@@ -38,29 +38,35 @@ const upload = multer({
 
 // ── POST /api/pdfs — save PDF record ──────────
 router.post('/', auth, (req, res, next) => {
-    // Run multer as a callback to handle errors properly in Express 5
-    upload.single('pdfFile')(req, res, async (err) => {
+    // Handle both PDF and potential thumbnail upload
+    upload.fields([
+        { name: 'pdfFile', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 }
+    ])(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err);
             return res.status(400).json({ msg: 'File upload error: ' + err.message });
         }
         try {
-            const { filename, fileSize, pageCount, thumbnailUrl } = req.body;
+            const { filename, fileSize, pageCount } = req.body;
 
             let fileUrl = '';
-            if (req.file) {
-                fileUrl = `/uploads/${req.file.filename}`;
-            } else if (req.body.fileUrl) {
-                fileUrl = req.body.fileUrl;
+            if (req.files['pdfFile']) {
+                fileUrl = `/uploads/${req.files['pdfFile'][0].filename}`;
+            }
+
+            let thumbnailUrl = req.body.thumbnailUrl || '';
+            if (req.files['thumbnail']) {
+                thumbnailUrl = `/uploads/${req.files['thumbnail'][0].filename}`;
             }
 
             const newPdf = new Pdf({
                 userId: req.user.id,
                 filename: filename || 'Untitled.pdf',
                 fileUrl,
-                fileSize: fileSize ? Number(fileSize) : (req.file ? req.file.size : 0),
+                fileSize: fileSize ? Number(fileSize) : (req.files['pdfFile'] ? req.files['pdfFile'][0].size : 0),
                 pageCount: pageCount ? Number(pageCount) : 1,
-                thumbnailUrl: thumbnailUrl || ''
+                thumbnailUrl: thumbnailUrl
             });
 
             const pdf = await newPdf.save();

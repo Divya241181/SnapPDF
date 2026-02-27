@@ -1,17 +1,21 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
+/* Tailwind v4 Theme Configuration */
 @theme {
   --color-primary: #3b82f6;
   --color-secondary: #0f172a;
   --color-accent: #f43f5e;
+
+  --font-inter: "Inter", system-ui, sans-serif;
 }
+
+/* Custom Variant for Dark Mode (v4 Syntax) */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   body {
-    @apply transition-colors duration-300 antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-inter);
+    @apply transition-colors duration-300 antialiased text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950;
   }
 }
 

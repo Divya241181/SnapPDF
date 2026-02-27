@@ -194,6 +194,19 @@ const CreatePDF = () => {
                 formData.append('filename', pdfFilename);
                 formData.append('pageCount', String(images.length));
                 formData.append('fileSize', String(blob.size));
+
+                // Add the first image as a thumbnail
+                if (images.length > 0) {
+                    try {
+                        const firstImageRes = await fetch(images[0].preview);
+                        const thumbnailBlob = await firstImageRes.blob();
+                        const thumbnailFile = new File([thumbnailBlob], 'thumbnail.jpg', { type: 'image/jpeg' });
+                        formData.append('thumbnail', thumbnailFile);
+                    } catch (thumbErr) {
+                        console.warn('Could not generate thumbnail:', thumbErr);
+                    }
+                }
+
                 await axios.post('/api/pdfs', formData);
             } catch (backendErr) {
                 console.warn('Backend save failed:', backendErr.message);

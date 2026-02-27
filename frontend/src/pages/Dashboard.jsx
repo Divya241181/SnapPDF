@@ -98,13 +98,29 @@ const Dashboard = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {filteredPdfs.map(pdf => (
                             <div key={pdf._id} className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all duration-300">
-                                {/* Thumbnail */}
-                                <div className="h-36 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden">
+                                {/* Thumbnail / PDF Preview Container */}
+                                <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden group/thumb">
                                     {pdf.thumbnailUrl ? (
-                                        <img src={`${axios.defaults.baseURL}${pdf.thumbnailUrl}`} alt={pdf.filename} className="w-full h-full object-cover" />
+                                        <>
+                                            <img
+                                                src={`${axios.defaults.baseURL}${pdf.thumbnailUrl}`}
+                                                alt={pdf.filename}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover/thumb:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/thumb:opacity-100 transition-opacity" />
+                                        </>
                                     ) : (
-                                        <FileText className="w-14 h-14 text-slate-300 dark:text-slate-600" />
+                                        <div className="flex flex-col items-center gap-2">
+                                            <FileText className="w-12 h-12 text-slate-300 dark:text-slate-600" />
+                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">No Preview</span>
+                                        </div>
                                     )}
+
+                                    {/* Page Count Badge */}
+                                    <div className="absolute top-2 right-2 px-2 py-1 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shadow-sm border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 transition-transform group-hover/thumb:-translate-y-1">
+                                        <FileText className="w-3 h-3 text-blue-500" />
+                                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{pdf.pageCount} pg</span>
+                                    </div>
                                 </div>
 
                                 {/* Info */}
