@@ -15,20 +15,35 @@ const toJpegBytes = (src) =>
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(async (blob) => {
-                if (!blob) return reject(new Error('Canvas toBlob failed'));
-                const arrayBuffer = await blob.arrayBuffer();
-                resolve(new Uint8Array(arrayBuffer));
-            }, 'image/jpeg', 0.92);
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Could not get canvas context');
+
+                // Set background to white (for transparency support in JPEG)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        reject(new Error('Canvas toBlob failed'));
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        resolve(new Uint8Array(reader.result));
+                    };
+                    reader.onerror = () => reject(new Error('FileReader failed'));
+                    reader.readAsArrayBuffer(blob);
+                }, 'image/jpeg', 0.9);
+            } catch (err) {
+                reject(err);
+            }
         };
-        img.onerror = () => reject(new Error('Failed to load image for PDF embedding'));
+        img.onerror = () => reject(new Error('Failed to load image for PDF embedding. The image source might be corrupted or revoked.'));
         img.src = src;
     });
 
@@ -44,16 +59,22 @@ const CreatePDF = () => {
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
 
-    // Cleanup object URLs on unmount
+    // Use a ref to track the latest images for the unmount cleanup
+    const imagesRef = useRef(images);
+    useEffect(() => {
+        imagesRef.current = images;
+    }, [images]);
+
     useEffect(() => {
         return () => {
-            images.forEach(img => {
-                if (img.preview.startsWith('blob:')) {
+            // Only revoke on unmount to prevent premature revocation during edits
+            imagesRef.current.forEach(img => {
+                if (img.preview && typeof img.preview === 'string' && img.preview.startsWith('blob:')) {
                     URL.revokeObjectURL(img.preview);
                 }
             });
         };
-    }, [images]);
+    }, []);
 
     // ── Upload handler ─────────────────────────
     const handleImageUpload = async (e) => {
