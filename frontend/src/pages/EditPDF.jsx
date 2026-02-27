@@ -5,14 +5,15 @@ import imageCompression from 'browser-image-compression';
 import axios from 'axios';
 import {
     UploadCloud, Camera, X, FilePlus, AlertCircle,
-    CheckCircle, ChevronLeft, ChevronRight, Save, Trash2, ArrowLeft, Loader2
+    CheckCircle, ChevronLeft, ChevronRight, Save, Trash2, ArrowLeft, Loader2,
+    Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers
 } from 'lucide-react';
 import Webcam from "react-webcam";
 // pdfjs worker setup
 import * as pdfjs from 'pdfjs-dist';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
-const toJpegBytes = (src) =>
+const toJpegBytes = (src, filter = 'none') =>
     new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -23,9 +24,74 @@ const toJpegBytes = (src) =>
                 canvas.height = img.naturalHeight;
                 const ctx = canvas.getContext('2d');
                 if (!ctx) throw new Error('Could not get canvas context');
+
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
+
+                // Apply Filters
+                if (filter !== 'none') {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    if (filter === 'grayscale') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+                            data[i] = data[i + 1] = data[i + 2] = avg;
+                        }
+                    } else if (filter === 'high-contrast') {
+                        const factor = (259 * (128 + 255)) / (255 * (259 - 128));
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = factor * (data[i] - 128) + 128;
+                            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+                            data[i + 2] = factor * (data[i + 2] - 128) + 128;
+                        }
+                    } else if (filter === 'threshold') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                            const val = avg > 128 ? 255 : 0;
+                            data[i] = data[i + 1] = data[i + 2] = val;
+                        }
+                    } else if (filter === 'brighten') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] += 40; data[i + 1] += 40; data[i + 2] += 40;
+                        }
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    if (filter === 'sharpen') {
+                        const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+                        const side = Math.round(Math.sqrt(weights.length));
+                        const halfSide = Math.floor(side / 2);
+                        const dataSrc = imageData.data;
+                        const sw = canvas.width, sh = canvas.height;
+                        const output = ctx.createImageData(sw, sh);
+                        const dst = output.data;
+                        for (let y = 0; y < sh; y++) {
+                            for (let x = 0; x < sw; x++) {
+                                let r = 0, g = 0, b = 0;
+                                for (let cy = 0; cy < side; cy++) {
+                                    for (let cx = 0; cx < side; cx++) {
+                                        const scy = y + cy - halfSide;
+                                        const scx = x + cx - halfSide;
+                                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                                            const srcOff = (scy * sw + scx) * 4;
+                                            const wt = weights[cy * side + cx];
+                                            r += dataSrc[srcOff] * wt;
+                                            g += dataSrc[srcOff + 1] * wt;
+                                            b += dataSrc[srcOff + 2] * wt;
+                                        }
+                                    }
+                                }
+                                const dstOff = (y * sw + x) * 4;
+                                dst[dstOff] = r; dst[dstOff + 1] = g; dst[dstOff + 2] = b; dst[dstOff + 3] = 255;
+                            }
+                        }
+                        ctx.putImageData(output, 0, 0);
+                    }
+                }
+
                 canvas.toBlob((blob) => {
                     if (!blob) {
                         reject(new Error('Canvas toBlob failed'));
@@ -33,7 +99,6 @@ const toJpegBytes = (src) =>
                     }
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(new Uint8Array(reader.result));
-                    reader.onerror = () => reject(new Error('FileReader failed'));
                     reader.readAsArrayBuffer(blob);
                 }, 'image/jpeg', 0.9);
             } catch (err) { reject(err); }
@@ -52,6 +117,16 @@ const EditPDF = () => {
     const [mode, setMode] = useState('edit'); // edit | camera | upload
     const [filename, setFilename] = useState('');
     const [pdfDetails, setPdfDetails] = useState(null);
+    const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+
+    const VISION_FILTERS = [
+        { id: 'none', label: 'Original', icon: <Wand2 className="w-4 h-4" /> },
+        { id: 'grayscale', label: 'Black & White', icon: <Layers className="w-4 h-4" /> },
+        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast className="w-4 h-4" /> },
+        { id: 'threshold', label: 'Scanner Look', icon: <Hash className="w-4 h-4" /> },
+        { id: 'sharpen', label: 'Sharpen Text', icon: <Maximize className="w-4 h-4" /> },
+        { id: 'brighten', label: 'Brighten', icon: <Sun className="w-4 h-4" /> },
+    ];
 
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
@@ -88,7 +163,7 @@ const EditPDF = () => {
 
                     await page.render({ canvasContext: context, viewport }).promise;
                     const preview = canvas.toDataURL('image/jpeg', 0.8);
-                    loadedImages.push({ id: `page-${i}-${Date.now()}`, preview });
+                    loadedImages.push({ id: `page-${i}-${Date.now()}`, preview, filter: 'none' });
                 }
                 setImages(loadedImages);
                 setLoading(false);
@@ -119,7 +194,7 @@ const EditPDF = () => {
             for (let file of files) {
                 const compressed = await imageCompression(file, options);
                 const preview = URL.createObjectURL(compressed);
-                newProcessed.push({ id: Math.random().toString(36).substr(2, 9), preview });
+                newProcessed.push({ id: Math.random().toString(36).substr(2, 9), preview, filter: 'none' });
             }
             setImages(prev => [...prev, ...newProcessed]);
             setMode('edit');
@@ -131,7 +206,7 @@ const EditPDF = () => {
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
-            setImages(prev => [...prev, { id: 'cam-' + Date.now(), preview: imageSrc }]);
+            setImages(prev => [...prev, { id: 'cam-' + Date.now(), preview: imageSrc, filter: 'none' }]);
             setMode('edit');
         }
     }, []);
@@ -148,6 +223,17 @@ const EditPDF = () => {
         if (target < 0 || target >= newImages.length) return;
         [newImages[index], newImages[target]] = [newImages[target], newImages[index]];
         setImages(newImages);
+        if (selectedPageIndex === index) setSelectedPageIndex(target);
+        else if (selectedPageIndex === target) setSelectedPageIndex(index);
+    };
+
+    const applyFilter = (filterId, all = false) => {
+        setImages(prev => prev.map((img, idx) => {
+            if (all || idx === selectedPageIndex) {
+                return { ...img, filter: filterId };
+            }
+            return img;
+        }));
     };
 
     const saveChanges = async () => {
@@ -160,8 +246,8 @@ const EditPDF = () => {
             const width = 595.28, height = 841.89;
 
             for (let i = 0; i < images.length; i++) {
-                setStatus(`Rebuilding page ${i + 1} of ${images.length}…`);
-                const bytes = await toJpegBytes(images[i].preview);
+                setStatus(`Enhancing and rebuilding page ${i + 1} of ${images.length}…`);
+                const bytes = await toJpegBytes(images[i].preview, images[i].filter);
                 const embedded = await pdfDoc.embedJpg(bytes);
                 const page = pdfDoc.addPage([width, height]);
                 const scale = Math.min(width / embedded.width, height / embedded.height);
@@ -293,16 +379,35 @@ const EditPDF = () => {
                         <div key={img.id} className="group relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all duration-300">
                             <img src={img.preview} alt={`Page ${idx + 1}`} className="w-full h-full object-cover" />
 
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
 
-                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-800 shadow-sm z-30">
                                 <span className="text-xs font-black text-slate-800 dark:text-slate-200">{idx + 1}</span>
                             </div>
 
+                            {/* Selection Overlay */}
+                            <div
+                                className="absolute inset-0 cursor-pointer z-10"
+                                onClick={() => setSelectedPageIndex(idx)}
+                            />
+
+                            {selectedPageIndex === idx && (
+                                <div className="absolute inset-0 ring-4 ring-blue-500 ring-inset pointer-events-none z-20" />
+                            )}
+
+                            {img.filter !== 'none' && (
+                                <div className="absolute top-3 right-12 bg-blue-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md z-30 flex items-center gap-1">
+                                    <Sparkles className="w-2 h-2" /> ENHANCED
+                                </div>
+                            )}
+
                             {/* Actions */}
-                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0">
+                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 z-40">
                                 <button
-                                    onClick={() => removePage(img.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removePage(img.id);
+                                    }}
                                     className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors"
                                     title="Delete Page"
                                 >
@@ -310,17 +415,23 @@ const EditPDF = () => {
                                 </button>
                             </div>
 
-                            <div className="absolute bottom-4 inset-x-4 flex justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0">
+                            <div className="absolute bottom-4 inset-x-4 flex justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 z-40">
                                 <button
                                     disabled={idx === 0}
-                                    onClick={() => movePage(idx, -1)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        movePage(idx, -1);
+                                    }}
                                     className="flex-1 h-8 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
                                 <button
                                     disabled={idx === images.length - 1}
-                                    onClick={() => movePage(idx, 1)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        movePage(idx, 1);
+                                    }}
                                     className="flex-1 h-8 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                                 >
                                     <ChevronRight className="w-4 h-4" />
@@ -339,6 +450,69 @@ const EditPDF = () => {
                         </div>
                         <span className="text-xs font-bold uppercase tracking-widest text-slate-400 group-hover:text-blue-600">Add Page</span>
                     </button>
+                </div>
+
+                {/* Vision Lab — Edit Mode */}
+                <div className="mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-6">
+                        <Sparkles className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Vision Lab — Enhancement Center</h3>
+                    </div>
+
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-6 border border-slate-200 dark:border-slate-800">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            {/* Selected Page Details */}
+                            <div className="space-y-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Current Focus</p>
+                                <div className="flex items-center gap-6 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
+                                    <div className="w-20 aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
+                                        <img
+                                            src={images[selectedPageIndex]?.preview}
+                                            alt="Preview"
+                                            className={`w-full h-full object-cover ${images[selectedPageIndex]?.filter === 'grayscale' ? 'grayscale' :
+                                                images[selectedPageIndex]?.filter === 'high-contrast' ? 'contrast-150 grayscale' :
+                                                    images[selectedPageIndex]?.filter === 'threshold' ? 'contrast-[200] grayscale' :
+                                                        images[selectedPageIndex]?.filter === 'brighten' ? 'brightness-125' :
+                                                            images[selectedPageIndex]?.filter === 'sharpen' ? 'contrast-125 saturate-0' : ''
+                                                }`}
+                                        />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xl font-black text-slate-900 dark:text-white">Page {selectedPageIndex + 1}</h4>
+                                        <p className="text-sm text-slate-500 mt-1">Enhance this page specifically or update entire document.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Filter selection */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Apply Filter</p>
+                                    <button
+                                        onClick={() => applyFilter(images[selectedPageIndex]?.filter, true)}
+                                        className="text-[10px] font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 uppercase underline"
+                                    >
+                                        Apply to All
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {VISION_FILTERS.map((f) => (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => applyFilter(f.id)}
+                                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border text-[10px] font-bold transition-all duration-200 ${images[selectedPageIndex]?.filter === f.id
+                                                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
+                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-500'
+                                                }`}
+                                        >
+                                            {f.icon}
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">

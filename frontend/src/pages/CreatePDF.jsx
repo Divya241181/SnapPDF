@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
-import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers } from 'lucide-react';
 import Webcam from "react-webcam";
 
 // ─────────────────────────────────────────────
 // Converts any image (blob/file/dataURL) to a
 // clean JPEG Uint8Array via the Canvas API.
 // ─────────────────────────────────────────────
-const toJpegBytes = (src) =>
+const toJpegBytes = (src, filter = 'none') =>
     new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -22,10 +22,72 @@ const toJpegBytes = (src) =>
                 const ctx = canvas.getContext('2d');
                 if (!ctx) throw new Error('Could not get canvas context');
 
-                // Set background to white (for transparency support in JPEG)
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0);
+
+                // Apply Filters if any
+                if (filter !== 'none') {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    if (filter === 'grayscale') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] * 0.3 + data[i + 1] * 0.59 + data[i + 2] * 0.11);
+                            data[i] = data[i + 1] = data[i + 2] = avg;
+                        }
+                    } else if (filter === 'high-contrast') {
+                        const factor = (259 * (128 + 255)) / (255 * (259 - 128));
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = factor * (data[i] - 128) + 128;
+                            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+                            data[i + 2] = factor * (data[i + 2] - 128) + 128;
+                        }
+                    } else if (filter === 'threshold') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                            const val = avg > 128 ? 255 : 0;
+                            data[i] = data[i + 1] = data[i + 2] = val;
+                        }
+                    } else if (filter === 'brighten') {
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] += 40; data[i + 1] += 40; data[i + 2] += 40;
+                        }
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    if (filter === 'sharpen') {
+                        const weights = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+                        const side = Math.round(Math.sqrt(weights.length));
+                        const halfSide = Math.floor(side / 2);
+                        const src = imageData.data;
+                        const sw = canvas.width, sh = canvas.height;
+                        const output = ctx.createImageData(sw, sh);
+                        const dst = output.data;
+                        for (let y = 0; y < sh; y++) {
+                            for (let x = 0; x < sw; x++) {
+                                let r = 0, g = 0, b = 0;
+                                for (let cy = 0; cy < side; cy++) {
+                                    for (let cx = 0; cx < side; cx++) {
+                                        const scy = y + cy - halfSide;
+                                        const scx = x + cx - halfSide;
+                                        if (scy >= 0 && scy < sh && scx >= 0 && scx < sw) {
+                                            const srcOff = (scy * sw + scx) * 4;
+                                            const wt = weights[cy * side + cx];
+                                            r += src[srcOff] * wt;
+                                            g += src[srcOff + 1] * wt;
+                                            b += src[srcOff + 2] * wt;
+                                        }
+                                    }
+                                }
+                                const dstOff = (y * sw + x) * 4;
+                                dst[dstOff] = r; dst[dstOff + 1] = g; dst[dstOff + 2] = b; dst[dstOff + 3] = 255;
+                            }
+                        }
+                        ctx.putImageData(output, 0, 0);
+                    }
+                }
 
                 canvas.toBlob((blob) => {
                     if (!blob) {
@@ -36,7 +98,6 @@ const toJpegBytes = (src) =>
                     reader.onloadend = () => {
                         resolve(new Uint8Array(reader.result));
                     };
-                    reader.onerror = () => reject(new Error('FileReader failed'));
                     reader.readAsArrayBuffer(blob);
                 }, 'image/jpeg', 0.9);
             } catch (err) {
@@ -58,6 +119,16 @@ const CreatePDF = () => {
     const [filename, setFilename] = useState('New_Document.pdf');
     const [generatedBlob, setGeneratedBlob] = useState(null);
     const [isGenerated, setIsGenerated] = useState(false);
+    const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+
+    const VISION_FILTERS = [
+        { id: 'none', label: 'Original', icon: <Wand2 className="w-4 h-4" /> },
+        { id: 'grayscale', label: 'Black & White', icon: <Layers className="w-4 h-4" /> },
+        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast className="w-4 h-4" /> },
+        { id: 'threshold', label: 'Scanner Look', icon: <Hash className="w-4 h-4" /> },
+        { id: 'sharpen', label: 'Sharpen Text', icon: <Maximize className="w-4 h-4" /> },
+        { id: 'brighten', label: 'Brighten', icon: <Sun className="w-4 h-4" /> },
+    ];
 
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
@@ -106,11 +177,19 @@ const CreatePDF = () => {
                 try {
                     const compressed = await imageCompression(file, options);
                     const preview = URL.createObjectURL(compressed);
-                    processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
+                    processedImages.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        preview,
+                        filter: 'none'
+                    });
                 } catch (compErr) {
                     console.error(`Compression failed for ${file.name}:`, compErr);
                     const preview = URL.createObjectURL(file);
-                    processedImages.push({ id: Math.random().toString(36).substr(2, 9), preview });
+                    processedImages.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        preview,
+                        filter: 'none'
+                    });
                 }
             }
 
@@ -154,7 +233,11 @@ const CreatePDF = () => {
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
-            setImages((prev) => [...prev, { id: 'cam-' + Date.now(), preview: imageSrc }]);
+            setImages((prev) => [...prev, {
+                id: 'cam-' + Date.now(),
+                preview: imageSrc,
+                filter: 'none'
+            }]);
         }
     }, []);
 
@@ -190,6 +273,17 @@ const CreatePDF = () => {
         if (targetIndex < 0 || targetIndex >= newImages.length) return;
         [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
         setImages(newImages);
+        if (selectedPageIndex === index) setSelectedPageIndex(targetIndex);
+        else if (selectedPageIndex === targetIndex) setSelectedPageIndex(index);
+    };
+
+    const applyFilter = (filterId, all = false) => {
+        setImages(prev => prev.map((img, idx) => {
+            if (all || idx === selectedPageIndex) {
+                return { ...img, filter: filterId };
+            }
+            return img;
+        }));
     };
 
     // ── Generate PDF ───────────────────────────
@@ -205,9 +299,9 @@ const CreatePDF = () => {
             const A4_W = 595.28, A4_H = 841.89;
 
             for (let i = 0; i < images.length; i++) {
-                setStatus(`Embedding page ${i + 1} of ${images.length}…`);
+                setStatus(`Enhancing and embedding page ${i + 1} of ${images.length}…`);
                 const img = images[i];
-                const jpegBytes = await toJpegBytes(img.preview);
+                const jpegBytes = await toJpegBytes(img.preview, img.filter);
                 const embeddedImage = await pdfDoc.embedJpg(jpegBytes);
 
                 const { width, height } = embeddedImage.scale(1);
@@ -321,8 +415,8 @@ const CreatePDF = () => {
                 {mode === 'upload' ? (
                     <div
                         className={`border-2 border-dashed rounded-xl p-8 sm:p-14 text-center transition-all cursor-pointer select-none relative ${isDragging
-                                ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-900/40 scale-95'
-                                : 'border-blue-300 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20'
+                            ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-900/40 scale-95'
+                            : 'border-blue-300 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20'
                             }`}
                         onClick={() => fileInputRef.current?.click()}
                         onDragOver={handleDragOver}
@@ -427,33 +521,117 @@ const CreatePDF = () => {
                                 <div className="absolute top-1 left-1 bg-black/60 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-md">
                                     {index + 1}
                                 </div>
+                                <div
+                                    className="absolute inset-0 cursor-pointer z-10"
+                                    onClick={() => setSelectedPageIndex(index)}
+                                />
                                 <button
-                                    onClick={() => removeImage(img.id)}
-                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md opacity-0 group-hover:opacity-100"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeImage(img.id);
+                                    }}
+                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md opacity-0 group-hover:opacity-100 z-30"
                                     aria-label="Remove page"
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>
 
                                 {/* Reordering Controls */}
-                                <div className="absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around opacity-0 group-hover:opacity-100 transition-opacity z-30">
                                     <button
                                         disabled={index === 0}
-                                        onClick={() => movePage(index, -1)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            movePage(index, -1);
+                                        }}
                                         className="text-white hover:text-blue-300 disabled:opacity-30"
                                     >
                                         <ChevronLeft className="w-4 h-4" />
                                     </button>
                                     <button
                                         disabled={index === images.length - 1}
-                                        onClick={() => movePage(index, 1)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            movePage(index, 1);
+                                        }}
                                         className="text-white hover:text-blue-300 disabled:opacity-30"
                                     >
                                         <ChevronRight className="w-4 h-4" />
                                     </button>
                                 </div>
+                                {selectedPageIndex === index && (
+                                    <div className="absolute inset-0 ring-4 ring-blue-500 ring-inset pointer-events-none z-20" />
+                                )}
+                                {img.filter !== 'none' && (
+                                    <div className="absolute top-1 right-8 bg-blue-600 text-white text-[8px] font-bold px-1 rounded flex items-center gap-1 backdrop-blur-sm z-30">
+                                        <Sparkles className="w-2 h-2" /> ENHANCED
+                                    </div>
+                                )}
                             </div>
                         ))}
+                    </div>
+
+                    {/* Vision Lab Control Panel */}
+                    <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Vision Lab — Enhancement Center</h3>
+                        </div>
+
+                        <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Page Selection Info */}
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Selected View</p>
+                                    <div className="flex items-center gap-4 bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                                        <div className="w-16 aspect-[3/4] bg-slate-100 rounded overflow-hidden">
+                                            <img
+                                                src={images[selectedPageIndex].preview}
+                                                alt="Selected"
+                                                className={`w-full h-full object-cover ${images[selectedPageIndex].filter === 'grayscale' ? 'grayscale' :
+                                                    images[selectedPageIndex].filter === 'high-contrast' ? 'contrast-150 grayscale' :
+                                                        images[selectedPageIndex].filter === 'threshold' ? 'contrast-[200] grayscale' :
+                                                            images[selectedPageIndex].filter === 'brighten' ? 'brightness-125' :
+                                                                images[selectedPageIndex].filter === 'sharpen' ? 'contrast-125 saturate-0' : ''
+                                                    }`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-900 dark:text-white">Page {selectedPageIndex + 1}</h4>
+                                            <p className="text-xs text-slate-500">Apply filters to fix text clarity or lighting issues.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Filter Grid */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Apply Filters</p>
+                                        <button
+                                            onClick={() => applyFilter(images[selectedPageIndex].filter, true)}
+                                            className="text-[10px] font-extrabold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 uppercase underline"
+                                        >
+                                            Apply to All Pages
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {VISION_FILTERS.map((f) => (
+                                            <button
+                                                key={f.id}
+                                                onClick={() => applyFilter(f.id)}
+                                                className={`flex flex-col items-center justify-center gap-2 p-2 rounded-lg border text-[10px] font-bold transition-all ${images[selectedPageIndex].filter === f.id
+                                                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
+                                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-500'
+                                                    }`}
+                                            >
+                                                {f.icon}
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <p className="mt-4 text-xs text-slate-400 flex items-center gap-1 transition-colors">
