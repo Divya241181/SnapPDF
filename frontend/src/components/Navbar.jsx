@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import useAuthStore from '../store/authStore';
 import ThemeToggle from './ThemeToggle';
 import { Menu, X, LayoutDashboard, PlusCircle, LogOut, LogIn, UserPlus, User } from 'lucide-react';
@@ -55,7 +56,7 @@ const Navbar = () => {
                                         <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-100 dark:bg-slate-800 flex items-center justify-center border border-blue-200 dark:border-slate-700">
                                             {user?.profilePhotoUrl ? (
                                                 <img
-                                                    src={user.profilePhotoUrl.startsWith('http') ? user.profilePhotoUrl : `http://localhost:5000${user.profilePhotoUrl}`}
+                                                    src={user.profilePhotoUrl.startsWith('http') ? user.profilePhotoUrl : `${axios.defaults.baseURL}${user.profilePhotoUrl}`}
                                                     alt="User"
                                                     className="w-full h-full object-cover"
                                                 />

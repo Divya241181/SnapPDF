@@ -7,16 +7,19 @@ import './index.css'
 // ── API CONFIGURATION ──────────────────────────
 // Use the current hostname to ensure LAN works (mobile devices)
 const getApiBaseUrl = () => {
-  const { hostname, protocol } = window.location;
-  // If we're on localhost, stick to localhost:5000
+  const { hostname } = window.location;
+
+  // 1. Local Development
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5000';
   }
-  // Otherwise, assume the backend is on the same host, port 5000
-  return `${protocol}//${hostname}:5000`;
+
+  // 2. Production / GitHub Pages
+  // You should set VITE_API_URL in your deployment environment
+  return import.meta.env.VITE_API_URL || 'https://snappdf-backend.onrender.com';
 };
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || getApiBaseUrl();
+axios.defaults.baseURL = getApiBaseUrl();
 
 // Set default auth header from localStorage on startup
 const token = localStorage.getItem('token');
