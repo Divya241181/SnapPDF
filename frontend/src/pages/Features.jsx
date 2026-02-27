@@ -101,10 +101,10 @@ const Features = () => {
                     {techFeatures.map((t, i) => (
                         <motion.div
                             key={i}
-                            whileHover={{ y: -5 }}
-                            className="bg-white/50 dark:bg-slate-800/30 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 text-center flex flex-col items-center"
+                            whileHover={{ y: -5, borderColor: "rgba(59, 130, 246, 0.5)" }}
+                            className="glass-panel p-6 rounded-[2rem] bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20 text-center flex flex-col items-center group transition-all duration-300"
                         >
-                            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 mb-4">{t.icon}</div>
+                            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 mb-4 transition-transform duration-300 group-hover:scale-110">{t.icon}</div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-1 text-sm">{t.title}</h4>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{t.d}</p>
                         </motion.div>

@@ -100,10 +100,10 @@ const About = () => {
                     {values.map((v, i) => (
                         <motion.div
                             key={i}
-                            whileHover={{ y: -10 }}
-                            className="glass-panel p-8 text-center"
+                            whileHover={{ y: -10, borderColor: "rgba(59, 130, 246, 0.5)" }}
+                            className="glass-panel p-8 text-center bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20 group transition-all duration-300"
                         >
-                            <div className="inline-flex p-3 rounded-xl bg-blue-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 mb-6 group-hover:scale-110 transition-transform">
+                            <div className="inline-flex p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6 transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-blue-500/10">
                                 <CheckCircle2 className="w-8 h-8" />
                             </div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">{v.title}</h4>

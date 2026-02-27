@@ -111,7 +111,7 @@ const Landing = () => {
                         initial={{ opacity: 0, x: -30 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="glass-panel p-8 bg-white/40 dark:bg-slate-800/20"
+                        className="glass-panel p-8 bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20"
                     >
                         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-blue-500/30">
                             <Target className="w-6 h-6" />
@@ -128,7 +128,7 @@ const Landing = () => {
                         initial={{ opacity: 0, y: 30 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        className="glass-panel p-8 bg-white/40 dark:bg-slate-800/20"
+                        className="glass-panel p-8 bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20"
                     >
                         <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
                             <Rocket className="w-6 h-6" />
@@ -276,7 +276,7 @@ const Landing = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="glass-panel p-12 md:p-16 text-center bg-gradient-to-r from-blue-600 to-indigo-700 border-none shadow-2xl shadow-blue-500/20 relative overflow-hidden"
+                    className="glass-panel p-12 md:p-16 text-center bg-gradient-to-r from-blue-600 to-cyan-500 border-none shadow-2xl shadow-blue-500/20 relative overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
