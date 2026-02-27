@@ -7,15 +7,21 @@ import './index.css'
 // ── API CONFIGURATION ──────────────────────────
 // Use the current hostname to ensure LAN works (mobile devices)
 const getApiBaseUrl = () => {
-  const { hostname } = window.location;
+  const { hostname, protocol } = window.location;
 
-  // 1. Local Development
+  // 1. Local Development (localhost)
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:5000';
   }
 
-  // 2. Production / GitHub Pages
-  // You should set VITE_API_URL in your deployment environment
+  // 2. Private Network IPs (Mobile Testing on LAN)
+  // Detects 192.168.x.x, 10.x.x.x, 172.16-31.x.x
+  const isPrivateIp = /^(192\.168|10|127|172\.(1[6-9]|2[0-9]|3[0-1]))/.test(hostname);
+  if (isPrivateIp) {
+    return `${protocol}//${hostname}:5000`;
+  }
+
+  // 3. Production / GitHub Pages
   return import.meta.env.VITE_API_URL || 'https://snappdf-backend.onrender.com';
 };
 

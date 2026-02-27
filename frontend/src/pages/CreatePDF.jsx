@@ -55,6 +55,8 @@ const CreatePDF = () => {
     const [error, setError] = useState('');
     const [mode, setMode] = useState('upload');
     const [filename, setFilename] = useState('New_Document.pdf');
+    const [generatedBlob, setGeneratedBlob] = useState(null);
+    const [isGenerated, setIsGenerated] = useState(false);
 
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
@@ -170,10 +172,12 @@ const CreatePDF = () => {
     };
 
     // ── Generate PDF ───────────────────────────
-    const generatePDF = async () => {
+    const handleGenerate = async () => {
         if (images.length === 0) return;
         setError('');
         setLoading(true);
+        setGeneratedBlob(null);
+        setIsGenerated(false);
 
         try {
             const pdfDoc = await PDFDocument.create();
@@ -196,22 +200,16 @@ const CreatePDF = () => {
                 });
             }
 
-            setStatus('Saving PDF…');
+            setStatus('Finalizing PDF…');
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            setGeneratedBlob(blob);
+            setIsGenerated(true);
+
+            setStatus('Saving to your library…');
             let pdfFilename = filename.trim() || 'Document';
             if (!pdfFilename.toLowerCase().endsWith('.pdf')) pdfFilename += '.pdf';
 
-            const downloadUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = pdfFilename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
-
-            setStatus('Saving to your library…');
             try {
                 const file = new File([blob], pdfFilename, { type: 'application/pdf' });
                 const formData = new FormData();
@@ -220,7 +218,6 @@ const CreatePDF = () => {
                 formData.append('pageCount', String(images.length));
                 formData.append('fileSize', String(blob.size));
 
-                // Add the first image as a thumbnail
                 if (images.length > 0) {
                     try {
                         const firstImageRes = await fetch(images[0].preview);
@@ -233,18 +230,33 @@ const CreatePDF = () => {
                 }
 
                 await axios.post('/api/pdfs', formData);
+                setStatus('Success! PDF is ready.');
             } catch (backendErr) {
                 console.warn('Backend save failed:', backendErr.message);
+                setStatus('PDF generated but failed to save in library.');
             }
-
-            setStatus('Done!');
-            setTimeout(() => navigate('/dashboard'), 800);
         } catch (err) {
             console.error('PDF generation failed:', err);
             setError('PDF generation failed: ' + err.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleDownload = () => {
+        if (!generatedBlob) return;
+
+        let pdfFilename = filename.trim() || 'Document';
+        if (!pdfFilename.toLowerCase().endsWith('.pdf')) pdfFilename += '.pdf';
+
+        const downloadUrl = URL.createObjectURL(generatedBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = pdfFilename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
     };
 
     return (
@@ -342,16 +354,29 @@ const CreatePDF = () => {
                                 </span>
                                 Pages Selected
                             </h2>
-                            <button
-                                onClick={generatePDF}
-                                disabled={loading}
-                                className="btn-primary py-2 px-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {loading
-                                    ? <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> Working…</>
-                                    : <><FilePlus className="w-4 h-4" /> Generate &amp; Download</>
-                                }
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleGenerate}
+                                    disabled={loading}
+                                    className="btn-primary py-2 px-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                    {loading
+                                        ? <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> Working…</>
+                                        : <><FilePlus className="w-4 h-4" /> Generate</>
+                                    }
+                                </button>
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={!isGenerated || loading}
+                                    className={`py-2 px-4 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all duration-200 ${isGenerated
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-95'
+                                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                                        }`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    Download
+                                </button>
+                            </div>
                         </div>
                         <input
                             type="text"
@@ -400,7 +425,7 @@ const CreatePDF = () => {
 
                     <p className="mt-4 text-xs text-slate-400 flex items-center gap-1 transition-colors">
                         <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                        PDF will download automatically, then save to your library.
+                        Click "Generate" to process your PDF, then "Download" to save it.
                     </p>
                 </div>
             )}
