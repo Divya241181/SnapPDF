@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
-import { FileText, Download, Trash2, Eye, Plus, Search, Share2 } from 'lucide-react';
+import { FileText, Download, Trash2, Eye, Plus, Search, Share2, Edit2 } from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useAuthStore();
@@ -201,6 +201,13 @@ const Dashboard = () => {
                                         >
                                             <Download className="w-3.5 h-3.5" /> Download
                                         </a>
+                                        <Link
+                                            to={`/edit/${pdf._id}`}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-500/30"
+                                            title="Edit"
+                                        >
+                                            <Edit2 className="w-3.5 h-3.5" /> Edit
+                                        </Link>
                                         <button
                                             onClick={() => handleShare(pdf)}
                                             className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-transparent hover:border-blue-500/30"

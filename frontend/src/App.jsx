@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreatePDF from './pages/CreatePDF';
+import EditPDF from './pages/EditPDF';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -72,6 +73,9 @@ function App() {
             } />
             <Route path="/profile" element={
               <ProtectedRoute><Profile /></ProtectedRoute>
+            } />
+            <Route path="/edit/:id" element={
+              <ProtectedRoute><EditPDF /></ProtectedRoute>
             } />
 
             {/* Public Pages */}

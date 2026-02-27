@@ -89,6 +89,66 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
+// ── GET /api/pdfs/:id — get single PDF ────────
+router.get('/:id', auth, async (req, res) => {
+    try {
+        const pdf = await Pdf.findById(req.params.id);
+        if (!pdf) return res.status(404).json({ msg: 'PDF not found' });
+        if (pdf.userId.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+        res.json(pdf);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: 'Server Error' });
+    }
+});
+
+// ── PUT /api/pdfs/:id — update PDF ───────────
+router.put('/:id', auth, (req, res) => {
+    upload.fields([
+        { name: 'pdfFile', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 }
+    ])(req, res, async (err) => {
+        if (err) return res.status(400).json({ msg: 'File upload error: ' + err.message });
+        try {
+            let pdf = await Pdf.findById(req.params.id);
+            if (!pdf) return res.status(404).json({ msg: 'PDF not found' });
+            if (pdf.userId.toString() !== req.user.id) {
+                return res.status(401).json({ msg: 'Not authorized' });
+            }
+
+            const { filename, fileSize, pageCount } = req.body;
+
+            // If new file uploaded, delete old one
+            if (req.files['pdfFile']) {
+                const oldPath = path.join(__dirname, '../', pdf.fileUrl);
+                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                pdf.fileUrl = `/uploads/${req.files['pdfFile'][0].filename}`;
+                pdf.fileSize = fileSize ? Number(fileSize) : req.files['pdfFile'][0].size;
+            }
+
+            // If new thumbnail uploaded, delete old one
+            if (req.files['thumbnail']) {
+                if (pdf.thumbnailUrl) {
+                    const oldThumbPath = path.join(__dirname, '../', pdf.thumbnailUrl);
+                    if (fs.existsSync(oldThumbPath)) fs.unlinkSync(oldThumbPath);
+                }
+                pdf.thumbnailUrl = `/uploads/${req.files['thumbnail'][0].filename}`;
+            }
+
+            if (filename) pdf.filename = filename;
+            if (pageCount) pdf.pageCount = Number(pageCount);
+
+            await pdf.save();
+            res.json(pdf);
+        } catch (saveErr) {
+            console.error('Update error:', saveErr.message);
+            res.status(500).json({ msg: 'Server Error' });
+        }
+    });
+});
+
 // ── DELETE /api/pdfs/:id ──────────────────────
 router.delete('/:id', auth, async (req, res) => {
     try {
