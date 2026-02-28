@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Github, Heart, Globe, Shield, Terminal } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Github, Heart, Globe, Shield, Terminal, ChevronUp } from 'lucide-react';
 import logoLight from '../assets/SnapPDF Logo.png';
 import logoDark from '../assets/SnapPDF Logo Dark.png';
 import useThemeStore from '../store/themeStore';
@@ -8,6 +8,12 @@ import useThemeStore from '../store/themeStore';
 const Footer = () => {
     const { theme } = useThemeStore();
     const currentYear = new Date().getFullYear();
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
 
     const footerLinks = {
         product: [
@@ -121,10 +127,22 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1">
-                        © {currentYear} SnapPDF. All rights reserved. Made with <Heart className="w-4 h-4 text-rose-500 fill-rose-500" /> by Advanced Agentic Team.
+                <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+                    <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-1">
+                        © {currentYear} SnapPDF. All rights reserved. Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> by Advanced Agentic Team.
                     </p>
+                    
+                    {/* Compact Scroll to Top Button */}
+                    <button 
+                        onClick={scrollToTop}
+                        className="group flex flex-col items-center text-slate-400 hover:text-blue-600 transition-all duration-300 -mt-2"
+                        aria-label="Scroll to top"
+                    >
+                        <div className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center group-hover:border-blue-600 group-hover:-translate-y-1 transition-all duration-300 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-sm">
+                            <ChevronUp className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                        </div>
+                    </button>
+
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
                             <Terminal className="w-4 h-4" />

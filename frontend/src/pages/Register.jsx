@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import useAuthStore from '../store/authStore';
 
 const Register = () => {
@@ -7,8 +8,23 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { register } = useAuthStore();
+    const { register, googleLogin } = useAuthStore();
     const navigate = useNavigate();
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        setLoading(true);
+        const result = await googleLogin(credentialResponse.credential);
+        if (result.success) {
+            navigate('/dashboard');
+        } else {
+            setError(result.msg);
+        }
+        setLoading(false);
+    };
+
+    const handleGoogleError = () => {
+        setError('Google authentication failed. Please try again.');
+    };
 
     const { username, email, password, profession } = formData;
 
@@ -99,6 +115,28 @@ const Register = () => {
                         {loading ? 'Signing up...' : 'Sign Up'}
                     </button>
                 </form>
+
+                <div className="relative my-8">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm uppercase">
+                        <span className="px-2 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
+                    </div>
+                </div>
+
+                <div className="flex justify-center flex-col items-center gap-4">
+                    <GoogleLogin 
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        useOneTap
+                        theme="filled_blue"
+                        shape="pill"
+                        size="large"
+                        text="signup_with"
+                        width="384px"
+                    />
+                </div>
 
                 <p className="mt-8 text-center text-slate-600 dark:text-slate-400 transition-colors">
                     Already have an account? <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-semibold transition-colors">Log in</Link>

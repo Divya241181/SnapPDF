@@ -6,3 +6,6 @@ mongodata/
 Thumbs.db
 .vscode/
 .idea/
+.env
+.env.example
+credentails.json

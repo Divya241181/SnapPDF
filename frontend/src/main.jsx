@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import axios from 'axios'
 import App from './App.jsx'
 import './index.css'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+
 
 // ── API CONFIGURATION ──────────────────────────
 // Use the current hostname to ensure LAN works (mobile devices)
@@ -35,6 +37,8 @@ if (token) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+      <App />
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 )

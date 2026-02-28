@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ── Validation rules ─────────────────────────
 const registerRules = [
@@ -120,6 +123,70 @@ router.post('/login', loginRules, async (req, res) => {
     } catch (err) {
         console.error('Login error:', err.message);
         res.status(500).json({ msg: 'Server error, please try again' });
+    }
+});
+
+// ── POST /api/auth/google ────────────────────
+router.post('/google', async (req, res) => {
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ msg: 'No token provided' });
+
+    try {
+        // Verify token
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name, picture } = payload;
+
+        // Check if user exists by googleId OR email
+        let user = await User.findOne({ 
+            $or: [
+                { googleId },
+                { email }
+            ]
+        });
+
+        if (user) {
+            // Update googleId if not present (in case they previously registered with email)
+            if (!user.googleId) {
+                user.googleId = googleId;
+                await user.save();
+            }
+        } else {
+            // Create new user
+            user = new User({
+                email,
+                username: name,
+                googleId,
+                profilePhotoUrl: picture,
+                profession: 'Other' // Default profession
+            });
+            await user.save();
+        }
+
+        // Issue JWT
+        const jwtPayload = { user: { id: user.id } };
+        const token = await new Promise((resolve, reject) =>
+            jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, t) =>
+                err ? reject(err) : resolve(t)
+            )
+        );
+
+        res.json({
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                profession: user.profession,
+                profilePhotoUrl: user.profilePhotoUrl
+            }
+        });
+    } catch (err) {
+        console.error('Google login error:', err.message);
+        res.status(400).json({ msg: 'Invalid Google token' });
     }
 });
 
