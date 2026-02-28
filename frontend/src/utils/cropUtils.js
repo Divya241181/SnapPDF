@@ -73,16 +73,16 @@ function getRadianChatSize(width, height, rotation) {
 }
 
 /**
- * Intelligent Document Boundary Detection (Auto-Crop)
- * Detects the document area based on contrast and edge consistency.
+ * Intelligent Document Boundary Detection (Auto-Clean)
+ * Uses high-contrast gradient detection to find sharp document edges.
  */
 export async function autoDetectBoundary(imageSrc) {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   
-  // Use a smaller canvas for analysis speed
-  const maxDim = 800;
+  // Downscale for performance
+  const maxDim = 600; 
   const scale = Math.min(1, maxDim / Math.max(image.width, image.height));
   canvas.width = image.width * scale;
   canvas.height = image.height * scale;
@@ -91,75 +91,57 @@ export async function autoDetectBoundary(imageSrc) {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const { data, width, height } = imageData;
   
-  // 1. Convert to grayscale and find background color (mode of corners)
-  const getBrightness = (i) => (data[i] + data[i+1] + data[i+2]) / 3;
-  
-  // Sample corners to estimate background
-  const samplePoints = [
-    {x: 5, y: 5}, {x: width-5, y: 5}, {x: 5, y: height-5}, {x: width-5, y: height-5},
-    {x: width/2, y: 5}, {x: width/2, y: height-5}
-  ];
-  let avgBg = 0;
-  samplePoints.forEach(p => {
-    avgBg += getBrightness((Math.floor(p.y) * width + Math.floor(p.x)) * 4);
-  });
-  avgBg /= samplePoints.length;
+  const getBrightness = (x, y) => {
+    const i = (y * width + x) * 4;
+    return (data[i] + data[i+1] + data[i+2]) / 3;
+  };
 
-  // 2. Scan from edges to find the first significant change in contrast
-  const threshold = 35;
-  let minX = 0, maxX = width, minY = 0, maxY = height;
+  // Find bounding box of high-gradient areas (edges)
+  let minX = width, minY = height, maxX = 0, maxY = 0;
+  let foundEdges = 0;
 
-  // Top to bottom
-  outer: for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (Math.abs(getBrightness((y * width + x) * 4) - avgBg) > threshold) {
-        minY = y; break outer;
-      }
-    }
-  }
-  // Bottom to top
-  outer: for (let y = height - 1; y >= 0; y--) {
-    for (let x = 0; x < width; x++) {
-      if (Math.abs(getBrightness((y * width + x) * 4) - avgBg) > threshold) {
-        maxY = y; break outer;
-      }
-    }
-  }
-  // Left to right
-  outer: for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      if (Math.abs(getBrightness((y * width + x) * 4) - avgBg) > threshold) {
-        minX = x; break outer;
-      }
-    }
-  }
-  // Right to left
-  outer: for (let x = width - 1; x >= 0; x--) {
-    for (let y = 0; y < height; y++) {
-      if (Math.abs(getBrightness((y * width + x) * 4) - avgBg) > threshold) {
-        maxX = x; break outer;
+  // Edge detection sensitivity
+  const edgeThreshold = 25; 
+
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      // Simple Sobel-like gradient check
+      const gx = Math.abs(getBrightness(x + 1, y) - getBrightness(x - 1, y));
+      const gy = Math.abs(getBrightness(x, y + 1) - getBrightness(x, y - 1));
+      
+      if (gx + gy > edgeThreshold) {
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x > maxX) maxX = x;
+        if (y > maxY) maxY = y;
+        foundEdges++;
       }
     }
   }
 
-  // Safety check: if detected box is too small, return original
-  if (maxX - minX < width * 0.1 || maxY - minY < height * 0.1) {
-    return imageSrc;
+  // Fallback: If no edges found or area is too small, return original
+  const area = (maxX - minX) * (maxY - minY);
+  if (foundEdges < 100 || area < (width * height * 0.1)) {
+    return imageSrc; 
   }
 
-  // Add slight margin (3%)
-  const padX = (maxX - minX) * 0.03;
-  const padY = (maxY - minY) * 0.03;
+  // Add 4% padding for a professional "scan" look
+  const padX = (maxX - minX) * 0.04;
+  const padY = (maxY - minY) * 0.04;
 
-  const cropCanvas = document.createElement('canvas');
   const finalX = Math.max(0, (minX - padX) / scale);
   const finalY = Math.max(0, (minY - padY) / scale);
   const finalW = Math.min(image.width - finalX, (maxX - minX + 2*padX) / scale);
   const finalH = Math.min(image.height - finalY, (maxY - minY + 2*padY) / scale);
-  
+
+  const cropCanvas = document.createElement('canvas');
   cropCanvas.width = finalW;
   cropCanvas.height = finalH;
   const cropCtx = cropCanvas.getContext('2d');
+  
+  // Use high-quality scaling
+  cropCtx.imageSmoothingEnabled = true;
+  cropCtx.imageSmoothingQuality = 'high';
   cropCtx.drawImage(image, finalX, finalY, finalW, finalH, 0, 0, finalW, finalH);
 
   return new Promise((resolve) => {

@@ -1,4 +1,6 @@
 import React, { useState, useCallback } from 'react';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import Cropper from 'react-easy-crop';
 import { 
   X, Check, RotateCw, RotateCcw, FlipHorizontal, FlipVertical, 
@@ -57,12 +59,14 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
         {/* Header Bar */}
         <div className="flex items-center justify-between p-4 sm:p-6 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 z-50">
           <div className="flex items-center gap-4">
-            <button 
+            <motion.button 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors sm:hidden"
             >
                 <X className="w-6 h-6 text-slate-500" />
-            </button>
+            </motion.button>
             <div>
                 <h3 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <Grid3X3 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
@@ -72,7 +76,9 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
             </div>
           </div>
           <div className="flex gap-2">
-            <button
+            <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onMouseDown={() => setShowCompare(true)}
                 onMouseUp={() => setShowCompare(false)}
                 onTouchStart={() => setShowCompare(true)}
@@ -80,13 +86,15 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
                 className={`p-3 rounded-xl flex items-center gap-2 font-bold text-sm transition-all ${showCompare ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'}`}
             >
                 <Eye className="w-4 h-4" /> <span className="hidden sm:inline">Compare</span>
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
+                whileHover={{ rotate: 90, scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className="hidden sm:flex p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-500"
             >
                 <X className="w-6 h-6" />
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -120,14 +128,16 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
           {/* Floating Aspect Selection */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex bg-white/10 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl gap-1 shadow-2xl z-40">
             {ASPECT_RATIOS.map((r) => (
-                <button
+                <motion.button
                     key={r.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setAspect(r.value)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${aspect === r.value ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10 hover:text-white'}`}
                 >
                     {r.icon}
                     <span className="hidden sm:inline">{r.label}</span>
-                </button>
+                </motion.button>
             ))}
           </div>
         </div>
@@ -162,23 +172,27 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
                 <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3 block">Transform Tools</label>
                     <div className="flex gap-2">
-                        <button onClick={() => setRotation(r => (r - 90) % 360)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><RotateCcw className="w-4 h-4" /> 90°</button>
-                        <button onClick={() => setRotation(r => (r + 90) % 360)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><RotateCw className="w-4 h-4" /> 90°</button>
-                        <button onClick={() => setFlip(f => ({...f, horizontal: !f.horizontal}))} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><FlipHorizontal className="w-4 h-4" /> Flip</button>
-                        <button onClick={() => setFlip(f => ({...f, vertical: !f.vertical}))} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><FlipVertical className="w-4 h-4" /> Flip</button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setRotation(r => (r - 90) % 360)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><RotateCcw className="w-4 h-4" /> 90°</motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setRotation(r => (r + 90) % 360)} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><RotateCw className="w-4 h-4" /> 90°</motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setFlip(f => ({...f, horizontal: !f.horizontal}))} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><FlipHorizontal className="w-4 h-4" /> Flip</motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setFlip(f => ({...f, vertical: !f.vertical}))} className="flex-1 p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-xs"><FlipVertical className="w-4 h-4" /> Flip</motion.button>
                     </div>
                 </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.02, backgroundColor: '#fef2f2' }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={resetAll}
                     disabled={isProcessing}
                     className="flex-1 py-4 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black text-sm rounded-2xl transition-all hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center gap-2 uppercase tracking-widest"
                 >
                     <RefreshCw className="w-4 h-4" /> Reset
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleSave}
                     disabled={isProcessing}
                     className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-600/20 flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-70 uppercase tracking-widest"
@@ -188,7 +202,7 @@ const EnhancedCropModal = ({ isOpen, image, onCropComplete: onSave, onClose }) =
                     ) : (
                         <><Check className="w-5 h-5" /> Apply changes</>
                     )}
-                </button>
+                </motion.button>
             </div>
           </div>
         </div>
