@@ -9,6 +9,7 @@ import {
     ChevronLeft, ChevronRight, Sparkles, Wand2, Contrast, 
     Hash, Maximize, Sun, Layers, Crop 
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Webcam from "react-webcam";
 import EnhancedCropModal from '../components/EnhancedCropModal';
 import { autoDetectBoundary } from '../utils/cropUtils';
@@ -390,10 +391,11 @@ const CreatePDF = () => {
                 }
 
                 await axios.post('/api/pdfs', formData);
-                setStatus('Success! PDF is ready.');
+                setStatus('✨ Success! PDF is ready and saved to your dashboard.');
+                setIsGenerated(true);
             } catch (backendErr) {
                 console.warn('Backend save failed:', backendErr.message);
-                setStatus('PDF generated but failed to save in library.');
+                setStatus('✅ PDF generated! (Note: Failed to save in library, but you can download it now)');
             }
         } catch (err) {
             console.error('PDF generation failed:', err);
@@ -450,10 +452,29 @@ const CreatePDF = () => {
             )}
 
             {loading && status && (
-                <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-colors">
+                <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-all">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
                     <span>{status}</span>
                 </div>
+            )}
+
+            {isGenerated && !loading && status && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -10 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-4 rounded-xl text-sm font-medium transition-all"
+                >
+                    <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 flex-shrink-0 text-emerald-500" />
+                        <div>
+                            <p className="font-bold">{status}</p>
+                            <p className="text-[10px] opacity-80 uppercase tracking-wider mt-0.5">You can now view it in your dashboard library.</p>
+                        </div>
+                    </div>
+                    <Link to="/dashboard" className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 text-center whitespace-nowrap">
+                        Go to Dashboard →
+                    </Link>
+                </motion.div>
             )}
 
             <div className={`glass-panel p-4 sm:p-6 mb-6 transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-4 ring-blue-500/50 border-blue-500 scale-[1.01] shadow-2xl' : ''}`}>
@@ -517,36 +538,40 @@ const CreatePDF = () => {
             </div>
 
             {images.length > 0 && (
-                <div className="glass-panel p-4 sm:p-6 transition-colors">
+                <div className="glass-panel py-3 px-4 sm:p-5 transition-colors">
                     <div className="flex flex-col gap-3 mb-5">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                                <span className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 h-10">
+                                <div className="bg-blue-600 text-white min-w-[32px] h-8 rounded-lg flex items-center justify-center text-[11px] font-black shadow-lg shadow-blue-600/20">
                                     {images.length}
-                                </span>
-                                Pages Selected
-                            </h2>
-                            <div className="flex gap-2">
+                                </div>
+                                <div className="hidden xs:block">
+                                    <h2 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Pages</h2>
+                                </div>
+                            </div>
+                            <div className="flex-1 flex items-center justify-end gap-1.5 h-10">
                                 <button
                                     onClick={handleGenerate}
                                     disabled={loading}
-                                    className="btn-primary py-2 px-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="flex-1 sm:flex-none btn-primary py-2 px-3 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 h-8 min-w-[90px]"
                                 >
                                     {loading
-                                        ? <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> Working…</>
-                                        : <><FilePlus className="w-4 h-4" /> Generate</>
+                                        ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                                        : <><div className="hidden sm:block"><FilePlus className="w-3.5 h-3.5" /></div> Generate</>
                                     }
                                 </button>
                                 <button
                                     onClick={handleDownload}
                                     disabled={!isGenerated || loading}
-                                    className={`py-2 px-4 text-sm font-semibold rounded-lg flex items-center gap-2 transition-all duration-200 ${isGenerated
-                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-95'
-                                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                                    className={`flex-1 sm:flex-none py-2 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 h-8 min-w-[70px] ${isGenerated
+                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg active:scale-95'
+                                        : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-100 dark:border-slate-800'
                                         }`}
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                    Download
+                                    <div className="hidden sm:block">
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    </div>
+                                    Save
                                 </button>
                             </div>
                         </div>
