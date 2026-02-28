@@ -3,8 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
-import { UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers } from 'lucide-react';
+import { 
+    UploadCloud, Camera, X, FilePlus, AlertCircle, CheckCircle, 
+    ChevronLeft, ChevronRight, Sparkles, Wand2, Contrast, 
+    Hash, Maximize, Sun, Layers, Crop 
+} from 'lucide-react';
 import Webcam from "react-webcam";
+import EnhancedCropModal from '../components/EnhancedCropModal';
+import { autoDetectBoundary } from '../utils/cropUtils';
 
 // ─────────────────────────────────────────────
 // Converts any image (blob/file/dataURL) to a
@@ -120,6 +126,8 @@ const CreatePDF = () => {
     const [generatedBlob, setGeneratedBlob] = useState(null);
     const [isGenerated, setIsGenerated] = useState(false);
     const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+    const [isAutoCropping, setIsAutoCropping] = useState(false);
 
     const VISION_FILTERS = [
         { id: 'none', label: 'Original', icon: <Wand2 className="w-4 h-4" /> },
@@ -284,6 +292,43 @@ const CreatePDF = () => {
             }
             return img;
         }));
+    };
+
+    // ── Cropping Logic ──────────────────────────
+    const handleAutoCrop = async () => {
+        if (images.length === 0) return;
+        setIsAutoCropping(true);
+        setStatus('Scanning for document boundaries...');
+        try {
+            const currentImg = images[selectedPageIndex];
+            const croppedPreview = await autoDetectBoundary(currentImg.preview);
+            
+            setImages(prev => prev.map((img, idx) => {
+                if (idx === selectedPageIndex) {
+                    return { ...img, preview: croppedPreview };
+                }
+                return img;
+            }));
+            setStatus('Auto-crop applied successfully!');
+            setTimeout(() => setStatus(''), 2000);
+        } catch (err) {
+            console.error('Auto-crop failed:', err);
+            setError('Auto-crop failed to detect edges.');
+        } finally {
+            setIsAutoCropping(false);
+        }
+    };
+
+    const handleManualCropSave = (newPreview) => {
+        setImages(prev => prev.map((img, idx) => {
+            if (idx === selectedPageIndex) {
+                return { ...img, preview: newPreview };
+            }
+            return img;
+        }));
+        setIsCropModalOpen(false);
+        setStatus('Manual crop applied.');
+        setTimeout(() => setStatus(''), 2000);
     };
 
     // ── Generate PDF ───────────────────────────
@@ -629,6 +674,43 @@ const CreatePDF = () => {
                                             </button>
                                         ))}
                                     </div>
+                                    
+                                    {/* Advanced Tool Group */}
+                                    <div className="mt-8">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4 flex items-center gap-2">
+                                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                                            Smart Formatting
+                                            <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1"></div>
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={handleAutoCrop}
+                                                disabled={isAutoCropping}
+                                                className="group relative flex flex-col items-center justify-center gap-2 p-4 bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all active:scale-95 disabled:opacity-50"
+                                            >
+                                                <div className="p-2 rounded-lg bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                                    <Sparkles className={`w-5 h-5 ${isAutoCropping ? 'animate-spin' : ''}`} />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-xs font-black text-indigo-900 dark:text-indigo-100 uppercase tracking-wider">Auto-Clean</p>
+                                                    <p className="text-[9px] text-indigo-500 font-medium hidden sm:block">Intelligent Border Detection</p>
+                                                </div>
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => setIsCropModalOpen(true)}
+                                                className="group relative flex flex-col items-center justify-center gap-2 p-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all active:scale-95"
+                                            >
+                                                <div className="p-2 rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                                                    <Crop className="w-5 h-5" />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-xs font-black text-blue-900 dark:text-blue-100 uppercase tracking-wider">Manual Crop</p>
+                                                    <p className="text-[9px] text-blue-500 font-medium hidden sm:block">Precision Boundary Selection</p>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -639,6 +721,15 @@ const CreatePDF = () => {
                         Click "Generate" to process your PDF, then "Download" to save it.
                     </p>
                 </div>
+            )}
+
+            {isCropModalOpen && (
+                <EnhancedCropModal
+                    isOpen={isCropModalOpen}
+                    image={images[selectedPageIndex].preview}
+                    onCropComplete={handleManualCropSave}
+                    onClose={() => setIsCropModalOpen(false)}
+                />
             )}
         </div>
     );
