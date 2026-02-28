@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import useAuthStore from '../store/authStore';
@@ -10,6 +10,17 @@ const Register = () => {
 
     const { register, googleLogin } = useAuthStore();
     const navigate = useNavigate();
+    const [googleWidth, setGoogleWidth] = useState(384);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const width = Math.min(window.innerWidth - 100, 320); // Align with login page reduction
+            setGoogleWidth(Math.max(width, 200)); 
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true);
@@ -125,7 +136,7 @@ const Register = () => {
                     </div>
                 </div>
 
-                <div className="flex justify-center flex-col items-center gap-4">
+                <div className="flex justify-center w-full">
                     <GoogleLogin 
                         onSuccess={handleGoogleSuccess}
                         onError={handleGoogleError}
@@ -134,7 +145,7 @@ const Register = () => {
                         shape="pill"
                         size="large"
                         text="signup_with"
-                        width="384px"
+                        width={googleWidth}
                     />
                 </div>
 
