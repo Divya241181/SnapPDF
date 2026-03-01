@@ -140,12 +140,12 @@ const Register = () => {
                     <GoogleLogin 
                         onSuccess={handleGoogleSuccess}
                         onError={handleGoogleError}
-                        useOneTap
                         theme="filled_blue"
                         shape="pill"
                         size="large"
                         text="signup_with"
                         width={googleWidth}
+                        ux_mode="popup"
                     />
                 </div>
 
