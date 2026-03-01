@@ -1,18 +1,26 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { PDFDocument } from 'pdf-lib';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
 import {
     UploadCloud, Camera, X, FilePlus, AlertCircle,
     CheckCircle, ChevronLeft, ChevronRight, Save, Trash2, ArrowLeft, Loader2,
-    Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers
+    Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers, Crop
 } from 'lucide-react';
 import Webcam from "react-webcam";
+import ManualCropModal from '../components/ManualCropModal';
+import { autoDetectBoundary } from '../utils/cropUtils';
 // pdfjs worker setup
 import * as pdfjs from 'pdfjs-dist';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
+// ─────────────────────────────────────────────
+// Converts any image (blob/file/dataURL) to a
+// clean JPEG Uint8Array via the Canvas API,
+// applying vision filters on the way.
+// ─────────────────────────────────────────────
 const toJpegBytes = (src, filter = 'none') =>
     new Promise((resolve, reject) => {
         const img = new Image();
@@ -93,10 +101,7 @@ const toJpegBytes = (src, filter = 'none') =>
                 }
 
                 canvas.toBlob((blob) => {
-                    if (!blob) {
-                        reject(new Error('Canvas toBlob failed'));
-                        return;
-                    }
+                    if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(new Uint8Array(reader.result));
                     reader.readAsArrayBuffer(blob);
@@ -106,6 +111,15 @@ const toJpegBytes = (src, filter = 'none') =>
         img.onerror = () => reject(new Error('Failed to load image.'));
         img.src = src;
     });
+
+// ─────────────────────────────────────────────
+// PlusCircle inline SVG (no extra import needed)
+// ─────────────────────────────────────────────
+const PlusCircle = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" />
+    </svg>
+);
 
 const EditPDF = () => {
     const { id } = useParams();
@@ -118,24 +132,25 @@ const EditPDF = () => {
     const [filename, setFilename] = useState('');
     const [pdfDetails, setPdfDetails] = useState(null);
     const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+    const [isAutoCropping, setIsAutoCropping] = useState(false);
 
     const VISION_FILTERS = [
-        { id: 'none', label: 'Original', icon: <Wand2 className="w-4 h-4" /> },
-        { id: 'grayscale', label: 'Black & White', icon: <Layers className="w-4 h-4" /> },
-        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast className="w-4 h-4" /> },
-        { id: 'threshold', label: 'Scanner Look', icon: <Hash className="w-4 h-4" /> },
-        { id: 'sharpen', label: 'Sharpen Text', icon: <Maximize className="w-4 h-4" /> },
-        { id: 'brighten', label: 'Brighten', icon: <Sun className="w-4 h-4" /> },
+        { id: 'none',          label: 'Original',     icon: <Wand2     className="w-4 h-4" /> },
+        { id: 'grayscale',     label: 'Black & White', icon: <Layers    className="w-4 h-4" /> },
+        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast  className="w-4 h-4" /> },
+        { id: 'threshold',     label: 'Scanner Look',  icon: <Hash      className="w-4 h-4" /> },
+        { id: 'sharpen',       label: 'Sharpen Text',  icon: <Maximize  className="w-4 h-4" /> },
+        { id: 'brighten',      label: 'Brighten',      icon: <Sun       className="w-4 h-4" /> },
     ];
 
     const fileInputRef = useRef(null);
-    const webcamRef = useRef(null);
-    const imagesRef = useRef([]);
+    const webcamRef    = useRef(null);
+    const imagesRef    = useRef([]);
 
-    useEffect(() => {
-        imagesRef.current = images;
-    }, [images]);
+    useEffect(() => { imagesRef.current = images; }, [images]);
 
+    // ── Load PDF and extract pages ──────────────────────
     useEffect(() => {
         const fetchPdf = async () => {
             try {
@@ -144,7 +159,6 @@ const EditPDF = () => {
                 setPdfDetails(res.data);
                 setFilename(res.data.filename);
 
-                // Fetch the actual PDF file to extract pages
                 const pdfRes = await axios.get(res.data.fileUrl, { responseType: 'arraybuffer' });
                 const pdfData = new Uint8Array(pdfRes.data);
 
@@ -159,18 +173,19 @@ const EditPDF = () => {
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
+                    canvas.width  = viewport.width;
                     await page.render({ canvasContext: context, viewport }).promise;
                     const preview = canvas.toDataURL('image/jpeg', 0.8);
                     loadedImages.push({ id: `page-${i}-${Date.now()}`, preview, filter: 'none' });
                 }
                 setImages(loadedImages);
                 setLoading(false);
+                setStatus('');
             } catch (err) {
                 console.error(err);
                 setError('Failed to load PDF for editing.');
                 setLoading(false);
+                setStatus('');
             }
         };
         fetchPdf();
@@ -182,16 +197,16 @@ const EditPDF = () => {
         };
     }, [id]);
 
+    // ── Add images ──────────────────────────────────────
     const handleImageUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
         setError('');
-        setStatus(`Processing images…`);
-
+        setStatus('Processing images…');
         try {
             const options = { maxSizeMB: 1.0, maxWidthOrHeight: 1920, useWebWorker: false, fileType: 'image/jpeg' };
             const newProcessed = [];
-            for (let file of files) {
+            for (const file of files) {
                 const compressed = await imageCompression(file, options);
                 const preview = URL.createObjectURL(compressed);
                 newProcessed.push({ id: Math.random().toString(36).substr(2, 9), preview, filter: 'none' });
@@ -211,10 +226,10 @@ const EditPDF = () => {
         }
     }, []);
 
-    const removePage = (id) => {
-        const img = images.find(i => i.id === id);
+    const removePage = (imgId) => {
+        const img = images.find(i => i.id === imgId);
         if (img?.preview?.startsWith('blob:')) URL.revokeObjectURL(img.preview);
-        setImages(images.filter(i => i.id !== id));
+        setImages(images.filter(i => i.id !== imgId));
     };
 
     const movePage = (index, direction) => {
@@ -227,15 +242,45 @@ const EditPDF = () => {
         else if (selectedPageIndex === target) setSelectedPageIndex(index);
     };
 
+    // ── Filters ─────────────────────────────────────────
     const applyFilter = (filterId, all = false) => {
         setImages(prev => prev.map((img, idx) => {
-            if (all || idx === selectedPageIndex) {
-                return { ...img, filter: filterId };
-            }
+            if (all || idx === selectedPageIndex) return { ...img, filter: filterId };
             return img;
         }));
     };
 
+    // ── Cropping ─────────────────────────────────────────
+    const handleAutoCrop = async () => {
+        if (images.length === 0) return;
+        setIsAutoCropping(true);
+        setStatus('Scanning for document boundaries...');
+        try {
+            const currentImg = images[selectedPageIndex];
+            const croppedPreview = await autoDetectBoundary(currentImg.preview);
+            setImages(prev => prev.map((img, idx) =>
+                idx === selectedPageIndex ? { ...img, preview: croppedPreview } : img
+            ));
+            setStatus('Auto-crop applied successfully!');
+            setTimeout(() => setStatus(''), 2000);
+        } catch (err) {
+            console.error('Auto-crop failed:', err);
+            setError('Auto-crop failed to detect edges.');
+        } finally {
+            setIsAutoCropping(false);
+        }
+    };
+
+    const handleManualCropSave = (newPreview) => {
+        setImages(prev => prev.map((img, idx) =>
+            idx === selectedPageIndex ? { ...img, preview: newPreview } : img
+        ));
+        setIsCropModalOpen(false);
+        setStatus('Manual crop applied.');
+        setTimeout(() => setStatus(''), 2000);
+    };
+
+    // ── Save changes ─────────────────────────────────────
     const saveChanges = async () => {
         if (images.length === 0) return setError('PDF cannot be empty');
         setLoading(true);
@@ -247,34 +292,33 @@ const EditPDF = () => {
 
             for (let i = 0; i < images.length; i++) {
                 setStatus(`Enhancing and rebuilding page ${i + 1} of ${images.length}…`);
-                const bytes = await toJpegBytes(images[i].preview, images[i].filter);
+                const bytes    = await toJpegBytes(images[i].preview, images[i].filter);
                 const embedded = await pdfDoc.embedJpg(bytes);
-                const page = pdfDoc.addPage([width, height]);
-                const scale = Math.min(width / embedded.width, height / embedded.height);
+                const page     = pdfDoc.addPage([width, height]);
+                const scale    = Math.min(width / embedded.width, height / embedded.height);
                 page.drawImage(embedded, {
-                    x: (width - embedded.width * scale) / 2,
+                    x: (width  - embedded.width  * scale) / 2,
                     y: (height - embedded.height * scale) / 2,
-                    width: embedded.width * scale,
+                    width:  embedded.width  * scale,
                     height: embedded.height * scale,
                 });
             }
 
             setStatus('Finalizing PDF…');
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            let finalName = filename.trim() || 'Updated_Document.pdf';
+            const pdfBytes  = await pdfDoc.save();
+            const blob      = new Blob([pdfBytes], { type: 'application/pdf' });
+            let finalName   = filename.trim() || 'Updated_Document.pdf';
             if (!finalName.toLowerCase().endsWith('.pdf')) finalName += '.pdf';
 
             const formData = new FormData();
-            formData.append('pdfFile', new File([blob], finalName, { type: 'application/pdf' }));
-            formData.append('filename', finalName);
+            formData.append('pdfFile',   new File([blob], finalName, { type: 'application/pdf' }));
+            formData.append('filename',  finalName);
             formData.append('pageCount', String(images.length));
-            formData.append('fileSize', String(blob.size));
+            formData.append('fileSize',  String(blob.size));
 
-            // Generate new thumbnail
             setStatus('Updating thumbnail…');
             const firstImgRes = await fetch(images[0].preview);
-            const thumbBlob = await firstImgRes.blob();
+            const thumbBlob   = await firstImgRes.blob();
             formData.append('thumbnail', new File([thumbBlob], 'thumb.jpg', { type: 'image/jpeg' }));
 
             await axios.put(`/api/pdfs/${id}`, formData);
@@ -287,6 +331,14 @@ const EditPDF = () => {
         }
     };
 
+    // ── CSS filter class helper (live preview via CSS) ──
+    const filterClass = (f) =>
+        f === 'grayscale'     ? 'grayscale' :
+        f === 'high-contrast' ? 'contrast-150 grayscale' :
+        f === 'threshold'     ? 'contrast-[200] grayscale' :
+        f === 'brighten'      ? 'brightness-125' :
+        f === 'sharpen'       ? 'contrast-125 saturate-0' : '';
+
     if (loading && !status) return (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
@@ -296,6 +348,7 @@ const EditPDF = () => {
 
     return (
         <div className="max-w-5xl mx-auto py-6">
+            {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">
                     <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
@@ -320,14 +373,19 @@ const EditPDF = () => {
                 </div>
             </div>
 
-            {error && <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-xl flex items-center gap-3 border border-rose-100 dark:border-rose-900/30">
-                <AlertCircle className="w-5 h-5" /> {error}
-            </div>}
+            {/* ── Error / Status Banners ── */}
+            {error && (
+                <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-xl flex items-center gap-3 border border-rose-100 dark:border-rose-900/30">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" /> {error}
+                </div>
+            )}
+            {status && (
+                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-xl flex items-center gap-3 border border-blue-100 dark:border-blue-900/30">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0" /> {status}
+                </div>
+            )}
 
-            {status && <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-xl flex items-center gap-3 border border-blue-100 dark:border-blue-900/30">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" /> {status}
-            </div>}
-
+            {/* ── Camera Mode ── */}
             {mode === 'camera' && (
                 <div className="bg-black rounded-3xl overflow-hidden relative mb-8 aspect-video max-w-2xl mx-auto border-4 border-slate-800 shadow-2xl">
                     <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="w-full h-full object-cover" />
@@ -342,6 +400,7 @@ const EditPDF = () => {
                 </div>
             )}
 
+            {/* ── Upload Mode ── */}
             {mode === 'upload' && (
                 <div className="border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center mb-8 bg-slate-50/50 dark:bg-slate-900/30">
                     <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
@@ -349,13 +408,15 @@ const EditPDF = () => {
                     <h3 className="text-xl font-bold mb-2">Select new images</h3>
                     <p className="text-slate-500 mb-6 text-sm">Add more pages from your files</p>
                     <div className="flex justify-center gap-4">
-                        <button onClick={() => fileInputRef.current?.click()} className="btn-primary">Choose Files</button>
+                        <button onClick={() => fileInputRef.current?.click()} className="btn-primary"><FilePlus className="w-4 h-4" />Choose Files</button>
                         <button onClick={() => setMode('edit')} className="btn-secondary">Cancel</button>
                     </div>
                 </div>
             )}
 
-            <div className="glass-panel p-6">
+            {/* ── Main Editor Panel ── */}
+            <div className="glass-panel p-4 sm:p-6">
+                {/* Document Name */}
                 <div className="mb-6">
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wider">Document Name</label>
                     <input
@@ -367,72 +428,69 @@ const EditPDF = () => {
                     />
                 </div>
 
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm">{images.length}</span>
+                {/* Page Grid header */}
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-black">{images.length}</span>
                         Total Pages
                     </h3>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {/* ── Page Grid ── */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                     {images.map((img, idx) => (
                         <div key={img.id} className="group relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all duration-300">
-                            <img src={img.preview} alt={`Page ${idx + 1}`} className="w-full h-full object-cover" />
-
+                            <img
+                                src={img.preview}
+                                alt={`Page ${idx + 1}`}
+                                className={`w-full h-full object-cover transition-all duration-300 ${filterClass(img.filter)}`}
+                            />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
 
-                            <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-800 shadow-sm z-30">
+                            {/* Page number badge */}
+                            <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border border-slate-200 dark:border-slate-800 shadow-sm z-30">
                                 <span className="text-xs font-black text-slate-800 dark:text-slate-200">{idx + 1}</span>
                             </div>
 
-                            {/* Selection Overlay */}
-                            <div
-                                className="absolute inset-0 cursor-pointer z-10"
-                                onClick={() => setSelectedPageIndex(idx)}
-                            />
-
-                            {selectedPageIndex === idx && (
-                                <div className="absolute inset-0 ring-4 ring-blue-500 ring-inset pointer-events-none z-20" />
-                            )}
-
+                            {/* Filter badge */}
                             {img.filter !== 'none' && (
-                                <div className="absolute top-3 right-12 bg-blue-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md z-30 flex items-center gap-1">
+                                <div className="absolute top-2 right-10 bg-blue-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded backdrop-blur-md z-30 flex items-center gap-1">
                                     <Sparkles className="w-2 h-2" /> ENHANCED
                                 </div>
                             )}
 
-                            {/* Actions */}
-                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 z-40">
+                            {/* Click overlay to select */}
+                            <div className="absolute inset-0 cursor-pointer z-10" onClick={() => setSelectedPageIndex(idx)} />
+
+                            {/* Selected ring */}
+                            {selectedPageIndex === idx && (
+                                <div className="absolute inset-0 ring-4 ring-blue-500 ring-inset pointer-events-none z-20" />
+                            )}
+
+                            {/* Delete button */}
+                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 z-40">
                                 <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        removePage(img.id);
-                                    }}
-                                    className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors"
+                                    onClick={(e) => { e.stopPropagation(); removePage(img.id); }}
+                                    className="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors"
                                     title="Delete Page"
                                 >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                             </div>
 
-                            <div className="absolute bottom-4 inset-x-4 flex justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 z-40">
+                            {/* Reorder controls */}
+                            <div className="absolute bottom-3 inset-x-3 flex justify-between gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 z-40">
                                 <button
                                     disabled={idx === 0}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        movePage(idx, -1);
-                                    }}
-                                    className="flex-1 h-8 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                    onClick={(e) => { e.stopPropagation(); movePage(idx, -1); }}
+                                    className="flex-1 h-7 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
                                 <button
                                     disabled={idx === images.length - 1}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        movePage(idx, 1);
-                                    }}
-                                    className="flex-1 h-8 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                    onClick={(e) => { e.stopPropagation(); movePage(idx, 1); }}
+                                    className="flex-1 h-7 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                                 >
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
@@ -440,10 +498,10 @@ const EditPDF = () => {
                         </div>
                     ))}
 
-                    {/* Add More Button */}
+                    {/* Add More */}
                     <button
                         onClick={() => setMode('upload')}
-                        className="rounded-2xl border-4 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-all group"
+                        className="rounded-2xl border-4 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3 aspect-[3/4] hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-all group"
                     >
                         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900 group-hover:text-blue-600 flex items-center justify-center transition-colors">
                             <PlusCircle className="w-6 h-6" />
@@ -452,83 +510,125 @@ const EditPDF = () => {
                     </button>
                 </div>
 
-                {/* Vision Lab — Edit Mode */}
-                <div className="mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Sparkles className="w-5 h-5 text-blue-600" />
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white transition-colors">Vision Lab — Enhancement Center</h3>
-                    </div>
+                {/* ──────────────────────────────────────────────────────────────
+                    VISION LAB — identical layout to CreatePDF's Vision Lab
+                    ────────────────────────────────────────────────────────────── */}
+                {images.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 premium-typography">
+                        {/* Section header */}
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Vision Lab</h3>
+                        </div>
 
-                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-3xl p-6 border border-slate-200 dark:border-slate-800">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                            {/* Selected Page Details */}
-                            <div className="space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Current Focus</p>
-                                <div className="flex items-center gap-6 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
-                                    <div className="w-20 aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 shadow-inner">
-                                        <img
-                                            src={images[selectedPageIndex]?.preview}
-                                            alt="Preview"
-                                            className={`w-full h-full object-cover ${images[selectedPageIndex]?.filter === 'grayscale' ? 'grayscale' :
-                                                images[selectedPageIndex]?.filter === 'high-contrast' ? 'contrast-150 grayscale' :
-                                                    images[selectedPageIndex]?.filter === 'threshold' ? 'contrast-[200] grayscale' :
-                                                        images[selectedPageIndex]?.filter === 'brighten' ? 'brightness-125' :
-                                                            images[selectedPageIndex]?.filter === 'sharpen' ? 'contrast-125 saturate-0' : ''
-                                                }`}
-                                        />
+                        <div className="flex flex-col md:flex-row gap-4">
+                            {/* ── Large Preview ── */}
+                            <div className="md:w-1/2 lg:w-2/5">
+                                <div className="relative group aspect-[4/5] w-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
+                                    <img
+                                        src={images[selectedPageIndex]?.preview}
+                                        alt="Current Page"
+                                        className={`w-full h-full object-contain p-2 sm:p-4 transition-all duration-300 ${filterClass(images[selectedPageIndex]?.filter)}`}
+                                    />
+                                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">
+                                        Page {selectedPageIndex + 1}
                                     </div>
-                                    <div>
-                                        <h4 className="text-xl font-black text-slate-900 dark:text-white">Page {selectedPageIndex + 1}</h4>
-                                        <p className="text-sm text-slate-500 mt-1">Enhance this page specifically or update entire document.</p>
-                                    </div>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => applyFilter(images[selectedPageIndex]?.filter, true)}
+                                        className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter transition-colors shadow-lg"
+                                    >
+                                        Apply All
+                                    </motion.button>
                                 </div>
                             </div>
 
-                            {/* Filter selection */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Apply Filter</p>
-                                    <button
-                                        onClick={() => applyFilter(images[selectedPageIndex]?.filter, true)}
-                                        className="text-[10px] font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 uppercase underline"
-                                    >
-                                        Apply to All
-                                    </button>
-                                </div>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {VISION_FILTERS.map((f) => (
-                                        <button
-                                            key={f.id}
-                                            onClick={() => applyFilter(f.id)}
-                                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border text-[10px] font-bold transition-all duration-200 ${images[selectedPageIndex]?.filter === f.id
-                                                ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-105'
-                                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-500'
+                            {/* ── Controls ── */}
+                            <div className="flex-1 flex flex-col gap-4">
+                                {/* Filters grid */}
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Filters</p>
+                                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                        {VISION_FILTERS.map((f) => (
+                                            <motion.button
+                                                key={f.id}
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => applyFilter(f.id)}
+                                                className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
+                                                    images[selectedPageIndex]?.filter === f.id
+                                                        ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                                                        : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                                 }`}
+                                            >
+                                                <div className={`p-1.5 rounded-lg ${images[selectedPageIndex]?.filter === f.id ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                                                    {React.cloneElement(f.icon, { className: "w-3 h-3" })}
+                                                </div>
+                                                <span className="text-[10px] font-black uppercase leading-none truncate">{f.label}</span>
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Smart Tools */}
+                                <div className="mt-auto">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Smart Tools</p>
+                                    <div className="flex gap-2">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={handleAutoCrop}
+                                            disabled={isAutoCropping}
+                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all disabled:opacity-50"
                                         >
-                                            {f.icon}
-                                            {f.label}
-                                        </button>
-                                    ))}
+                                            <Sparkles className={`w-3.5 h-3.5 ${isAutoCropping ? 'animate-spin' : ''}`} />
+                                            <span className="text-[10px] font-black uppercase tracking-wider">Auto-Clean</span>
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setIsCropModalOpen(true)}
+                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-slate-800 dark:bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-900 dark:hover:bg-slate-600 transition-all border border-slate-700 dark:border-slate-600"
+                                        >
+                                            <Crop className="w-3.5 h-3.5" />
+                                            <span className="text-[10px] font-black uppercase tracking-wider">Manual Crop</span>
+                                        </motion.button>
+                                    </div>
+                                </div>
+
+                                {/* Ready strip */}
+                                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl flex items-center gap-2">
+                                    <div className="p-1 bg-emerald-500 rounded-full">
+                                        <CheckCircle className="w-2.5 h-2.5 text-white" />
+                                    </div>
+                                    <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Ready to Save</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">
+                {/* ── Save notice ── */}
+                <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
                     <div className="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
-                        <CheckCircle className="w-5 h-5" />
+                        <CheckCircle className="w-5 h-5 flex-shrink-0" />
                         <p className="text-sm font-medium">Any changes you save will automatically update your PDF library and regenerate the file.</p>
                     </div>
                 </div>
             </div>
+
+            {/* ── Manual Crop Modal ── */}
+            {isCropModalOpen && images[selectedPageIndex] && (
+                <ManualCropModal
+                    isOpen={isCropModalOpen}
+                    image={images[selectedPageIndex].preview}
+                    onCropComplete={handleManualCropSave}
+                    onClose={() => setIsCropModalOpen(false)}
+                />
+            )}
         </div>
     );
 };
-
-// Re-importing missing icons
-const PlusCircle = (props) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
-);
 
 export default EditPDF;
