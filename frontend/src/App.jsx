@@ -19,6 +19,7 @@ import Documentation from './pages/Documentation';
 import Mission from './pages/Mission';
 import Security from './pages/Security';
 import Features from './pages/Features';
+import NotFound from './pages/NotFound';
 
 // Components
 import Navbar from './components/Navbar';
@@ -89,6 +90,9 @@ function App() {
             <Route path="/mission" element={<Mission />} />
             <Route path="/security" element={<Security />} />
             <Route path="/features" element={<Features />} />
+
+            {/* Catch-all 404 Page */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 
