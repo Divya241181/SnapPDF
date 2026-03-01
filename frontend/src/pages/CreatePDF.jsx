@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Webcam from "react-webcam";
-import EnhancedCropModal from '../components/EnhancedCropModal';
+import ManualCropModal from '../components/ManualCropModal';
 import { autoDetectBoundary } from '../utils/cropUtils';
 
 // ─────────────────────────────────────────────
@@ -741,8 +741,8 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            {isCropModalOpen && (
-                <EnhancedCropModal
+            {isCropModalOpen && images[selectedPageIndex] && (
+                <ManualCropModal
                     isOpen={isCropModalOpen}
                     image={images[selectedPageIndex].preview}
                     onCropComplete={handleManualCropSave}
