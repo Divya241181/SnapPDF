@@ -1,7 +1,6 @@
 import React from 'react';
 import { Users, Target, Award, History, CheckCircle2, Cpu, Terminal } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import PrathamImg from '../assets/Pratham.jpeg';
 import DivyaImg from '../assets/Divya.jpg';
 

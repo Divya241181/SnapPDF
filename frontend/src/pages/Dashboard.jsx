@@ -14,8 +14,8 @@ const Dashboard = () => {
         try {
             const res = await axios.get('/api/pdfs');
             setPdfs(res.data);
-        } catch (err) {
-            console.error(err);
+        } catch {
+            console.error('Fetch failed');
         } finally {
             setLoading(false);
         }
@@ -28,8 +28,8 @@ const Dashboard = () => {
             try {
                 await axios.delete(`/api/pdfs/${id}`);
                 setPdfs(pdfs.filter(pdf => pdf._id !== id));
-            } catch (err) {
-                console.error(err);
+            } catch {
+                console.error('Delete failed');
             }
         }
     };
@@ -78,7 +78,7 @@ const Dashboard = () => {
                     prompt('Sharing link (Manual Copy):', fullUrl);
                 }
             }
-        } catch (err) {
+        } catch {
             prompt('Copy this link to share:', fullUrl);
         }
     };
@@ -188,7 +188,7 @@ const Dashboard = () => {
                                     </h4>
                                     <div className="flex justify-between items-center text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mb-2 sm:mb-3">
                                         <span className="truncate mr-1">{new Date(pdf.createdAt).toLocaleDateString()}</span>
-                                        <span className="shrink-0">{pdf.pageCount} pg</span>
+                                        <span className="shrink-0">{pdf.pageCount} pg • {formatBytes(pdf.fileSize)}</span>
                                     </div>
 
                                     {/* Actions — optimized for mobile */}

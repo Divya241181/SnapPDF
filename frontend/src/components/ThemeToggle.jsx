@@ -1,18 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useThemeStore from '../store/themeStore';
 
 const ThemeToggle = () => {
     const { theme, toggleTheme } = useThemeStore();
-    const [mounted, setMounted] = useState(false);
-
-    // Prevent hydration mismatch
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) return <div className="w-14 h-7" />;
 
     return (
         <button
