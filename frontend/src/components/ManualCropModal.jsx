@@ -345,6 +345,27 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
     dragRef.current.active = false;
   }, []);
 
+  // ── Attach touch events imperatively with { passive: false } ──
+  // React's synthetic onTouchXxx are passive by default, which prevents
+  // calling e.preventDefault() and causes console errors during drag.
+  // We bypass React's passivity by attaching directly to the DOM element.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isOpen) return;
+
+    canvas.addEventListener('touchstart',  onPointerDown, { passive: false });
+    canvas.addEventListener('touchmove',   onPointerMove, { passive: false });
+    canvas.addEventListener('touchend',    onPointerUp,   { passive: true  });
+    canvas.addEventListener('touchcancel', onPointerUp,   { passive: true  });
+
+    return () => {
+      canvas.removeEventListener('touchstart',  onPointerDown);
+      canvas.removeEventListener('touchmove',   onPointerMove);
+      canvas.removeEventListener('touchend',    onPointerUp);
+      canvas.removeEventListener('touchcancel', onPointerUp);
+    };
+  }, [isOpen, onPointerDown, onPointerMove, onPointerUp]);
+
   // ── Apply crop: draw region to off-screen canvas ───────
   const handleApply = async () => {
     if (!box || !imgRef.current) return;
@@ -467,9 +488,8 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
               onMouseMove={onPointerMove}
               onMouseUp={onPointerUp}
               onMouseLeave={onPointerUp}
-              onTouchStart={onPointerDown}
-              onTouchMove={onPointerMove}
-              onTouchEnd={onPointerUp}
+              // Touch events are attached imperatively with { passive: false }
+              // in the useEffect above to allow e.preventDefault() during drag.
             />
 
             {/* Touch-friendly hint chip */}
