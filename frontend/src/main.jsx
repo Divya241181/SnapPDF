@@ -24,7 +24,7 @@ const getApiBaseUrl = () => {
   }
 
   // 3. Production / GitHub Pages
-  return import.meta.env.VITE_API_URL || 'https://snappdf-backend.onrender.com';
+  return import.meta.env.VITE_API_URL || 'https://snappdf-na6s.onrender.com';
 };
 
 axios.defaults.baseURL = getApiBaseUrl();
