@@ -7,7 +7,7 @@ import axios from 'axios';
 import {
     UploadCloud, Camera, X, FilePlus, AlertCircle,
     CheckCircle, ChevronLeft, ChevronRight, Save, Trash2, ArrowLeft, Loader2,
-    Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers, Crop
+    Sparkles, Wand2, Contrast, Hash, Maximize, Sun, Layers, Crop, Palette, Eraser
 } from 'lucide-react';
 import Webcam from "react-webcam";
 import ManualCropModal from '../components/ManualCropModal';
@@ -63,6 +63,63 @@ const toJpegBytes = (src, filter = 'none') =>
                     } else if (filter === 'brighten') {
                         for (let i = 0; i < data.length; i += 4) {
                             data[i] += 40; data[i + 1] += 40; data[i + 2] += 40;
+                        }
+                    } else if (filter === 'magic-color') {
+                        // Step 1: Boost contrast
+                        const contrastFactor = (259 * (60 + 255)) / (255 * (259 - 60));
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i]     = Math.min(255, Math.max(0, contrastFactor * (data[i]     - 128) + 128));
+                            data[i + 1] = Math.min(255, Math.max(0, contrastFactor * (data[i + 1] - 128) + 128));
+                            data[i + 2] = Math.min(255, Math.max(0, contrastFactor * (data[i + 2] - 128) + 128));
+                        }
+                        // Step 2: Boost saturation (push each channel away from its grayscale average)
+                        const satBoost = 1.6;
+                        for (let i = 0; i < data.length; i += 4) {
+                            const gray = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
+                            data[i]     = Math.min(255, Math.max(0, gray + satBoost * (data[i]     - gray)));
+                            data[i + 1] = Math.min(255, Math.max(0, gray + satBoost * (data[i + 1] - gray)));
+                            data[i + 2] = Math.min(255, Math.max(0, gray + satBoost * (data[i + 2] - gray)));
+                        }
+                        // Step 3: Slight brightness lift
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i]     = Math.min(255, data[i]     + 15);
+                            data[i + 1] = Math.min(255, data[i + 1] + 15);
+                            data[i + 2] = Math.min(255, data[i + 2] + 15);
+                        }
+                    } else if (filter === 'no-shadow') {
+                        // Shadow removal via background normalization:
+                        // Estimate background via 2-pass box-blur on luminance, then divide.
+                        const w = canvas.width, h = canvas.height;
+                        const lum = new Float32Array(w * h);
+                        for (let i = 0; i < data.length; i += 4) {
+                            lum[i >> 2] = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
+                        }
+                        const radius = Math.max(20, Math.floor(Math.min(w, h) / 20));
+                        const blurred = new Float32Array(w * h);
+                        for (let y = 0; y < h; y++) {
+                            let sum = 0, count = 0;
+                            for (let x = 0; x < radius; x++) { sum += lum[y * w + x]; count++; }
+                            for (let x = 0; x < w; x++) {
+                                if (x + radius < w) { sum += lum[y * w + x + radius]; count++; }
+                                if (x - radius - 1 >= 0) { sum -= lum[y * w + x - radius - 1]; count--; }
+                                blurred[y * w + x] = sum / count;
+                            }
+                        }
+                        const bg = new Float32Array(w * h);
+                        for (let x = 0; x < w; x++) {
+                            let sum = 0, count = 0;
+                            for (let y = 0; y < radius; y++) { sum += blurred[y * w + x]; count++; }
+                            for (let y = 0; y < h; y++) {
+                                if (y + radius < h) { sum += blurred[(y + radius) * w + x]; count++; }
+                                if (y - radius - 1 >= 0) { sum -= blurred[(y - radius - 1) * w + x]; count--; }
+                                bg[y * w + x] = sum / count;
+                            }
+                        }
+                        for (let i = 0; i < data.length; i += 4) {
+                            const bgVal = Math.max(1, bg[i >> 2]);
+                            data[i]     = Math.min(255, (data[i]     / bgVal) * 240);
+                            data[i + 1] = Math.min(255, (data[i + 1] / bgVal) * 240);
+                            data[i + 2] = Math.min(255, (data[i + 2] / bgVal) * 240);
                         }
                     }
 
@@ -136,12 +193,14 @@ const EditPDF = () => {
     const [isAutoCropping, setIsAutoCropping] = useState(false);
 
     const VISION_FILTERS = [
-        { id: 'none',          label: 'Original',     icon: <Wand2     className="w-4 h-4" /> },
-        { id: 'grayscale',     label: 'Black & White', icon: <Layers    className="w-4 h-4" /> },
-        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast  className="w-4 h-4" /> },
-        { id: 'threshold',     label: 'Scanner Look',  icon: <Hash      className="w-4 h-4" /> },
-        { id: 'sharpen',       label: 'Sharpen Text',  icon: <Maximize  className="w-4 h-4" /> },
-        { id: 'brighten',      label: 'Brighten',      icon: <Sun       className="w-4 h-4" /> },
+        { id: 'none',          label: 'Original',     icon: <Wand2    className="w-4 h-4" /> },
+        { id: 'grayscale',     label: 'Black & White', icon: <Layers   className="w-4 h-4" /> },
+        { id: 'high-contrast', label: 'High Contrast', icon: <Contrast className="w-4 h-4" /> },
+        { id: 'threshold',     label: 'Scanner Look',  icon: <Hash     className="w-4 h-4" /> },
+        { id: 'sharpen',       label: 'Sharpen Text',  icon: <Maximize className="w-4 h-4" /> },
+        { id: 'brighten',      label: 'Brighten',      icon: <Sun      className="w-4 h-4" /> },
+        { id: 'magic-color',   label: 'Magic Color',   icon: <Palette  className="w-4 h-4" /> },
+        { id: 'no-shadow',     label: 'No Shadow',     icon: <Eraser   className="w-4 h-4" /> },
     ];
 
     const fileInputRef = useRef(null);
@@ -337,7 +396,9 @@ const EditPDF = () => {
         f === 'high-contrast' ? 'contrast-150 grayscale' :
         f === 'threshold'     ? 'contrast-[200] grayscale' :
         f === 'brighten'      ? 'brightness-125' :
-        f === 'sharpen'       ? 'contrast-125 saturate-0' : '';
+        f === 'sharpen'       ? 'contrast-125 saturate-0' :
+        f === 'magic-color'   ? 'saturate-[1.8] contrast-[1.2] brightness-110' :
+        f === 'no-shadow'     ? 'contrast-[1.15] brightness-110' : '';
 
     if (loading && !status) return (
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
