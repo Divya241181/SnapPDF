@@ -90,12 +90,38 @@ app.use('/uploads', express.static('uploads'));
 // 6. DATABASE
 // ─────────────────────────────────────────────
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log('MongoDB Error:', err));
+    .then(() => console.log('✅ MongoDB Connected successfully'))
+    .catch(err => {
+        console.error('❌ MongoDB Connection FAILED!');
+        console.error('URI used:', process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/:([^@]+)@/, ':****@') : 'NOT SET');
+        console.error('Error:', err.message);
+    });
 
 // ─────────────────────────────────────────────
 // 7. ROUTES
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// Health Check — visit /health or / to diagnose
+// ─────────────────────────────────────────────
+app.get('/', (req, res) => res.json({ status: '🚀 SnapPDF API is running' }));
+
+app.get('/health', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const dbStatus = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' }[dbState];
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        database: dbStatus,
+        env: {
+            MONGODB_URI:         process.env.MONGODB_URI         ? '✅ set' : '❌ MISSING',
+            JWT_SECRET:          process.env.JWT_SECRET          ? '✅ set' : '❌ MISSING',
+            FRONTEND_URL:        process.env.FRONTEND_URL        ? '✅ set' : '❌ MISSING',
+            GOOGLE_CLIENT_ID:    process.env.GOOGLE_CLIENT_ID    ? '✅ set' : '❌ MISSING',
+            GOOGLE_CLIENT_SECRET:process.env.GOOGLE_CLIENT_SECRET? '✅ set' : '❌ MISSING',
+        }
+    });
+});
+
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/user', apiLimiter, require('./routes/user'));
 app.use('/api/pdfs', apiLimiter, require('./routes/pdf'));
@@ -107,7 +133,8 @@ app.use((err, req, res, next) => {
     if (err.message && err.message.includes('CORS')) {
         return res.status(403).json({ msg: err.message });
     }
-    console.error('Unhandled error:', err.message);
+    console.error('❌ Unhandled error:', err.message);
+    console.error(err.stack);
     res.status(500).json({ msg: 'Internal server error' });
 });
 
