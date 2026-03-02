@@ -114,4 +114,24 @@ router.put('/profile', auth, (req, res) => {
     });
 });
 
+// ── DELETE /api/user/account ──────────────────
+// Permanently deletes the authenticated user's account
+// and all PDF records they own.
+router.delete('/account', auth, async (req, res) => {
+    try {
+        const Pdf = require('../models/Pdf');
+
+        // Delete all PDFs owned by this user
+        await Pdf.deleteMany({ userId: req.user.id });
+
+        // Delete the user document
+        await User.findByIdAndDelete(req.user.id);
+
+        res.json({ msg: 'Account deleted successfully' });
+    } catch (err) {
+        console.error('Account delete error:', err.message);
+        res.status(500).json({ msg: 'Server Error' });
+    }
+});
+
 module.exports = router;
