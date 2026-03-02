@@ -190,6 +190,7 @@ const CreatePDF = () => {
     const [selectedPageIndex, setSelectedPageIndex] = useState(0);
     const [isCropModalOpen, setIsCropModalOpen] = useState(false);
     const [isAutoCropping, setIsAutoCropping] = useState(false);
+    const [isFlashing, setIsFlashing] = useState(false);  // shutter flash
 
     const VISION_FILTERS = [
         { id: 'none',         label: 'Original',     icon: <Wand2    className="w-4 h-4" /> },
@@ -204,6 +205,7 @@ const CreatePDF = () => {
 
     const fileInputRef = useRef(null);
     const webcamRef = useRef(null);
+    const audioCtxRef = useRef(null);  // Web Audio context for shutter sound
 
     // Use a ref to track the latest images for the unmount cleanup
     const imagesRef = useRef(images);
@@ -301,17 +303,65 @@ const CreatePDF = () => {
         processFiles(files);
     };
 
-    // ── Camera capture  ────────────────────────
+    // ── Shutter sound via Web Audio API (no file dependency) ──
+    const playShutterSound = useCallback(() => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtxRef.current = ctx;
+
+            // Click transient  — short burst of noise
+            const bufferSize = ctx.sampleRate * 0.06; // 60 ms
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                // Decaying white noise — classic camera click
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 8);
+            }
+
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+
+            // Slight bandpass to make it punchier
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1200;
+            filter.Q.value = 0.8;
+
+            // Gain envelope
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.7, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            source.start(ctx.currentTime);
+            source.stop(ctx.currentTime + 0.07);
+            source.onended = () => ctx.close();
+        } catch {
+            // Silently fail if audio is blocked (e.g. Safari requires user gesture)
+        }
+    }, []);
+
+    // ── Camera capture ─────────────────────────
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
+            // 1. Shutter flash overlay
+            setIsFlashing(true);
+            setTimeout(() => setIsFlashing(false), 160);
+
+            // 2. Camera click sound
+            playShutterSound();
+
+            // 3. Add captured image
             setImages((prev) => [...prev, {
                 id: 'cam-' + Date.now(),
                 preview: imageSrc,
                 filter: 'none'
             }]);
         }
-    }, []);
+    }, [playShutterSound]);
 
     const handleWebcamError = useCallback((err) => {
         let errorMsg = 'Camera access denied or not available.';
@@ -573,8 +623,10 @@ const CreatePDF = () => {
                         <p className={`text-sm text-slate-500 dark:text-slate-400 transition-opacity ${isDragging ? 'opacity-0' : ''}`}>JPG, PNG, WebP — all supported</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center gap-4">
-                        <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-slate-800 dark:border-slate-700 bg-black w-full max-w-sm aspect-[3/4]">
+                    <div className="flex flex-col items-center gap-3 sm:gap-4">
+
+                        {/* ─ Viewfinder ─ */}
+                        <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-slate-800 dark:border-slate-700 bg-black w-full max-w-sm sm:max-w-lg aspect-[3/4] sm:aspect-[3/4]">
                             <Webcam
                                 audio={false}
                                 ref={webcamRef}
@@ -584,18 +636,75 @@ const CreatePDF = () => {
                                 onUserMediaError={handleWebcamError}
                                 className="w-full h-full object-cover"
                             />
-                            <div className="absolute inset-4 border-2 border-white/30 rounded-lg pointer-events-none" />
-                        </div>
-                        <button
-                            onClick={capture}
-                            className="w-20 h-20 bg-white dark:bg-slate-800 rounded-full border-4 border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-2xl active:scale-90 transition-all"
-                            aria-label="Capture photo"
-                        >
-                            <div className="w-14 h-14 bg-blue-600 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center">
-                                <Camera className="w-6 h-6 text-white" />
+
+                            {/* Document guide corners */}
+                            <div className="absolute inset-4 pointer-events-none">
+                                <div className="absolute top-0    left-0  w-6 h-6 border-t-2 border-l-2 border-white/60 rounded-tl-md" />
+                                <div className="absolute top-0    right-0 w-6 h-6 border-t-2 border-r-2 border-white/60 rounded-tr-md" />
+                                <div className="absolute bottom-0 left-0  w-6 h-6 border-b-2 border-l-2 border-white/60 rounded-bl-md" />
+                                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/60 rounded-br-md" />
                             </div>
-                        </button>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Tap to capture a page</p>
+
+                            {/* Shutter flash overlay */}
+                            <div
+                                className="absolute inset-0 bg-white pointer-events-none transition-opacity duration-150"
+                                style={{ opacity: isFlashing ? 0.85 : 0 }}
+                            />
+
+                            {/* Page counter badge — top-left of viewfinder */}
+                            {images.length > 0 && (
+                                <div
+                                    className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1.5 rounded-full shadow-lg"
+                                    style={{ transition: 'transform 0.2s', transform: isFlashing ? 'scale(1.2)' : 'scale(1)' }}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse inline-block" />
+                                    {images.length} {images.length === 1 ? 'page' : 'pages'}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* ─ Capture controls row ─ */}
+                        <div className="flex items-center justify-center gap-5 sm:gap-6 w-full">
+
+                            {/* Page counter pill — left of button on larger screens */}
+                            <div className="flex flex-col items-center gap-0.5 min-w-[44px]">
+                                <span
+                                    className="text-2xl sm:text-3xl font-black tabular-nums leading-none"
+                                    style={{
+                                        background: 'linear-gradient(135deg,#60a5fa,#818cf8)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                        transition: 'transform 0.15s',
+                                        transform: isFlashing ? 'scale(1.3)' : 'scale(1)',
+                                    }}
+                                >
+                                    {images.length}
+                                </span>
+                                <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+                                    {images.length === 1 ? 'PAGE' : 'PAGES'}
+                                </span>
+                            </div>
+
+                            {/* Capture button */}
+                            <button
+                                onClick={capture}
+                                className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-slate-800 rounded-full border-4 border-slate-300 dark:border-slate-600 flex items-center justify-center shadow-2xl active:scale-90 transition-all"
+                                aria-label="Capture photo"
+                                style={{ boxShadow: isFlashing ? '0 0 0 8px rgba(59,130,246,0.35)' : '' }}
+                            >
+                                <div className="w-11 h-11 sm:w-14 sm:h-14 bg-blue-600 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center transition-transform"
+                                    style={{ transform: isFlashing ? 'scale(0.88)' : 'scale(1)' }}>
+                                    <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                                </div>
+                            </button>
+
+                            {/* Spacer to balance the layout */}
+                            <div className="min-w-[44px]" />
+                        </div>
+
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center">
+                            Tap to capture a page
+                        </p>
                     </div>
                 )}
             </div>
