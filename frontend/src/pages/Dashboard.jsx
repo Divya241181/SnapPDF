@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
-import { FileText, Download, Trash2, Eye, Plus, Search, Share2, Edit2 } from 'lucide-react';
+import { FileText, Download, Trash2, Plus, Search, Share2, Edit2 } from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useAuthStore();
@@ -186,14 +186,6 @@ const Dashboard = () => {
                                                     alt={pdf.filename}
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover/thumb:scale-105"
                                                 />
-                                                {/* Open overlay — only when NOT selected */}
-                                                {!isSelected && (
-                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity bg-black/10">
-                                                        <div className="bg-white/90 dark:bg-slate-900/90 p-2 rounded-full shadow-lg">
-                                                            <Eye className="w-4 h-4 text-blue-600" />
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </>
                                         ) : (
                                             <div className="flex flex-col items-center gap-2">
