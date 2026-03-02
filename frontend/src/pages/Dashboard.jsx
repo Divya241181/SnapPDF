@@ -13,6 +13,7 @@ const Dashboard = () => {
 
     // Deselect when clicking outside any card
     const gridRef = useRef(null);
+    const clickTimerRef = useRef(null); // for single vs double click
     const handleOutsideClick = useCallback((e) => {
         if (gridRef.current && !gridRef.current.contains(e.target)) {
             setSelectedPdfId(null);
@@ -29,6 +30,22 @@ const Dashboard = () => {
         if (url.startsWith('http')) return url;
         return `${axios.defaults.baseURL}${url}`;
     };
+
+    // Single click = select/deselect  |  Double click/tap = open PDF in new tab
+    const handleCardClick = useCallback((pdf, e) => {
+        if (e.detail === 2) {
+            // Double click / double tap
+            clearTimeout(clickTimerRef.current);
+            const url = getFullUrl(pdf.fileUrl);
+            if (url) window.open(url, '_blank', 'noopener,noreferrer');
+            return;
+        }
+        // Single click — short timer so it doesn't race with double click
+        clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = setTimeout(() => {
+            setSelectedPdfId(prev => prev === pdf._id ? null : pdf._id);
+        }, 220);
+    }, []);
 
     const fetchPdfs = async () => {
         try {
@@ -153,7 +170,7 @@ const Dashboard = () => {
                             return (
                                 <div
                                     key={pdf._id}
-                                    onClick={() => setSelectedPdfId(isSelected ? null : pdf._id)}
+                                    onClick={(e) => handleCardClick(pdf, e)}
                                     className={`relative rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 cursor-pointer select-none
                                         ${isSelected
                                             ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/20 scale-[1.02]'
@@ -197,6 +214,14 @@ const Dashboard = () => {
                                                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                                                 </svg>
+                                            </div>
+                                        )}
+                                        {/* Double-tap hint overlay when selected */}
+                                        {isSelected && (
+                                            <div className="absolute inset-0 flex items-end justify-center pb-2 pointer-events-none">
+                                                <span className="text-[9px] font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                                    Double-tap to open
+                                                </span>
                                             </div>
                                         )}
                                     </div>
