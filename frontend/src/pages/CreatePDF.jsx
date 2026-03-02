@@ -772,14 +772,14 @@ const CreatePDF = () => {
                                         e.stopPropagation();
                                         removeImage(img.id);
                                     }}
-                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md opacity-0 group-hover:opacity-100 z-30"
+                                    className="absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md z-30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                                     aria-label="Remove page"
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>
 
                                 {/* Reordering Controls */}
-                                <div className="absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                                <div className="absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around transition-opacity z-30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                                     <button
                                         disabled={index === 0}
                                         onClick={(e) => {
