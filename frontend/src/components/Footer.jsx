@@ -113,9 +113,9 @@ const Footer = () => {
                     <div className="col-span-1 lg:col-span-2">
                         <h4 className="text-slate-900 dark:text-white font-bold mb-6">Contact</h4>
                         <div className="space-y-4">
-                            <a href="mailto:support@snappdf.com" className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+                            <a href="mailto:team.snappdf@gmail.com" className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
                                 <Mail className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm truncate sm:whitespace-normal">support@snappdf.com</span>
+                                <span className="text-sm truncate sm:whitespace-normal">team.snappdf@gmail.com</span>
                             </a>
                             <div className="pt-2">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
@@ -129,7 +129,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 relative">
                     <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-1">
-                        © {currentYear} SnapPDF. All rights reserved. Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> by Advanced Agentic Team.
+                        © {currentYear} SnapPDF. All rights reserved. Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> by Advanced SnapPDF Team.
                     </p>
                     
                     {/* Compact Scroll to Top Button */}
