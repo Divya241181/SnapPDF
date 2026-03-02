@@ -67,6 +67,10 @@ const useAuthStore = create((set) => ({
             localStorage.setItem('token', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             set({ token, user: res.data.user, isAuthenticated: true, loading: false });
+            // Send welcome email only for brand-new Google signups
+            if (res.data.isNewUser) {
+                sendWelcomeEmail(res.data.user, 'signup');
+            }
             return { success: true };
         } catch (err) {
             localStorage.removeItem('token');

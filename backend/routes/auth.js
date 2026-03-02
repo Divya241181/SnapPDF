@@ -141,12 +141,14 @@ router.post('/google', async (req, res) => {
         const { sub: googleId, email, name, picture } = payload;
 
         // Check if user exists by googleId OR email
-        let user = await User.findOne({ 
+        let user = await User.findOne({
             $or: [
                 { googleId },
                 { email }
             ]
         });
+
+        let isNewUser = false;
 
         if (user) {
             // Update googleId if not present (in case they previously registered with email)
@@ -156,12 +158,13 @@ router.post('/google', async (req, res) => {
             }
         } else {
             // Create new user
+            isNewUser = true;
             user = new User({
                 email,
                 username: name,
                 googleId,
                 profilePhotoUrl: picture,
-                profession: 'Other' // Default profession
+                profession: 'Other'
             });
             await user.save();
         }
@@ -176,6 +179,7 @@ router.post('/google', async (req, res) => {
 
         res.json({
             token,
+            isNewUser,           // ← frontend uses this to send welcome email only on first signup
             user: {
                 id: user.id,
                 username: user.username,
