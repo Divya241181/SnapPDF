@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { sendWelcomeEmail } from '../services/emailService';
 
 const useAuthStore = create((set) => ({
     user: null,
@@ -32,6 +33,8 @@ const useAuthStore = create((set) => ({
             localStorage.setItem('token', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             set({ token, user: res.data.user, isAuthenticated: true, loading: false });
+            // Send welcome / greeting email (fires-and-forgets, never blocks)
+            sendWelcomeEmail(res.data.user, 'signup');
             return { success: true };
         } catch (err) {
             localStorage.removeItem('token');
@@ -48,6 +51,8 @@ const useAuthStore = create((set) => ({
             localStorage.setItem('token', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             set({ token, user: res.data.user, isAuthenticated: true, loading: false });
+            // Send greeting email on each login (fires-and-forgets)
+            sendWelcomeEmail(res.data.user, 'login');
             return { success: true };
         } catch (err) {
             localStorage.removeItem('token');
@@ -64,6 +69,8 @@ const useAuthStore = create((set) => ({
             localStorage.setItem('token', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             set({ token, user: res.data.user, isAuthenticated: true, loading: false });
+            // Send greeting email for Google auth too
+            sendWelcomeEmail(res.data.user, 'login');
             return { success: true };
         } catch (err) {
             localStorage.removeItem('token');
