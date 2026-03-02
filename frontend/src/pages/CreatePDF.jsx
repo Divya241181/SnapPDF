@@ -631,7 +631,7 @@ const CreatePDF = () => {
                                 audio={false}
                                 ref={webcamRef}
                                 screenshotFormat="image/jpeg"
-                                screenshotQuality={0.92}
+                                screenshotQuality={1.00}
                                 videoConstraints={{ facingMode: "environment" }}
                                 onUserMediaError={handleWebcamError}
                                 className="w-full h-full object-cover"
