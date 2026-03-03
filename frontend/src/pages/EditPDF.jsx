@@ -12,6 +12,7 @@ import {
 import Webcam from "react-webcam";
 import ManualCropModal from '../components/ManualCropModal';
 import { autoDetectBoundary } from '../utils/cropUtils';
+import watermarkImg from '../assets/SnapPDF Watermark.png';
 // pdfjs worker setup
 import * as pdfjs from 'pdfjs-dist';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
@@ -361,6 +362,29 @@ const EditPDF = () => {
                     width:  embedded.width  * scale,
                     height: embedded.height * scale,
                 });
+            }
+
+            // ── Add Watermark ──────────────────────────
+            try {
+                const watermarkRes = await fetch(watermarkImg);
+                const watermarkBytes = await watermarkRes.arrayBuffer();
+                const watermarkEmbed = await pdfDoc.embedPng(watermarkBytes);
+                const { width: wmOriginalWidth, height: wmOriginalHeight } = watermarkEmbed.scale(1);
+                
+                const wmFinalWidth = 150; 
+                const wmFinalHeight = (wmOriginalHeight / wmOriginalWidth) * wmFinalWidth;
+
+                pdfDoc.getPages().forEach(page => {
+                    page.drawImage(watermarkEmbed, {
+                        x: width - wmFinalWidth - 10,
+                        y: 5,
+                        width: wmFinalWidth,
+                        height: wmFinalHeight,
+                        opacity: 1.0,
+                    });
+                });
+            } catch (wmError) {
+                console.warn('Could not add watermark:', wmError);
             }
 
             setStatus('Finalizing PDF…');
