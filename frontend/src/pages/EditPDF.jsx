@@ -377,7 +377,7 @@ const EditPDF = () => {
                 pdfDoc.getPages().forEach(page => {
                     page.drawImage(watermarkEmbed, {
                         x: width - wmFinalWidth - 10,
-                        y: 5,
+                        y: 3,
                         width: wmFinalWidth,
                         height: wmFinalHeight,
                         opacity: 1.0,

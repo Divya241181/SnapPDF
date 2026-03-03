@@ -588,33 +588,7 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            {loading && status && (
-                <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-all">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
-                    <span>{status}</span>
-                </div>
-            )}
-
-            {isGenerated && !loading && status && (
-                <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-4 rounded-xl text-sm font-medium transition-all"
-                >
-                    <div className="flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 text-emerald-500" />
-                        <div>
-                            <p className="font-bold">{status}</p>
-                            <p className="text-[10px] opacity-80 uppercase tracking-wider mt-0.5">You can now view it in your dashboard library.</p>
-                        </div>
-                    </div>
-                    <Link to="/dashboard" className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 text-center whitespace-nowrap">
-                        Go to Dashboard →
-                    </Link>
-                </motion.div>
-            )}
-
-            <div className={`glass-panel p-4 sm:p-6 mb-6 transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-4 ring-blue-500/50 border-blue-500 scale-[1.01] shadow-2xl' : ''}`}>
+<div className={`glass-panel p-4 sm:p-6 mb-6 transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-4 ring-blue-500/50 border-blue-500 scale-[1.01] shadow-2xl' : ''}`}>
                 {mode === 'upload' ? (
                     <div
                         className={`border-2 border-dashed rounded-xl p-8 sm:p-14 text-center transition-all cursor-pointer select-none relative ${isDragging
@@ -732,6 +706,32 @@ const CreatePDF = () => {
                     </div>
                 )}
             </div>
+
+            {loading && status && (
+                <div className="mb-6 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-all shadow-sm">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
+                    <span>{status}</span>
+                </div>
+            )}
+
+            {isGenerated && !loading && status && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -10 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-4 rounded-xl text-sm font-medium transition-all shadow-md"
+                >
+                    <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 flex-shrink-0 text-emerald-500" />
+                        <div>
+                            <p className="font-bold">{status}</p>
+                            <p className="text-[10px] opacity-80 uppercase tracking-wider mt-0.5">You can now view it in your dashboard library.</p>
+                        </div>
+                    </div>
+                    <Link to="/dashboard" className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 text-center whitespace-nowrap">
+                        Go to Dashboard →
+                    </Link>
+                </motion.div>
+            )}
 
             {images.length > 0 && (
                 <div className="glass-panel py-3 px-4 sm:p-5 transition-colors">
