@@ -104,6 +104,29 @@ const Dashboard = () => {
         } catch { prompt('Copy this link to share:', fullUrl); }
     };
 
+    const handleDownload = async (pdf, e) => {
+        e.stopPropagation();
+        const url = getFullUrl(pdf.fileUrl);
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = pdf.filename.toLowerCase().endsWith('.pdf') ? pdf.filename : `${pdf.filename}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback: Just open in new tab if fetch fails (CORS etc)
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    };
+
     const filteredPdfs = pdfs.filter(pdf =>
         pdf.filename.toLowerCase().includes(search.toLowerCase())
     );
@@ -239,17 +262,14 @@ const Dashboard = () => {
                                         >
                                             <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                                                 {/* Open / View */}
-                                                <a
-                                                    href={getFullUrl(pdf.fileUrl)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    onClick={e => e.stopPropagation()}
+                                                <button
+                                                    onClick={(e) => handleDownload(pdf, e)}
                                                     className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] sm:text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-sm active:scale-95"
-                                                    title="Open PDF"
+                                                    title="Download PDF"
                                                 >
                                                     <Download className="w-3.5 h-3.5" />
                                                     <span className="hidden sm:inline">Save</span>
-                                                </a>
+                                                </button>
                                                 {/* Edit */}
                                                 <Link
                                                     to={`/edit/${pdf._id}`}
