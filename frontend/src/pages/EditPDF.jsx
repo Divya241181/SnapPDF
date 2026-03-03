@@ -448,7 +448,7 @@ const EditPDF = () => {
 
             {/* ── Camera Mode ── */}
             {mode === 'camera' && (
-                <div className="bg-black rounded-3xl overflow-hidden relative mb-6 w-[90%] mx-auto aspect-[3/4] max-w-sm border-4 border-slate-800 shadow-2xl">
+                <div className="bg-[transparent] rounded-3xl overflow-hidden relative mb-6 w-[90%] mx-auto aspect-[3/4] max-w-sm border border-slate-700 shadow-2xl">
                     <Webcam
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
@@ -511,7 +511,7 @@ const EditPDF = () => {
                 {/* ── Page Grid ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                     {images.map((img, idx) => (
-                        <div key={img.id} className="group relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl transition-all duration-300">
+                        <div key={img.id} className="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-slate-100 dark:bg-slate-800 transition-colors">
                             <img
                                 src={img.preview}
                                 alt={`Page ${idx + 1}`}
@@ -540,29 +540,27 @@ const EditPDF = () => {
                             )}
 
                             {/* Delete button */}
-                            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 z-40">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); removePage(img.id); }}
-                                    className="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors"
-                                    title="Delete Page"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); removePage(img.id); }}
+                                className={`absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md z-30 ${selectedPageIndex === idx ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}
+                                title="Delete Page"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
 
                             {/* Reorder controls */}
-                            <div className="absolute bottom-3 inset-x-3 flex justify-between gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 z-40">
+                            <div className={`absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around transition-opacity z-30 ${selectedPageIndex === idx ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}>
                                 <button
                                     disabled={idx === 0}
                                     onClick={(e) => { e.stopPropagation(); movePage(idx, -1); }}
-                                    className="flex-1 h-7 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                    className="text-white hover:text-blue-300 disabled:opacity-30"
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
                                 <button
                                     disabled={idx === images.length - 1}
                                     onClick={(e) => { e.stopPropagation(); movePage(idx, 1); }}
-                                    className="flex-1 h-7 rounded-lg bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center disabled:opacity-30 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                    className="text-white hover:text-blue-300 disabled:opacity-30"
                                 >
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
@@ -573,7 +571,7 @@ const EditPDF = () => {
                     {/* Add More */}
                     <button
                         onClick={() => setMode('upload')}
-                        className="rounded-2xl border-4 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-3 aspect-[3/4] hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-all group"
+                        className="rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-3 aspect-[3/4] hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/30 dark:hover:bg-blue-950/10 transition-all group"
                     >
                         <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900 group-hover:text-blue-600 flex items-center justify-center transition-colors">
                             <PlusCircle className="w-6 h-6" />
