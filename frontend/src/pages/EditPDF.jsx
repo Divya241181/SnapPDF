@@ -448,8 +448,19 @@ const EditPDF = () => {
 
             {/* ── Camera Mode ── */}
             {mode === 'camera' && (
-                <div className="bg-black rounded-3xl overflow-hidden relative mb-8 aspect-video max-w-2xl mx-auto border-4 border-slate-800 shadow-2xl">
-                    <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="w-full h-full object-cover" />
+                <div className="bg-black rounded-3xl overflow-hidden relative mb-6 w-[90%] mx-auto aspect-[3/4] max-w-sm border-4 border-slate-800 shadow-2xl">
+                    <Webcam
+                        ref={webcamRef}
+                        screenshotFormat="image/jpeg"
+                        screenshotQuality={1.0}
+                        videoConstraints={{
+                            facingMode: { exact: 'environment' },
+                            width:      { ideal: 1920 },
+                            height:     { ideal: 1080 },
+                            advanced:   [{ zoom: 1.0 }],
+                        }}
+                        className="w-full h-full object-cover"
+                    />
                     <button onClick={capture} className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl active:scale-90 transition-transform">
                         <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
                             <Camera className="w-6 h-6 text-white" />
@@ -601,6 +612,54 @@ const EditPDF = () => {
                                         className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter transition-colors shadow-lg"
                                     >
                                         Apply All
+                                    </motion.button>
+                                </div>
+
+                                {/* ── Page Navigation Bar ───────────────────── */}
+                                <div className="flex items-center justify-between mt-2.5 px-1">
+                                    {/* Prev */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.08 }}
+                                        whileTap={{ scale: 0.88 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                        onClick={() => setSelectedPageIndex(i => Math.max(0, i - 1))}
+                                        disabled={selectedPageIndex === 0}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        aria-label="Previous page"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Prev</span>
+                                    </motion.button>
+
+                                    {/* Page X of Y */}
+                                    <motion.div
+                                        key={selectedPageIndex}
+                                        initial={{ opacity: 0, y: -4, scale: 0.9 }}
+                                        animate={{ opacity: 1, y: 0,  scale: 1   }}
+                                        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                                        className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl shadow"
+                                    >
+                                        <span className="text-blue-400 font-black text-sm tabular-nums">
+                                            {selectedPageIndex + 1}
+                                        </span>
+                                        <span className="text-slate-500 text-[10px] font-semibold">of</span>
+                                        <span className="text-slate-300 font-black text-sm tabular-nums">
+                                            {images.length}
+                                        </span>
+                                    </motion.div>
+
+                                    {/* Next */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.08 }}
+                                        whileTap={{ scale: 0.88 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                        onClick={() => setSelectedPageIndex(i => Math.min(images.length - 1, i + 1))}
+                                        disabled={selectedPageIndex === images.length - 1}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        aria-label="Next page"
+                                    >
+                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Next</span>
+                                        <ChevronRight className="w-4 h-4" />
                                     </motion.button>
                                 </div>
                             </div>

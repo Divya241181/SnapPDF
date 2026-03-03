@@ -849,6 +849,54 @@ const CreatePDF = () => {
                                         Apply All
                                     </motion.button>
                                 </div>
+
+                                {/* ── Page Navigation Bar ───────────────────── */}
+                                <div className="flex items-center justify-between mt-2.5 px-1">
+                                    {/* Prev */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.08 }}
+                                        whileTap={{ scale: 0.88 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                        onClick={() => setSelectedPageIndex(i => Math.max(0, i - 1))}
+                                        disabled={selectedPageIndex === 0}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        aria-label="Previous page"
+                                    >
+                                        <ChevronLeft className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Prev</span>
+                                    </motion.button>
+
+                                    {/* Page X of Y */}
+                                    <motion.div
+                                        key={selectedPageIndex}
+                                        initial={{ opacity: 0, y: -4, scale: 0.9 }}
+                                        animate={{ opacity: 1, y: 0,  scale: 1   }}
+                                        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                                        className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl shadow"
+                                    >
+                                        <span className="text-blue-400 font-black text-sm tabular-nums">
+                                            {selectedPageIndex + 1}
+                                        </span>
+                                        <span className="text-slate-500 text-[10px] font-semibold">of</span>
+                                        <span className="text-slate-300 font-black text-sm tabular-nums">
+                                            {images.length}
+                                        </span>
+                                    </motion.div>
+
+                                    {/* Next */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.08 }}
+                                        whileTap={{ scale: 0.88 }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                        onClick={() => setSelectedPageIndex(i => Math.min(images.length - 1, i + 1))}
+                                        disabled={selectedPageIndex === images.length - 1}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        aria-label="Next page"
+                                    >
+                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Next</span>
+                                        <ChevronRight className="w-4 h-4" />
+                                    </motion.button>
+                                </div>
                             </div>
 
                             {/* Controls Area - Highly Compact Grid */}
