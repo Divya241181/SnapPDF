@@ -1,15 +1,39 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { sendContactInquiry } from '../services/emailService';
 
 const Contact = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        subject: 'General Inquiry',
+        message: ''
+    });
     const [status, setStatus] = useState({ type: '', msg: '' });
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setStatus({ type: 'success', msg: 'Message sent successfully! We will get back to you soon.' });
-        // Reset after 3s
-        setTimeout(() => setStatus({ type: '', msg: '' }), 3000);
+        setLoading(true);
+        setStatus({ type: '', msg: '' });
+
+        const result = await sendContactInquiry(formData);
+
+        if (result.success) {
+            setStatus({ type: 'success', msg: 'Message sent successfully! We will get back to you soon.' });
+            setFormData({ name: '', email: '', subject: 'General Inquiry', message: '' });
+        } else {
+            setStatus({ type: 'error', msg: result.error || 'Failed to send message. Please try again later.' });
+        }
+
+        setLoading(false);
+        // Clear message after 5s
+        setTimeout(() => setStatus({ type: '', msg: '' }), 5000);
     };
 
     return (
@@ -82,16 +106,37 @@ const Contact = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div className="space-y-1.5">
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Name</label>
-                                <input type="text" required className="input-field" placeholder="John Doe" />
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                    className="input-field"
+                                    placeholder="John Doe"
+                                />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Email</label>
-                                <input type="email" required className="input-field" placeholder="john@example.com" />
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    className="input-field"
+                                    placeholder="john@example.com"
+                                />
                             </div>
                         </div>
                         <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Subject</label>
-                            <select className="input-field">
+                            <select
+                                name="subject"
+                                value={formData.subject}
+                                onChange={handleChange}
+                                className="input-field"
+                            >
                                 <option>General Inquiry</option>
                                 <option>Technical Support</option>
                                 <option>Billing Issue</option>
@@ -100,11 +145,24 @@ const Contact = () => {
                         </div>
                         <div className="space-y-1.5">
                             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Message</label>
-                            <textarea rows="4" required className="input-field pt-3 resize-none" placeholder="How can we help you?"></textarea>
+                            <textarea
+                                name="message"
+                                value={formData.message}
+                                onChange={handleChange}
+                                rows="4"
+                                required
+                                className="input-field pt-3 resize-none"
+                                placeholder="How can we help you?"
+                            ></textarea>
                         </div>
 
-                        <button type="submit" className="w-full btn-primary py-4 rounded-xl flex items-center justify-center gap-3 text-lg group">
-                            Send Message <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full btn-primary py-4 rounded-xl flex items-center justify-center gap-3 text-lg group disabled:opacity-70"
+                        >
+                            {loading ? 'Sending...' : 'Send Message'}
+                            {!loading && <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
                         </button>
 
                         {status.msg && (

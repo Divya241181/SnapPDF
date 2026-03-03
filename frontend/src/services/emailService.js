@@ -47,3 +47,44 @@ export const sendWelcomeEmail = async (user, type = 'signup') => {
         console.warn('[EmailJS] Email send failed:', err?.text || err?.message || err);
     }
 };
+
+/**
+ * Sends a contact inquiry from the 'Contact Us' page.
+ * 
+ * @param {{ name: string, email: string, subject: string, message: string }} formData
+ */
+export const sendContactInquiry = async (formData) => {
+    // Guard: skip if EmailJS not configured
+    if (!SERVICE_ID || !PUBLIC_KEY) {
+        console.error('[EmailJS] Cannot send inquiry — Service ID or Public Key missing.');
+        return { success: false, error: 'Configuration missing' };
+    }
+
+    // NOTE: In a real app, you might want a different Template ID for inquiries.
+    // For now, we'll try to use a specific one from env OR failover to the default.
+    const CONTACT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_CONTACT_TEMPLATE_ID || TEMPLATE_ID;
+
+    if (!CONTACT_TEMPLATE_ID) {
+        console.error('[EmailJS] No Template ID found for contact form.');
+        return { success: false, error: 'Template ID missing' };
+    }
+
+    const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        reply_to: formData.email,
+    };
+
+    try {
+        await emailjs.send(SERVICE_ID, CONTACT_TEMPLATE_ID, templateParams, {
+            publicKey: PUBLIC_KEY,
+        });
+        console.log('[EmailJS] Inquiry sent successfully');
+        return { success: true };
+    } catch (err) {
+        console.error('[EmailJS] Inquiry failed:', err?.text || err?.message || err);
+        return { success: false, error: err?.text || 'Failed to send message' };
+    }
+};
