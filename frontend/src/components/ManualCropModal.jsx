@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, RefreshCw, Crop, Move, Info } from 'lucide-react';
+import { X, Check, RefreshCw, Crop, Move, Info, RotateCcw, RotateCw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────
 const HANDLE_RADIUS = 12;       // larger = easier to grab on touch
@@ -408,6 +408,68 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
     drawCanvas();
   };
 
+  // ─── Transform helpers (rotate / flip) ────────────────────────────────
+  // Bakes the transform into a new off-screen canvas then reloads imgRef so
+  // every downstream operation (drag, resize, Apply Crop) sees the correct source.
+  const transformImage = useCallback((rotateDeg, flipX, flipY) => {
+    const src = imgRef.current;
+    if (!src) return;
+
+    const rad  = (rotateDeg * Math.PI) / 180;
+    const cos  = Math.abs(Math.cos(rad));
+    const sin  = Math.abs(Math.sin(rad));
+    const srcW = src.naturalWidth;
+    const srcH = src.naturalHeight;
+    // 90° rotations swap width ↔ height
+    const outW = Math.round(srcW * cos + srcH * sin);
+    const outH = Math.round(srcW * sin + srcH * cos);
+
+    const off = document.createElement('canvas');
+    off.width  = outW;
+    off.height = outH;
+    const ctx  = off.getContext('2d');
+    ctx.save();
+    ctx.translate(outW / 2, outH / 2);
+    ctx.rotate(rad);
+    if (flipX) ctx.scale(-1,  1);
+    if (flipY) ctx.scale( 1, -1);
+    ctx.drawImage(src, -srcW / 2, -srcH / 2);
+    ctx.restore();
+
+    off.toBlob((blob) => {
+      const url    = URL.createObjectURL(blob);
+      const newImg = new Image();
+      newImg.crossOrigin = 'anonymous';
+      newImg.onload = () => {
+        imgRef.current = newImg;
+        URL.revokeObjectURL(url);
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const cw    = canvas.width;
+        const ch    = canvas.height;
+        const scale = Math.min(cw / newImg.naturalWidth, ch / newImg.naturalHeight, 1);
+        const iw    = newImg.naturalWidth  * scale;
+        const ih    = newImg.naturalHeight * scale;
+        const ix    = (cw - iw) / 2;
+        const iy    = (ch - ih) / 2;
+        imgRectRef.current = { x: ix, y: iy, w: iw, h: ih };
+
+        const pad = 0.08;
+        const nb  = { x: ix + iw * pad, y: iy + ih * pad, w: iw * (1 - 2 * pad), h: ih * (1 - 2 * pad) };
+        boxRef.current = nb;
+        setBox({ ...nb });
+        drawCanvas();
+      };
+      newImg.src = url;
+    }, 'image/png');
+  }, [drawCanvas]);
+
+  const handleRotateLeft  = useCallback(() => transformImage(-90, false, false), [transformImage]);
+  const handleRotateRight = useCallback(() => transformImage( 90, false, false), [transformImage]);
+  const handleFlipH       = useCallback(() => transformImage(  0,  true, false), [transformImage]);
+  const handleFlipV       = useCallback(() => transformImage(  0, false,  true), [transformImage]);
+
   if (!isOpen) return null;
 
   return (
@@ -484,6 +546,68 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
 
           {/* ── Footer Toolbar ───────────────────────── */}
           <div className="bg-slate-900/90 backdrop-blur-md border-t border-slate-800 px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0 z-50">
+
+            {/* ── Transform row ── */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 hidden sm:block mr-1">Transform</span>
+
+              <motion.button
+                whileHover={{ scale: 1.08, backgroundColor: 'rgba(99,102,241,0.25)' }}
+                whileTap={{ scale: 0.86, rotate: -20 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                onClick={handleRotateLeft}
+                disabled={isProcessing}
+                title="Rotate 90° counter-clockwise"
+                className="flex-1 py-2 sm:py-2.5 bg-slate-800 border border-slate-700 hover:border-indigo-500/60 text-slate-300 hover:text-indigo-300 rounded-xl flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">CCW</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.08, backgroundColor: 'rgba(99,102,241,0.25)' }}
+                whileTap={{ scale: 0.86, rotate: 20 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                onClick={handleRotateRight}
+                disabled={isProcessing}
+                title="Rotate 90° clockwise"
+                className="flex-1 py-2 sm:py-2.5 bg-slate-800 border border-slate-700 hover:border-indigo-500/60 text-slate-300 hover:text-indigo-300 rounded-xl flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
+              >
+                <RotateCw className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">CW</span>
+              </motion.button>
+
+              <div className="w-px h-7 bg-slate-700 mx-1 flex-shrink-0" />
+
+              <motion.button
+                whileHover={{ scale: 1.08, backgroundColor: 'rgba(20,184,166,0.2)' }}
+                whileTap={{ scale: 0.86, scaleX: -1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                onClick={handleFlipH}
+                disabled={isProcessing}
+                title="Flip horizontal (mirror left↔right)"
+                className="flex-1 py-2 sm:py-2.5 bg-slate-800 border border-slate-700 hover:border-teal-500/60 text-slate-300 hover:text-teal-300 rounded-xl flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
+              >
+                <FlipHorizontal2 className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">Flip H</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.08, backgroundColor: 'rgba(20,184,166,0.2)' }}
+                whileTap={{ scale: 0.86, scaleY: -1 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+                onClick={handleFlipV}
+                disabled={isProcessing}
+                title="Flip vertical (mirror top↔bottom)"
+                className="flex-1 py-2 sm:py-2.5 bg-slate-800 border border-slate-700 hover:border-teal-500/60 text-slate-300 hover:text-teal-300 rounded-xl flex items-center justify-center gap-1.5 transition-colors disabled:opacity-40"
+              >
+                <FlipVertical2 className="w-4 h-4" />
+                <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">Flip V</span>
+              </motion.button>
+            </div>
+
+            <div className="h-px bg-slate-800 mb-3" />
+
             {box && imgRef.current && (
               <div className="flex items-center gap-2 mb-3 text-slate-500 text-[10px] font-mono">
                 <Info className="w-3 h-3 text-blue-500 flex-shrink-0" />
