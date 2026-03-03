@@ -24,7 +24,7 @@ export const sendWelcomeEmail = async (user, type = 'signup') => {
         username:    user.username || 'there',
         user_email:  user.email,
         action_type: type === 'signup' ? 'joined' : 'logged in',
-        cta_url:     'https://divya241181.github.io/SnapPDF/',
+        cta_url:     'https://snappdff.netlify.app/',
     };
 
     try {
