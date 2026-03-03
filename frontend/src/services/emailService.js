@@ -16,9 +16,19 @@ const PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 export const sendWelcomeEmail = async (user, type = 'signup') => {
     // Guard: skip if EmailJS not configured (dev environment without keys)
     if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
-        console.warn('[EmailJS] Skipping email — env vars not set.');
+        if (import.meta.env.PROD) {
+            console.error('[EmailJS] Skipping email — Missing environment variables on Netlify!');
+            console.log('Detected values:', { 
+                SERVICE_ID: SERVICE_ID ? '✅ Set' : '❌ Missing', 
+                TEMPLATE_ID: TEMPLATE_ID ? '✅ Set' : '❌ Missing', 
+                PUBLIC_KEY: PUBLIC_KEY ? '✅ Set' : '❌ Missing' 
+            });
+        } else {
+            console.warn('[EmailJS] Skipping email — env vars not set.');
+        }
         return;
     }
+
 
     const templateParams = {
         username:    user.username || 'there',

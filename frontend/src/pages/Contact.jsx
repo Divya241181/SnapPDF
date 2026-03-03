@@ -35,7 +35,9 @@ const Contact = () => {
                                 <Mail className="w-6 h-6" />
                             </div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">Email Us</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">support@snappdf.com</p>
+                            <a href="mailto:team.snappdf@gmail.com">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">team.snappdf@gmail.com</p>
+                            </a>
                         </motion.div>
                         <motion.div whileHover={{ y: -5 }} className="glass-panel p-8 text-center">
                             <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4">
