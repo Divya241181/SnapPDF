@@ -414,9 +414,32 @@ const Landing = () => {
                     <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#60a5fa] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem] dark:opacity-10"></div>
                 </div> */}
 
-                <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 transition-colors">
-                    Create PDFs on the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Go</span>
-                </h1>
+                <div className="relative w-full flex justify-center">
+                    {/* Atmospheric Glow behind the text */}
+                    <div 
+                        className="absolute inset-0 bg-transparent z-0 pointer-events-none"
+                        style={{
+                            boxShadow: '0 0 40px 20px rgba(0, 180, 216, 0.15), 0 0 80px 40px rgba(0, 119, 182, 0.1)',
+                            borderRadius: '50%',
+                            filter: 'blur(30px)',
+                            transform: 'scale(1.1)',
+                        }}
+                    ></div>
+                    
+                    <h1 
+                        className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 transition-colors relative z-10"
+                        style={{
+                            textShadow: '0 0 10px rgba(0, 180, 216, 0.4), 0 0 20px rgba(0, 180, 216, 0.2), 0 0 30px rgba(0, 119, 182, 0.1)'
+                        }}
+                    >
+                        Create PDFs on the <span 
+                            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 inline-block"
+                            style={{ filter: 'drop-shadow(0 0 15px rgba(0, 180, 216, 0.6)) drop-shadow(0 0 30px rgba(0, 119, 182, 0.4))' }}
+                        >
+                            Go
+                        </span>
+                    </h1>
+                </div>
 
                 <p className="mt-4 text-xl text-slate-600 dark:text-slate-400 max-w-2xl mb-12 transition-colors">
                     Upload images or scan documents directly from your camera to generate professional PDF files in seconds. Securely stored and easily accessible.
