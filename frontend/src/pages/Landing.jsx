@@ -1,10 +1,177 @@
-import React from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Zap, Globe, Cpu, Users, ArrowRight, BarChart3, CheckCircle2, Target, Rocket, LayoutDashboard, FilePlus } from 'lucide-react';
+import { ShieldCheck, Zap, Globe, Cpu, Users, ArrowRight, BarChart3, CheckCircle2, Target, Rocket, LayoutDashboard, FilePlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
+/* ============================================================
+   PROJECT OVERVIEW — Mobile Horizontal Scroll Carousel
+   ============================================================ */
+const overviewCards = [
+    {
+        icon: <Target className="w-6 h-6" />,
+        iconBg: 'bg-blue-600 shadow-blue-500/30',
+        title: 'Our Mission',
+        gradient: 'from-blue-600/10',
+        content: (
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                SnapPDF was founded on a simple yet powerful mission: to bridge the gap between physical
+                documentation and digital efficiency. We recognize that in an increasingly paperless world,
+                the transition from physical to digital should be instantaneous, secure, and accessible to everyone.
+            </p>
+        ),
+    },
+    {
+        icon: <Rocket className="w-6 h-6" />,
+        iconBg: 'bg-indigo-600 shadow-indigo-500/30',
+        title: 'Our Vision',
+        gradient: 'from-indigo-600/10',
+        content: (
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                Our vision is to become the primary global utility for on-the-go document transformation,
+                providing a seamless ecosystem where users can capture, organize, and store information
+                without the need for bulky hardware or complex software.
+            </p>
+        ),
+    },
+    {
+        icon: <BarChart3 className="w-6 h-6" />,
+        iconBg: 'bg-emerald-600 shadow-emerald-500/30',
+        title: 'Core Objectives',
+        gradient: 'from-emerald-600/10',
+        content: (
+            <ul className="space-y-3">
+                {[
+                    'Enable high-fidelity document scanning across all mobile device platforms.',
+                    'Implement zero-friction workflows for image-to-PDF conversion.',
+                    'Guarantee enterprise-grade security for document storage and retrieval.',
+                    'Optimize the digital footprint of generated files for easy sharing.',
+                ].map((obj, i) => (
+                    <li key={i} className="flex gap-2 text-slate-700 dark:text-slate-300 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>{obj}</span>
+                    </li>
+                ))}
+            </ul>
+        ),
+    },
+];
+
+const ProjectOverviewCarousel = () => {
+    const trackRef = useRef(null);
+    const [activeIdx, setActiveIdx] = useState(0);
+    const TOTAL = overviewCards.length;
+    const [cardStyles, setCardStyles] = useState(
+        overviewCards.map((_, i) => ({ opacity: i === 0 ? 1 : 0.45, scale: i === 0 ? 1 : 0.92 }))
+    );
+
+    const onScroll = useCallback(() => {
+        const el = trackRef.current;
+        if (!el) return;
+        const cardW = el.scrollWidth / TOTAL;
+        const scrollX = el.scrollLeft;
+
+        const styles = overviewCards.map((_, i) => {
+            const cardCenter = cardW * i + cardW / 2;
+            const viewCenter = scrollX + el.clientWidth / 2;
+            const dist = Math.abs(viewCenter - cardCenter);
+            const ratio = Math.max(0, 1 - dist / cardW);
+            return {
+                opacity: 0.45 + ratio * 0.55,   // 0.45 → 1.0
+                scale: 0.92 + ratio * 0.08,      // 0.92 → 1.0
+            };
+        });
+        setCardStyles(styles);
+        setActiveIdx(Math.min(Math.max(Math.round(scrollX / cardW), 0), TOTAL - 1));
+    }, [TOTAL]);
+
+    useEffect(() => {
+        const el = trackRef.current;
+        if (!el) return;
+        el.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        return () => el.removeEventListener('scroll', onScroll);
+    }, [onScroll]);
+
+    const scrollTo = useCallback((idx) => {
+        const el = trackRef.current;
+        if (!el) return;
+        const cardW = el.scrollWidth / TOTAL;
+        el.scrollTo({ left: cardW * idx, behavior: 'smooth' });
+    }, [TOTAL]);
+
+    return (
+        <div className="lg:hidden relative">
+            {/* Scroll track — hidden scrollbar */}
+            <div
+                ref={trackRef}
+                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 -mx-4 px-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+                {overviewCards.map((card, i) => (
+                    <div
+                        key={i}
+                        className={`snap-center shrink-0 w-[82vw] max-w-sm glass-panel p-7 bg-gradient-to-br ${card.gradient} to-transparent border-blue-500/20`}
+                        style={{
+                            opacity: cardStyles[i].opacity,
+                            transform: `scale(${cardStyles[i].scale})`,
+                            transformOrigin: 'center center',
+                            transition: 'opacity 0.15s ease, transform 0.15s ease',
+                        }}
+                    >
+                        <div className={`w-12 h-12 ${card.iconBg} rounded-xl flex items-center justify-center text-white mb-5 shadow-lg`}>
+                            {card.icon}
+                        </div>
+                        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{card.title}</h4>
+                        {card.content}
+                    </div>
+                ))}
+            </div>
+
+            {/* Nav row: Prev · dots · Next */}
+            <div className="flex items-center justify-center gap-4 mt-6">
+                <button
+                    onClick={() => scrollTo(Math.max(activeIdx - 1, 0))}
+                    disabled={activeIdx === 0}
+                    aria-label="Previous card"
+                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm"
+                >
+                    <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2">
+                    {overviewCards.map((_, i) => (
+                        <button key={i} onClick={() => scrollTo(i)} aria-label={`Card ${i + 1}`}>
+                            <span
+                                className={`block rounded-full transition-all duration-300 ${
+                                    i === activeIdx
+                                        ? 'bg-blue-600'
+                                        : 'bg-slate-300 dark:bg-slate-600'
+                                }`}
+                                style={{
+                                    width: i === activeIdx ? '24px' : '10px',
+                                    height: '10px',
+                                }}
+                            />
+                        </button>
+                    ))}
+                </div>
+
+                <button
+                    onClick={() => scrollTo(Math.min(activeIdx + 1, TOTAL - 1))}
+                    disabled={activeIdx === TOTAL - 1}
+                    aria-label="Next card"
+                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm"
+                >
+                    <ChevronRight className="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const Landing = () => {
+
     // Animation Variants
     const fadeIn = {
         initial: { opacity: 0, y: 20 },
@@ -112,18 +279,15 @@ const Landing = () => {
                 </motion.div>
             </motion.div>
 
-            {/* 1. Project Overview - RESTRUCTURED */}
+            {/* 1. Project Overview */}
             <section className="mt-40 w-full max-w-6xl">
-                <motion.div
-                    {...fadeIn}
-                    className="text-center mb-16"
-                >
+                <motion.div {...fadeIn} className="text-center mb-10">
                     <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Project Overview</h2>
                     <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
                 </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Mission Card */}
+                {/* ── Desktop: 3-column grid (unchanged) ── */}
+                <div className="hidden lg:grid grid-cols-3 gap-8">
                     <motion.div
                         whileInView={{ opacity: 1, x: 0 }}
                         initial={{ opacity: 0, x: -30 }}
@@ -140,7 +304,6 @@ const Landing = () => {
                         </p>
                     </motion.div>
 
-                    {/* Vision Card */}
                     <motion.div
                         whileInView={{ opacity: 1, y: 0 }}
                         initial={{ opacity: 0, y: 30 }}
@@ -157,7 +320,6 @@ const Landing = () => {
                         </p>
                     </motion.div>
 
-                    {/* Objectives Card */}
                     <motion.div
                         whileInView={{ opacity: 1, x: 0 }}
                         initial={{ opacity: 0, x: 30 }}
@@ -184,6 +346,9 @@ const Landing = () => {
                         </ul>
                     </motion.div>
                 </div>
+
+                {/* ── Mobile: horizontal scroll carousel ── */}
+                <ProjectOverviewCarousel />
             </section>
 
             {/* 2. Key Features & Capabilities - WITH HOVER SCALE */}
