@@ -5,6 +5,220 @@ import { ShieldCheck, Zap, Globe, Cpu, Users, ArrowRight, BarChart3, CheckCircle
 import useAuthStore from '../store/authStore';
 
 /* ============================================================
+   KEY FEATURES — Mobile Horizontal Scroll Carousel
+   Special effects:
+   · Per-card scroll-driven opacity (0.4 → 1) + scale (0.88 → 1)
+   · Neon top-border that shifts colour per card
+   · Animated radial glow orb tracks the active card
+   · Smooth fill-progress bar + live counter badge
+   · Prev / Next buttons with ripple disabled state
+   ============================================================ */
+const featureCards = [
+    {
+        icon: <Zap className="w-7 h-7" />,
+        title: 'Real-time Capture',
+        desc: 'Proprietary camera algorithms optimize image clarity for text-heavy documents.',
+        glow: 'rgba(37,99,235,0.55)',        // blue
+        border: '#2563eb',
+        iconBg: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+        label: 'Speed',
+    },
+    {
+        icon: <ShieldCheck className="w-7 h-7" />,
+        title: 'Secure Encryption',
+        desc: 'All files are encrypted at rest and in transit, ensuring your data remains private.',
+        glow: 'rgba(124,58,237,0.55)',       // violet
+        border: '#7c3aed',
+        iconBg: 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400',
+        label: 'Security',
+    },
+    {
+        icon: <Globe className="w-7 h-7" />,
+        title: 'LAN Sync',
+        desc: 'Advanced network protocols allow for cross-device synchronization without cloud delays.',
+        glow: 'rgba(6,182,212,0.55)',        // cyan
+        border: '#06b6d4',
+        iconBg: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+        label: 'Network',
+    },
+    {
+        icon: <Cpu className="w-7 h-7" />,
+        title: 'Smart Compression',
+        desc: 'Generate compact PDFs that maintain 100% legibility for professional use.',
+        glow: 'rgba(5,150,105,0.55)',        // emerald
+        border: '#059669',
+        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+        label: 'Efficiency',
+    },
+];
+
+const FeaturesCarousel = () => {
+    const trackRef = useRef(null);
+    const [activeIdx, setActiveIdx] = useState(0);
+    const TOTAL = featureCards.length;
+    const [cardStyles, setCardStyles] = useState(
+        featureCards.map((_, i) => ({ opacity: i === 0 ? 1 : 0.4, scale: i === 0 ? 1 : 0.88 }))
+    );
+
+    const onScroll = useCallback(() => {
+        const el = trackRef.current;
+        if (!el) return;
+        const cardW = el.scrollWidth / TOTAL;
+        const scrollX = el.scrollLeft;
+        const maxScroll = el.scrollWidth - el.clientWidth; // eslint-disable-line no-unused-vars
+
+        // Per-card opacity + scale
+        const styles = featureCards.map((_, i) => {
+            const cardCenter = cardW * i + cardW / 2;
+            const viewCenter = scrollX + el.clientWidth / 2;
+            const dist = Math.abs(viewCenter - cardCenter);
+            const ratio = Math.max(0, 1 - dist / cardW);
+            return {
+                opacity: 0.4 + ratio * 0.6,    // 0.40 → 1.0
+                scale:   0.88 + ratio * 0.12,   // 0.88 → 1.0
+            };
+        });
+        setCardStyles(styles);
+        setActiveIdx(Math.min(Math.max(Math.round(scrollX / cardW), 0), TOTAL - 1));
+    }, [TOTAL]);
+
+    useEffect(() => {
+        const el = trackRef.current;
+        if (!el) return;
+        el.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        return () => el.removeEventListener('scroll', onScroll);
+    }, [onScroll]);
+
+    const scrollTo = useCallback((idx) => {
+        const el = trackRef.current;
+        if (!el) return;
+        const cardW = el.scrollWidth / TOTAL;
+        el.scrollTo({ left: cardW * idx, behavior: 'smooth' });
+    }, [TOTAL]);
+
+    const activeCard = featureCards[activeIdx];
+
+    return (
+        <div className="md:hidden relative">
+            {/* Ambient glow orb — tracks active card colour */}
+            <div
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-64 pointer-events-none"
+                style={{
+                    background: `radial-gradient(ellipse 60% 80% at 50% 50%, ${activeCard.glow}, transparent)`,
+                    filter: 'blur(40px)',
+                    transition: 'background 0.5s ease',
+                    zIndex: 0,
+                }}
+            />
+
+            {/* Scroll track */}
+            <div
+                ref={trackRef}
+                className="relative z-10 flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 -mx-4 px-4"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+                {featureCards.map((card, i) => (
+                    <div
+                        key={i}
+                        className="snap-center shrink-0 w-[78vw] max-w-xs glass-panel p-6 relative overflow-hidden"
+                        style={{
+                            opacity: cardStyles[i].opacity,
+                            transform: `scale(${cardStyles[i].scale})`,
+                            transformOrigin: 'center center',
+                            transition: 'opacity 0.12s ease, transform 0.12s ease',
+                            borderTop: `3px solid ${card.border}`,
+                        }}
+                    >
+                        {/* Subtle inner shine on active card */}
+                        {i === activeIdx && (
+                            <div
+                                className="absolute inset-0 pointer-events-none rounded-2xl"
+                                style={{
+                                    background: `linear-gradient(135deg, ${card.glow?.replace('0.55','0.08')} 0%, transparent 60%)`,
+                                }}
+                            />
+                        )}
+
+                        {/* Label badge */}
+                        <span
+                            className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                            style={{
+                                color: card.border,
+                                background: `${card.glow?.replace('0.55','0.12')}`,
+                                border: `1px solid ${card.border}40`,
+                            }}
+                        >
+                            {card.label}
+                        </span>
+
+                        {/* Icon */}
+                        <div className={`w-14 h-14 ${card.iconBg} rounded-2xl flex items-center justify-center mb-5 relative z-10`}>
+                            {card.icon}
+                        </div>
+
+                        <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2 relative z-10">{card.title}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed relative z-10">{card.desc}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Controls row */}
+            <div className="relative z-10 mt-6 flex flex-col items-center gap-4">
+
+                {/* Progress bar */}
+                <div className="w-full max-w-xs h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-full rounded-full transition-all duration-200 ease-out"
+                        style={{
+                            width: `${(activeIdx / (TOTAL - 1)) * 100}%`,
+                            minWidth: activeIdx === 0 ? '0%' : '8%',
+                            background: `linear-gradient(90deg, ${featureCards[0].border}, ${activeCard.border})`,
+                        }}
+                    />
+                </div>
+
+                {/* Prev · Counter · Next */}
+                <div className="flex items-center gap-5">
+                    <button
+                        onClick={() => scrollTo(Math.max(activeIdx - 1, 0))}
+                        disabled={activeIdx === 0}
+                        aria-label="Previous feature"
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all disabled:opacity-25 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm shadow-sm"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {/* Live counter badge */}
+                    <div
+                        className="px-4 py-1.5 rounded-full text-sm font-bold tabular-nums transition-all duration-300"
+                        style={{
+                            color: activeCard.border,
+                            background: activeCard.glow?.replace('0.55', '0.1'),
+                            border: `1px solid ${activeCard.border}40`,
+                            minWidth: '4.5rem',
+                            textAlign: 'center',
+                        }}
+                    >
+                        {activeIdx + 1} / {TOTAL}
+                    </div>
+
+                    <button
+                        onClick={() => scrollTo(Math.min(activeIdx + 1, TOTAL - 1))}
+                        disabled={activeIdx === TOTAL - 1}
+                        aria-label="Next feature"
+                        className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all disabled:opacity-25 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm shadow-sm"
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ============================================================
+
    PROJECT OVERVIEW — Mobile Horizontal Scroll Carousel
    ============================================================ */
 const overviewCards = [
@@ -351,18 +565,20 @@ const Landing = () => {
                 <ProjectOverviewCarousel />
             </section>
 
-            {/* 2. Key Features & Capabilities - WITH HOVER SCALE */}
+            {/* 2. Key Features & Capabilities */}
             <section className="mt-40 w-full max-w-7xl px-4">
-                <motion.div {...fadeIn} className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6">Key Features & Capabilities</h2>
+                <motion.div {...fadeIn} className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Key Features &amp; Capabilities</h2>
                     <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Explore the sophisticated tools designed to streamline your document management experience.</p>
                 </motion.div>
+
+                {/* ── Desktop: 4-column grid (unchanged) ── */}
                 <motion.div
                     variants={staggerContainer}
                     initial="initial"
                     whileInView="whileInView"
                     viewport={{ once: true }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                    className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     {[
                         { icon: <Zap />, title: "Real-time Capture", desc: "Proprietary camera algorithms optimize image clarity for text-heavy documents." },
@@ -382,7 +598,11 @@ const Landing = () => {
                         </motion.div>
                     ))}
                 </motion.div>
+
+                {/* ── Mobile: special effects carousel ── */}
+                <FeaturesCarousel />
             </section>
+
 
             {/* 3. Value Proposition - WITH GESTURES */}
             <section className="mt-40 w-full bg-slate-900 dark:bg-slate-800/60 rounded-[2.5rem] p-12 overflow-hidden relative">
