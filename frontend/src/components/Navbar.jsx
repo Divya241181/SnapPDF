@@ -88,47 +88,60 @@ const Navbar = () => {
                         <ThemeToggle />
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="p-2 -mr-1 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            className={`p-2 -mr-1 rounded-lg transition-all duration-300 ${
+                                menuOpen 
+                                    ? 'bg-blue-50/50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                            }`}
                             aria-label="Toggle menu"
                         >
-                            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            <div className="relative w-6 h-6 flex items-center justify-center">
+                                <X className={`absolute inset-0 w-6 h-6 transition-all duration-300 transform ${menuOpen ? 'rotate-0 opacity-100 scale-100' : 'rotate-90 opacity-0 scale-50'}`} />
+                                <Menu className={`absolute inset-0 w-6 h-6 transition-all duration-300 transform ${menuOpen ? '-rotate-90 opacity-0 scale-50' : 'rotate-0 opacity-100 scale-100'}`} />
+                            </div>
                         </button>
                     </div>
                 </div>
             </div>
 
             {/* Mobile Dropdown Menu */}
-            {menuOpen && (
-                <div className="sm:hidden border-t border-slate-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-lg">
-                    <div className="px-4 py-3 space-y-1">
-                        {isAuthenticated ? (
-                            <>
-                                <Link to="/dashboard" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
-                                    <LayoutDashboard className="w-5 h-5" /> Dashboard
-                                </Link>
-                                <Link to="/create" onClick={close} className="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium transition-colors hover:bg-blue-700">
-                                    <PlusCircle className="w-5 h-5" /> Create PDF
-                                </Link>
-                                <Link to="/profile" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
-                                    <User className="w-5 h-5" /> Profile Settings
-                                </Link>
-                                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors text-left">
-                                    <LogOut className="w-5 h-5" /> Logout
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link to="/login" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
-                                    <LogIn className="w-5 h-5" /> Log in
-                                </Link>
-                                <Link to="/register" onClick={close} className="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium transition-colors hover:bg-blue-700">
-                                    <UserPlus className="w-5 h-5" /> Sign up
-                                </Link>
-                            </>
-                        )}
+            <div 
+                className={`sm:hidden grid transition-all duration-300 ease-in-out ${
+                    menuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
+            >
+                <div className="overflow-hidden">
+                    <div className="border-t border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(59,130,246,0.12)] dark:shadow-[0_8px_30px_rgb(59,130,246,0.15)]">
+                        <div className="px-4 py-3 space-y-1">
+                            {isAuthenticated ? (
+                                <>
+                                    <Link to="/dashboard" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
+                                        <LayoutDashboard className="w-5 h-5" /> Dashboard
+                                    </Link>
+                                    <Link to="/create" onClick={close} className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                                        <PlusCircle className="w-5 h-5" /> Create PDF
+                                    </Link>
+                                    <Link to="/profile" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
+                                        <User className="w-5 h-5" /> Profile Settings
+                                    </Link>
+                                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-xl font-medium transition-colors text-left">
+                                        <LogOut className="w-5 h-5" /> Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login" onClick={close} className="flex items-center gap-3 px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl font-medium transition-colors">
+                                        <LogIn className="w-5 h-5" /> Log in
+                                    </Link>
+                                    <Link to="/register" onClick={close} className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-medium transition-all hover:scale-[1.02] shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                                        <UserPlus className="w-5 h-5" /> Sign up
+                                    </Link>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
-            )}
+            </div>
         </nav>
     );
 };
