@@ -62,7 +62,7 @@ const FeaturesCarousel = () => {
 
     const onScroll = useCallback(() => {
         const el = trackRef.current;
-        if (!el) return;
+        if (!el || el.scrollWidth === 0) return;
         const cardW = el.scrollWidth / TOTAL;
         const scrollX = el.scrollLeft;
         const maxScroll = el.scrollWidth - el.clientWidth; // eslint-disable-line no-unused-vars
@@ -281,7 +281,7 @@ const ProjectOverviewCarousel = () => {
 
     const onScroll = useCallback(() => {
         const el = trackRef.current;
-        if (!el) return;
+        if (!el || el.scrollWidth === 0) return;
         const cardW = el.scrollWidth / TOTAL;
         const scrollX = el.scrollLeft;
 
