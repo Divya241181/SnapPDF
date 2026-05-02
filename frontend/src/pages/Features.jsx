@@ -1,14 +1,7 @@
 import React from 'react';
 import { LayoutGrid, Camera, Image as ImageIcon, Shield, Globe, Cpu, Smartphone, Zap, CheckCircle, Download, Layout, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const Features = () => {
-    const fadeIn = {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.6 }
-    };
 
     const mainFeatures = [
         {
@@ -45,7 +38,7 @@ const Features = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 py-20 overflow-hidden">
             {/* Features Hero */}
-            <motion.div {...fadeIn} className="text-center mb-32">
+            <div className="text-center mb-32">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-8">
                     <LayoutGrid className="w-4 h-4" /> Power at your fingertips
                 </div>
@@ -53,14 +46,13 @@ const Features = () => {
                 <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
                     SnapPDF combines cutting-edge engineering with user-centric design to deliver a document toolkit that works as hard as you do.
                 </p>
-            </motion.div>
+            </div>
 
             {/* In-Depth Features */}
             <section className="mb-40 space-y-20">
                 {mainFeatures.map((f, i) => (
-                    <motion.div
+                    <div
                         key={i}
-                        {...fadeIn}
                         className={`flex flex-col ${i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-16 items-center`}
                     >
                         <div className="w-full lg:w-1/2">
@@ -82,32 +74,30 @@ const Features = () => {
                         </div>
                         <div className="w-full lg:w-1/2">
                             <div className="glass-panel aspect-video rounded-[2.5rem] bg-gradient-to-br from-blue-50 to-white dark:from-slate-800/50 dark:to-slate-900/50 flex items-center justify-center relative group opacity-50">
-                                <div className="absolute inset-0 bg-blue-600/5 blur-3xl group-hover:bg-blue-600/10 transition-colors"></div>
-                                <LayoutGrid className="w-24 h-24 text-blue-300 dark:text-slate-700 transition-transform group-hover:scale-110" />
+                                <LayoutGrid className="w-24 h-24 text-blue-300 dark:text-slate-700" />
                                 <span className="absolute bottom-6 text-xs text-slate-400 font-bold tracking-widest uppercase italic">Feature Visual Placeholder</span>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
             </section>
 
             {/* Technical Capability Grid */}
             <section className="mb-20">
-                <motion.div {...fadeIn} className="text-center mb-16">
+                <div className="text-center mb-16">
                     <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Technical Advantage</h2>
                     <p className="text-slate-600 dark:text-slate-400">Smaller details that make a massive difference in efficiency.</p>
-                </motion.div>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     {techFeatures.map((t, i) => (
-                        <motion.div
+                        <div
                             key={i}
-                            whileHover={{ y: -5, borderColor: "rgba(59, 130, 246, 0.5)" }}
-                            className="glass-panel p-6 rounded-[2rem] bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20 text-center flex flex-col items-center group transition-all duration-300"
+                            className="glass-panel p-6 rounded-[2rem] bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20 text-center flex flex-col items-center"
                         >
-                            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 mb-4 transition-transform duration-300 group-hover:scale-110">{t.icon}</div>
+                            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 mb-4">{t.icon}</div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-1 text-sm">{t.title}</h4>
                             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{t.d}</p>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </section>

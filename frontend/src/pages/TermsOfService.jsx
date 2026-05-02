@@ -1,13 +1,7 @@
 import React from 'react';
 import { Gavel, Scale, AlertTriangle, ShieldCheck, XCircle, Info } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const TermsOfService = () => {
-    const fadeIn = {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.6 }
-    };
 
     const clauses = [
         {
@@ -39,21 +33,17 @@ const TermsOfService = () => {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-20">
-            <motion.div {...fadeIn} className="text-center mb-16">
+            <div className="text-center mb-16">
                 <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-6">Terms of Service</h1>
                 <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                     Please read these terms carefully before using our platform. Your use of the service constitutes acceptance of these conditions.
                 </p>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {clauses.map((item, i) => (
-                    <motion.div
+                    <div
                         key={i}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
                         className="glass-panel p-8 hover:border-blue-500/50 transition-colors"
                     >
                         <div className="flex items-center gap-3 mb-4">
@@ -63,13 +53,12 @@ const TermsOfService = () => {
                         <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
                             {item.body}
                         </p>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
 
             {/* Disclaimer Box */}
-            <motion.div
-                {...fadeIn}
+            <div
                 className="mt-12 p-10 bg-slate-900 dark:bg-slate-800/80 rounded-3xl text-white relative overflow-hidden"
             >
                 <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -86,7 +75,7 @@ const TermsOfService = () => {
                         For detailed legal inquiries, please contact our legal counsel at <span className="text-blue-400 font-bold">legal@snappdf.com</span>
                     </p>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 };

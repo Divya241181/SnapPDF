@@ -1,14 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Lock, EyeOff, Server, Key, FileWarning, CheckCircle, RefreshCcw } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const Security = () => {
-    const fadeIn = {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.6 }
-    };
 
     const standards = [
         { icon: <Lock />, title: "AES-256 Encryption", desc: "All files at rest are encrypted using the same standards used by government agencies and banks." },
@@ -20,7 +13,7 @@ const Security = () => {
     return (
         <div className="max-w-7xl mx-auto px-4 py-20 overflow-hidden">
             {/* Security Hero */}
-            <motion.div {...fadeIn} className="text-center mb-32">
+            <div className="text-center mb-32">
                 <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
                     <ShieldCheck className="w-12 h-12" />
                 </div>
@@ -28,16 +21,11 @@ const Security = () => {
                 <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                     Your trust is our most valuable asset. We use enterprise-grade security to ensure your documents never fall into the wrong hands.
                 </p>
-            </motion.div>
+            </div>
 
             {/* Core Infrastructure Section */}
             <section className="mb-40 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <motion.div
-                    initial={{ opacity: 0, x: -50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="space-y-8"
-                >
+                <div className="space-y-8">
                     <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Built-in Protective Layers</h2>
                     <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
                         Security isn't a feature we added later; it's the foundation we built SnapPDF upon. We implement a multi-layered defense strategy to protect your sensitive documentation.
@@ -55,20 +43,19 @@ const Security = () => {
                             </div>
                         ))}
                     </div>
-                </motion.div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {standards.map((std, i) => (
-                        <motion.div
+                        <div
                             key={i}
-                            whileHover={{ y: -10, borderColor: "rgb(37 99 235)" }}
-                            className="glass-panel p-8 text-center sm:text-left transition-all"
+                            className="glass-panel p-8 text-center sm:text-left transition-all hover:-translate-y-2 hover:border-blue-600"
                         >
                             <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl w-fit sm:mb-6 mb-4 mx-auto sm:mx-0">
                                 {std.icon}
                             </div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">{std.title}</h4>
                             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{std.desc}</p>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </section>
@@ -96,7 +83,7 @@ const Security = () => {
             </section>
 
             {/* Emergency & Recovery */}
-            <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                 <div className="glass-panel p-10 flex gap-6 items-start bg-rose-50/50 dark:bg-rose-900/10 border-rose-200/50 dark:border-rose-900/30">
                     <FileWarning className="w-12 h-12 text-rose-500 shrink-0" />
                     <div>
@@ -115,7 +102,7 @@ const Security = () => {
                         </p>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 };

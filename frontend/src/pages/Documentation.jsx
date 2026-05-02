@@ -1,14 +1,7 @@
 import React from 'react';
 import { Book, Code, Rocket, Camera, FileText, Settings, HelpCircle, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const Documentation = () => {
-    const fadeIn = {
-        initial: { opacity: 0, y: 20 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true },
-        transition: { duration: 0.6 }
-    };
 
     const guides = [
         {
@@ -35,13 +28,13 @@ const Documentation = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-20">
-            <motion.div {...fadeIn} className="text-center mb-16">
+            <div className="text-center mb-16">
                 <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-6">Documentation</h1>
                 <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
                     Everything you need to know about using SnapPDF to its full potential.
                 </p>
                 <div className="h-1.5 w-24 bg-blue-600 mx-auto mt-6 rounded-full"></div>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Sidebar - Desktop */}
@@ -65,10 +58,8 @@ const Documentation = () => {
                 {/* Main Content */}
                 <div className="lg:col-span-3 space-y-12">
                     {guides.map((guide, i) => (
-                        <motion.section
+                        <section
                             key={i}
-                            {...fadeIn}
-                            transition={{ delay: i * 0.1 }}
                             className="glass-panel p-8 md:p-12 relative overflow-hidden"
                         >
                             <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -88,7 +79,7 @@ const Documentation = () => {
                                     </div>
                                 ))}
                             </div>
-                        </motion.section>
+                        </section>
                     ))}
 
                     {/* FAQ Quick Link */}

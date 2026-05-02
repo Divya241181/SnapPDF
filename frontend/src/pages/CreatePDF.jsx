@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { PDFDocument } from 'pdf-lib';
 import imageCompression from 'browser-image-compression';
 import axios from 'axios';
@@ -715,9 +715,7 @@ const CreatePDF = () => {
             )}
 
             {isGenerated && !loading && status && (
-                <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }}
+                <div 
                     className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-4 rounded-xl text-sm font-medium transition-all shadow-md"
                 >
                     <div className="flex items-center gap-3">
@@ -730,7 +728,7 @@ const CreatePDF = () => {
                     <Link to="/dashboard" className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 text-center whitespace-nowrap">
                         Go to Dashboard →
                     </Link>
-                </motion.div>
+                </div>
             )}
 
             {images.length > 0 && (
@@ -864,38 +862,30 @@ const CreatePDF = () => {
                                     <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">
                                         Page {selectedPageIndex + 1}
                                     </div>
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
+                                    <button
                                         onClick={() => applyFilter(images[selectedPageIndex].filter, true)}
-                                        className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter transition-colors shadow-lg"
+                                        className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter shadow-lg"
                                     >
                                         Apply All
-                                    </motion.button>
+                                    </button>
                                 </div>
 
                                 {/* ── Page Navigation Bar ───────────────────── */}
                                 <div className="flex items-center justify-between mt-2.5 px-1">
                                     {/* Prev */}
-                                    <motion.button
-                                        whileHover={{ scale: 1.08 }}
-                                        whileTap={{ scale: 0.88 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                    <button
                                         onClick={() => setSelectedPageIndex(i => Math.max(0, i - 1))}
                                         disabled={selectedPageIndex === 0}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl shadow"
                                         aria-label="Previous page"
                                     >
                                         <ChevronLeft className="w-4 h-4" />
                                         <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Prev</span>
-                                    </motion.button>
+                                    </button>
 
                                     {/* Page X of Y */}
-                                    <motion.div
+                                    <div
                                         key={selectedPageIndex}
-                                        initial={{ opacity: 0, y: -4, scale: 0.9 }}
-                                        animate={{ opacity: 1, y: 0,  scale: 1   }}
-                                        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                                         className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl shadow"
                                     >
                                         <span className="text-blue-400 font-black text-sm tabular-nums">
@@ -905,21 +895,18 @@ const CreatePDF = () => {
                                         <span className="text-slate-300 font-black text-sm tabular-nums">
                                             {images.length}
                                         </span>
-                                    </motion.div>
+                                    </div>
 
                                     {/* Next */}
-                                    <motion.button
-                                        whileHover={{ scale: 1.08 }}
-                                        whileTap={{ scale: 0.88 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                                    <button
                                         onClick={() => setSelectedPageIndex(i => Math.min(images.length - 1, i + 1))}
                                         disabled={selectedPageIndex === images.length - 1}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl shadow"
                                         aria-label="Next page"
                                     >
                                         <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Next</span>
                                         <ChevronRight className="w-4 h-4" />
-                                    </motion.button>
+                                    </button>
                                 </div>
                             </div>
 
@@ -930,12 +917,10 @@ const CreatePDF = () => {
                                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Filters</p>
                                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
                                         {VISION_FILTERS.map((f) => (
-                                            <motion.button
+                                            <button
                                                 key={f.id}
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
                                                 onClick={() => applyFilter(f.id)}
-                                                className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
+                                                className={`flex items-center gap-2 p-2 rounded-xl border ${
                                                     images[selectedPageIndex].filter === f.id
                                                     ? 'bg-blue-600 border-blue-600 text-white shadow-md'
                                                     : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
@@ -945,7 +930,7 @@ const CreatePDF = () => {
                                                     {React.cloneElement(f.icon, { className: "w-3 h-3" })}
                                                 </div>
                                                 <span className="text-[10px] font-black uppercase leading-none truncate">{f.label}</span>
-                                            </motion.button>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -954,25 +939,21 @@ const CreatePDF = () => {
                                 <div className="mt-auto">
                                     <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Smart Tools</p>
                                     <div className="flex gap-2">
-                                        <motion.button
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.95 }}
+                                        <button
                                             onClick={handleAutoCrop}
                                             disabled={isAutoCropping}
-                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all disabled:opacity-50"
+                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50"
                                         >
                                             <Sparkles className={`w-3.5 h-3.5 ${isAutoCropping ? 'animate-spin' : ''}`} />
                                             <span className="text-[10px] font-black uppercase tracking-wider">Auto-Clean</span>
-                                        </motion.button>
-                                        <motion.button
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.95 }}
+                                        </button>
+                                        <button
                                             onClick={() => setIsCropModalOpen(true)}
-                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-slate-800 dark:bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-900 dark:hover:bg-slate-600 transition-all border border-slate-700 dark:border-slate-600"
+                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-slate-800 dark:bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-900 dark:hover:bg-slate-600 border border-slate-700 dark:border-slate-600"
                                         >
                                             <Crop className="w-3.5 h-3.5" />
                                             <span className="text-[10px] font-black uppercase tracking-wider">Manual Crop</span>
-                                        </motion.button>
+                                        </button>
                                     </div>
                                 </div>
 

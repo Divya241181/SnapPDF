@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { sendContactInquiry } from '../services/emailService';
 
 const Contact = () => {
@@ -38,9 +37,7 @@ const Contact = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-20">
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="text-center mb-16"
             >
                 <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-6">Contact Us</h1>
@@ -48,13 +45,13 @@ const Contact = () => {
                     Have questions or need technical support? Our team is dedicated to providing you with the assistance you need. Reach out through any of the channels below.
                 </p>
                 <div className="h-1.5 w-24 bg-blue-600 mx-auto mt-6 rounded-full"></div>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 {/* Contact Information Cards */}
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <motion.div whileHover={{ y: -5 }} className="glass-panel p-8 text-center">
+                        <div className="glass-panel p-8 text-center">
                             <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <Mail className="w-6 h-6" />
                             </div>
@@ -62,14 +59,14 @@ const Contact = () => {
                             <a href="mailto:team.snappdf@gmail.com">
                                 <p className="text-sm text-slate-500 dark:text-slate-400">team.snappdf@gmail.com</p>
                             </a>
-                        </motion.div>
-                        <motion.div whileHover={{ y: -5 }} className="glass-panel p-8 text-center">
+                        </div>
+                        <div className="glass-panel p-8 text-center">
                             <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <Phone className="w-6 h-6" />
                             </div>
                             <h4 className="font-bold text-slate-900 dark:text-white mb-2">Call Us</h4>
                             <p className="text-sm text-slate-500 dark:text-slate-400">+91 8238075291</p>
-                        </motion.div>
+                        </div>
                     </div>
 
                     <div className="glass-panel p-8">

@@ -1,16 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Home, ArrowLeft, Search, AlertCircle } from 'lucide-react';
 
 const NotFound = () => {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="relative mb-8"
         >
           {/* Decorative background element */}
@@ -22,29 +18,16 @@ const NotFound = () => {
               404
             </h1>
             <div className="absolute inset-0 flex items-center justify-center">
-              <motion.div
-                animate={{ 
-                  y: [0, -10, 0],
-                  rotate: [0, 5, -5, 0]
-                }}
-                transition={{ 
-                  duration: 4, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
+              <div
                 className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800"
               >
                 <AlertCircle className="w-16 h-16 text-blue-600" />
-              </motion.div>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
+        <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 premium-typography">
             Page Not Found
           </h2>
@@ -78,7 +61,7 @@ const NotFound = () => {
               <Link to="/docs" className="text-blue-600 hover:underline font-medium">Documentation</Link>
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

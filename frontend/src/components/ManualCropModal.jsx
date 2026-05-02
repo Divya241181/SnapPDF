@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, RefreshCw, Crop, Move, Info, RotateCcw, RotateCw, FlipHorizontal2, FlipVertical2 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────
@@ -473,20 +472,11 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        key="manual-crop-overlay"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+    <>
+      <div
         className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-4 bg-slate-950/95 backdrop-blur-sm"
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1,    opacity: 1 }}
-          exit={{ scale: 0.95,    opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+        <div
           className="relative w-full max-w-5xl h-full sm:h-[90vh] bg-[#020617] sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl border border-slate-800"
         >
           {/* ── Header ─────────────────────────────────── */}
@@ -551,10 +541,7 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 hidden sm:block mr-1">Transform</span>
 
-              <motion.button
-                whileHover={{ scale: 1.08, backgroundColor: 'rgba(99,102,241,0.25)' }}
-                whileTap={{ scale: 0.86, rotate: -20 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+              <button
                 onClick={handleRotateLeft}
                 disabled={isProcessing}
                 title="Rotate 90° counter-clockwise"
@@ -562,12 +549,9 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
               >
                 <RotateCcw className="w-4 h-4" />
                 <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">CCW</span>
-              </motion.button>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.08, backgroundColor: 'rgba(99,102,241,0.25)' }}
-                whileTap={{ scale: 0.86, rotate: 20 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+              <button
                 onClick={handleRotateRight}
                 disabled={isProcessing}
                 title="Rotate 90° clockwise"
@@ -575,14 +559,11 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
               >
                 <RotateCw className="w-4 h-4" />
                 <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">CW</span>
-              </motion.button>
+              </button>
 
               <div className="w-px h-7 bg-slate-700 mx-1 flex-shrink-0" />
 
-              <motion.button
-                whileHover={{ scale: 1.08, backgroundColor: 'rgba(20,184,166,0.2)' }}
-                whileTap={{ scale: 0.86, scaleX: -1 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+              <button
                 onClick={handleFlipH}
                 disabled={isProcessing}
                 title="Flip horizontal (mirror left↔right)"
@@ -590,12 +571,9 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
               >
                 <FlipHorizontal2 className="w-4 h-4" />
                 <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">Flip H</span>
-              </motion.button>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.08, backgroundColor: 'rgba(20,184,166,0.2)' }}
-                whileTap={{ scale: 0.86, scaleY: -1 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+              <button
                 onClick={handleFlipV}
                 disabled={isProcessing}
                 title="Flip vertical (mirror top↔bottom)"
@@ -603,7 +581,7 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
               >
                 <FlipVertical2 className="w-4 h-4" />
                 <span className="text-[10px] font-black uppercase tracking-wider hidden sm:block">Flip V</span>
-              </motion.button>
+              </button>
             </div>
 
             <div className="h-px bg-slate-800 mb-3" />
@@ -622,24 +600,21 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
             )}
 
             <div className="flex gap-2 sm:gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              <button
                 onClick={handleReset} disabled={isProcessing}
                 className="flex-1 py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider disabled:opacity-40"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Reset
-              </motion.button>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              <button
                 onClick={handleSelectAll} disabled={isProcessing}
                 className="flex-1 py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all uppercase tracking-wider disabled:opacity-40"
               >
                 <Crop className="w-3.5 h-3.5" /> Full
-              </motion.button>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.02, y: -1 }} whileTap={{ scale: 0.97 }}
+              <button
                 onClick={handleApply} disabled={isProcessing}
                 className="flex-[2.5] py-2.5 sm:py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all uppercase tracking-wider disabled:opacity-50 text-white shadow-lg shadow-blue-600/30"
                 style={{ background: 'linear-gradient(135deg, #2563eb 0%, #06b6d4 100%)' }}
@@ -648,12 +623,12 @@ const ManualCropModal = ({ isOpen, image, onCropComplete, onClose }) => {
                   ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/40 border-t-white" />
                   : <><Check className="w-4 h-4" /> Apply Crop</>
                 }
-              </motion.button>
+              </button>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
+    </>
   );
 };
 

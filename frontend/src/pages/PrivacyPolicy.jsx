@@ -1,13 +1,7 @@
 import React from 'react';
 import { ShieldAlert, Cookie, Lock, Eye, FileText, Mail } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const PrivacyPolicy = () => {
-    const fadeIn = {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.6 }
-    };
 
     const sections = [
         {
@@ -39,20 +33,16 @@ const PrivacyPolicy = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-20">
-            <motion.div {...fadeIn} className="text-center mb-16">
+            <div className="text-center mb-16">
                 <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-6">Privacy Policy</h1>
                 <p className="text-slate-600 dark:text-slate-400">Last Updated: February 27, 2026</p>
                 <div className="h-1 w-20 bg-blue-600 mx-auto mt-6 rounded-full"></div>
-            </motion.div>
+            </div>
 
             <div className="space-y-8">
                 {sections.map((section, i) => (
-                    <motion.div
+                    <div
                         key={i}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: i * 0.1 }}
                         className="glass-panel p-8"
                     >
                         <div className="flex items-center gap-4 mb-4">
@@ -64,12 +54,11 @@ const PrivacyPolicy = () => {
                         <p className="text-slate-600 dark:text-slate-400 leading-relaxed pl-16">
                             {section.content}
                         </p>
-                    </motion.div>
+                    </div>
                 ))}
             </div>
 
-            <motion.div
-                {...fadeIn}
+            <div
                 className="mt-16 p-8 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30 text-center"
             >
                 <h4 className="font-bold text-slate-900 dark:text-white mb-4">Questions about your privacy?</h4>
@@ -80,7 +69,7 @@ const PrivacyPolicy = () => {
                 >
                     <Mail className="w-5 h-5" /> privacy@snappdf.com
                 </a>
-            </motion.div>
+            </div>
         </div>
     );
 };
