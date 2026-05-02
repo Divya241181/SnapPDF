@@ -143,7 +143,7 @@ const Dashboard = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white transition-colors">Welcome, {user?.username} 👋</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white transition-colors">Welcome, {user?.username}</h1>
                     <p className="text-slate-600 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Manage all your generated PDFs here.</p>
                 </div>
                 <Link to="/create" className="btn-primary w-full sm:w-auto justify-center py-2 text-sm">
