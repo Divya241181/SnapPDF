@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Zap, Globe, Cpu, Users, ArrowRight, BarChart3, CheckCircle2, Target, Rocket, LayoutDashboard, FilePlus, ChevronLeft, ChevronRight } from 'lucide-react';
 import useAuthStore from '../store/authStore';
+import { FloatingPaths } from '../components/ui/background-paths';
 
 /* ============================================================
    KEY FEATURES — Mobile Horizontal Scroll Carousel
@@ -325,9 +326,15 @@ const ProjectOverviewCarousel = () => {
 
 const Landing = () => {
     return (
-        <div className="flex flex-col items-center py-20 px-4 overflow-x-hidden">
-            {/* HERO SECTION - UNMODIFIED LAYOUT */}
-            <div className="flex flex-col items-center justify-center text-center relative z-10">
+        <div className="relative flex flex-col items-center py-20 px-4 overflow-x-hidden min-h-screen">
+            {/* Background Animation covering the top portion */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] h-[100vh] pointer-events-none z-0 overflow-hidden">
+                <FloatingPaths position={1} />
+                <FloatingPaths position={-1} />
+            </div>
+
+            {/* HERO SECTION - ADJUSTED LAYOUT */}
+            <div className="flex flex-col items-center justify-center text-center relative z-10 w-full min-h-[85vh] -mt-10 pb-20">
                 <div className="relative w-full flex justify-center">
                     <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 relative z-10">
                         Create PDFs on the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 inline-block">
@@ -369,9 +376,10 @@ const Landing = () => {
                         </>
                     )}
                 </div>
+            </div>
 
-                {/* Primary Feature Cards */}
-                <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-5xl">
+            {/* Primary Feature Cards */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-5xl relative z-10">
                     {[
                         {
                             icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>,
@@ -401,7 +409,6 @@ const Landing = () => {
                         </div>
                     ))}
                 </div>
-            </div>
 
             {/* 1. Project Overview */}
             <section className="mt-40 w-full max-w-6xl">

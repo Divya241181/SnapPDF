@@ -35,7 +35,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative mt-20 border-t border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl transition-colors duration-300">
+        <footer className="relative mt-20 border-t border-slate-200 dark:border-slate-800 bg-bg-light/80 dark:bg-slate-900/50 backdrop-blur-xl transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
                 <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 mb-16">
 

@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuthStore();
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="flex items-center justify-center min-h-screen bg-bg-light dark:bg-slate-950">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
   );
@@ -59,7 +59,7 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-300">
+      <div className="min-h-screen bg-bg-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-300">
         <Navbar />
 
         {/* pb-20 on mobile to avoid bottom nav overlap */}

@@ -23,7 +23,7 @@ const Navbar = () => {
     const close = () => setMenuOpen(false);
 
     return (
-        <nav className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 sticky top-0 z-50 transition-colors duration-300">
+        <nav className="bg-bg-light/80 dark:bg-slate-900/50 backdrop-blur-xl border-b border-white/20 dark:border-slate-800/50 sticky top-0 z-50 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
 
@@ -111,7 +111,7 @@ const Navbar = () => {
                 }`}
             >
                 <div className="overflow-hidden">
-                    <div className="border-t border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(59,130,246,0.12)] dark:shadow-[0_8px_30px_rgb(59,130,246,0.15)]">
+                    <div className="border-t border-slate-100 dark:border-slate-800 bg-bg-light/90 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_8px_30px_rgb(59,130,246,0.12)] dark:shadow-[0_8px_30px_rgb(59,130,246,0.15)]">
                         <div className="px-4 py-3 space-y-1">
                             {isAuthenticated ? (
                                 <>

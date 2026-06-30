@@ -5,6 +5,7 @@
   --color-primary: #3b82f6;
   --color-secondary: #0f172a;
   --color-accent: #f43f5e;
+  --color-bg-light: #f9f9ee;
 
   --font-inter: "Inter", system-ui, sans-serif;
   --font-outfit: "Outfit", sans-serif;
@@ -24,7 +25,7 @@
   body {
     font-weight: 300;        /* Light — comfortable body text reading */
     line-height: 1.65;
-    @apply transition-colors duration-300 antialiased text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-950;
+    @apply transition-colors duration-300 antialiased text-slate-900 dark:text-slate-100 bg-bg-light dark:bg-slate-950;
   }
 
   /* ── Headings ─────────────────────────────────────────── */
