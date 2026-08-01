@@ -1,102 +1,176 @@
 import React from 'react';
-import { Target, Eye, Heart, Zap, Shield, Globe, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import useReveal from '../hooks/useReveal';
 
-const Mission = () => {
+export default function Mission() {
+  useReveal();
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 py-20 overflow-hidden">
-            {/* Mission Hero */}
-            <div className="text-center mb-32">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-8">
-                    <Target className="w-4 h-4" /> Driven by purpose
-                </div>
-                <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-8">
-                    Our Mission & <span className="text-blue-600">Values</span>
-                </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed italic">
-                    "To redefine document accessibility by creating the world's most intuitive and secure digital scanning ecosystem."
-                </p>
+  return (
+    <>
+      <section className="split-hero">
+        <div className="container split-hero-inner">
+          <div className="split-hero-text reveal">
+            <p className="eyebrow">Mission</p>
+            <h1 className="h1"><span className="gradient-text">Democratizing</span><br/>digital documentation.</h1>
+            <p className="lede">The plumbing of paperwork should not cost anyone their afternoon. We're closing the gap between paper and pixels.</p>
+            <div className="split-hero-cta">
+              <a href="#journey" className="btn btn-glow">
+                Our journey
+                <svg className="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </a>
+              <Link to="/about" className="btn btn-ghost">Meet the team</Link>
             </div>
-
-            {/* Core Pillars */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-40">
-                <div>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-3">
-                        <Eye className="w-8 h-8 text-blue-600" /> Our Vision
-                    </h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                        We envision a world where physical paper is no longer a bottleneck for productivity. A future where every professional can capture and share information instantly, without compromising on security or environmental sustainability.
-                    </p>
-                    <div className="space-y-4">
-                        {[
-                            "Empower 10 million professionals by 2030",
-                            "Reduce global paper dependency by 40%",
-                            "Set the gold standard for document encryption"
-                        ].map((goal, i) => (
-                            <div key={i} className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                                <div className="w-2 h-2 rounded-full bg-blue-600"></div>
-                                <span>{goal}</span>
-                            </div>
-                        ))}
-                    </div>
+          </div>
+          <div className="split-hero-visual reveal reveal-delay-1">
+            <div className="anim-timeline">
+              <div className="timeline-track">
+                <div className="timeline-line"></div>
+                <div className="timeline-node tn-1">
+                  <div className="timeline-node-doc">
+                    <div className="doc-line" style={{width:'70%'}}></div>
+                    <div className="doc-line" style={{width:'85%'}}></div>
+                    <div className="doc-line" style={{width:'60%'}}></div>
+                  </div>
+                  <span>19</span>
+                  <div className="timeline-node-label">START</div>
                 </div>
-                <div className="relative">
-                    <div className="absolute -inset-4 bg-blue-600/10 blur-3xl rounded-full"></div>
-                    <div className="glass-panel p-12 bg-white/40 dark:bg-slate-800/20 relative z-10 text-center">
-                        <Heart className="w-20 h-20 text-rose-500 mx-auto mb-6 animate-pulse" />
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Built with Integrity</h4>
-                        <p className="text-slate-500 dark:text-slate-400">Our commitment to transparency and user trust is at the heart of everything we do.</p>
-                    </div>
+                <div className="timeline-node tn-2">
+                  <div className="timeline-node-doc">
+                    <div className="doc-line" style={{width:'80%', background:'var(--primary)', opacity:0.6}}></div>
+                    <div className="doc-line" style={{width:'70%', background:'var(--primary)', opacity:0.6}}></div>
+                    <div className="doc-line" style={{width:'65%', background:'var(--primary)', opacity:0.6}}></div>
+                  </div>
+                  <span>21</span>
+                  <div className="timeline-node-label">SOC 2</div>
                 </div>
+                <div className="timeline-node tn-3">
+                  <div className="timeline-node-doc">
+                    <div className="doc-line" style={{width:'75%'}}></div>
+                    <div className="doc-line" style={{width:'80%'}}></div>
+                    <div className="doc-line" style={{width:'65%'}}></div>
+                  </div>
+                  <span>24</span>
+                  <div className="timeline-node-label">LAN SYNC</div>
+                </div>
+                <div className="timeline-node tn-4">
+                  <div className="timeline-node-doc" style={{background:'var(--primary)', borderColor:'transparent'}}>
+                    <div className="doc-line" style={{width:'75%', background:'#fff', opacity:0.5}}></div>
+                    <div className="doc-line" style={{width:'85%', background:'#fff', opacity:0.5}}></div>
+                    <div className="doc-line" style={{width:'60%', background:'#fff', opacity:0.5}}></div>
+                  </div>
+                  <span>26</span>
+                  <div className="timeline-node-label">v3.2</div>
+                </div>
+              </div>
             </div>
-
-            {/* Cultural Values Grid */}
-            <section className="mb-40">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-6">What We Stand For</h2>
-                    <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {[
-                        { icon: <Zap />, c: "text-amber-500", t: "Speed over Perfection", d: "We value rapid iteration and solving problems as they occur, ensuring our users never wait for critical features." },
-                        { icon: <Shield />, c: "text-emerald-500", t: "Uncompromising Privacy", d: "We believe privacy is a fundamental human right. Our zero-knowledge architecture reflects this belief." },
-                        { icon: <Globe />, c: "text-indigo-500", t: "Global Scale", d: "We design for everyone, everywhere. Our tools are optimized for low-bandwidth networks and diverse device types." }
-                    ].map((v, i) => (
-                        <div
-                            key={i}
-                            className="glass-panel p-10 flex flex-col items-center text-center group"
-                        >
-                            <div className={`w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-6 flex items-center justify-center ${v.c} transition-transform group-hover:rotate-12`}>
-                                {v.icon}
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{v.t}</h4>
-                            <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">{v.d}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-
-            {/* CTA Final */}
-            <div
-                className="glass-panel p-12 text-center bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden"
-            >
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <Users className="w-32 h-32" />
-                </div>
-                <h3 className="text-3xl font-bold mb-6">Join our movement</h3>
-                <p className="text-slate-300 max-w-2xl mx-auto mb-10 text-lg">
-                    We're not just building an app; we're building a community of empowered professionals. Be part of the change.
-                </p>
-                <div className="flex justify-center gap-4">
-                    <Link to="/register" className="btn-primary px-10 py-4 flex items-center gap-2">
-                        Get Started <ArrowRight className="w-5 h-5" />
-                    </Link>
-                </div>
-            </div>
+          </div>
         </div>
-    );
-};
+      </section>
 
-export default Mission;
+      {/* Editorial narrative */}
+      <section className="section">
+        <div className="container">
+          <div className="mission-narrative reveal">
+            <p className="drop-cap">A billion people still keep their most important documents on paper — passports, prescriptions, contracts, receipts. Every one of them, at some point this week, will need that paper in digital form. Right now, that means finding a scanner, or emailing a blurry photo, or paying someone to do it. It shouldn't.</p>
+            <p>Our mission is to make document transformation as instant as taking a photo. To close the gap between the physical world and the digital one. To ship a tool so simple that no one has to think about it, and so precise that professionals trust it with their most sensitive files.</p>
+            <p>We measure success in seconds saved and afternoons reclaimed — not in features shipped or logos on a wall.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="section section-dark">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Progress</p>
+            <h2 className="h1 reveal reveal-delay-1">What we've done<br/>in six years.</h2>
+          </div>
+          <div className="mission-stats">
+            <div className="mission-stat reveal">
+              <div className="mission-stat-num">82</div>
+              <div className="mission-stat-label">Countries served daily</div>
+            </div>
+            <div className="mission-stat reveal reveal-delay-1">
+              <div className="mission-stat-num">4.1B</div>
+              <div className="mission-stat-label">Pages processed to date</div>
+            </div>
+            <div className="mission-stat reveal reveal-delay-2">
+              <div className="mission-stat-num">12M</div>
+              <div className="mission-stat-label">Active monthly users</div>
+            </div>
+            <div className="mission-stat reveal reveal-delay-3">
+              <div className="mission-stat-num">0</div>
+              <div className="mission-stat-label">Reported data leaks</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline */}
+      <section className="section" id="journey">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Journey</p>
+            <h2 className="h1 reveal reveal-delay-1">Six years,<br/>one direction.</h2>
+          </div>
+
+          <div className="timeline">
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2019 · SPRING</div>
+              <h3>The weekend it started</h3>
+              <p>Kalyani and Diego spend a rainy Saturday photographing 4,000 patient charts. Realize the tool they need doesn't exist. Start prototyping the same night.</p>
+            </div>
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2019 · WINTER</div>
+              <h3>First release</h3>
+              <p>SnapPDF 0.1 ships as a free iPhone app. 400 downloads in the first week — mostly friends. One of them is a lawyer who won't stop emailing feature requests.</p>
+            </div>
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2021 · JUNE</div>
+              <h3>Enterprise-grade encryption</h3>
+              <p>Rewrite the storage layer for zero-knowledge encryption. First SOC 2 audit passed. First clinic customer signs up.</p>
+            </div>
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2022 · OCTOBER</div>
+              <h3>1 million users</h3>
+              <p>Cross the million-user line without a single marketing campaign. Word of mouth in law firms, clinics, and freelance networks.</p>
+            </div>
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2024 · MARCH</div>
+              <h3>LAN sync ships</h3>
+              <p>Field teams and auditors can finally work with SnapPDF fully offline. Peer-to-peer over local network. Zero cloud required.</p>
+            </div>
+            <div className="timeline-item reveal">
+              <div className="timeline-year mono">2026 · TODAY</div>
+              <h3>Real-time OCR</h3>
+              <p>Text becomes selectable the moment you scan. On-device, no upload. Version 3.2 rolls out to every user this month.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Objectives */}
+      <section className="section section-dark">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">What's next</p>
+            <h2 className="h1 reveal reveal-delay-1">Where we're going.</h2>
+          </div>
+
+          <div className="values-grid" style={{gridTemplateColumns: '1fr 1fr'}}>
+            <div className="value-card reveal">
+              <div className="value-num mono">GOAL · 2026</div>
+              <h3>100 million pages a day</h3>
+              <p>Scale the pipeline for 10× current volume without adding infrastructure cost per user. Currently at 34M/day.</p>
+            </div>
+            <div className="value-card reveal reveal-delay-1">
+              <div className="value-num mono">GOAL · 2027</div>
+              <h3>Offline-first for every feature</h3>
+              <p>Every capability — including team libraries and sharing — should work without an internet connection. Cloud is a nice-to-have, not a requirement.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

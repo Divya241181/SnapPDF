@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnapPDF — Create PDFs on the go. Anywhere, instantly.</title>
+<link rel="stylesheet" href="shared.css?v=2">
+<link rel="stylesheet" href="styles-landing.css">
+</head>
+<body>
+
+<div data-nav></div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-mesh"></div>
+    <div class="grid-lines"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+  </div>
+
+  <div class="container hero-inner">
+    <div class="hero-badge reveal">
+      <span class="dot"></span>
+      <span>Now with real-time OCR · v3.2</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </div>
+
+    <h1 class="display hero-title reveal reveal-delay-1">
+      Create PDFs<br>
+      <span class="hero-title-accent">on the go.</span><br>
+      Anywhere, instantly.
+    </h1>
+
+    <p class="lede hero-lede reveal reveal-delay-2">
+      Turn any photo or camera scan into a crisp, shareable PDF in one tap.<br>
+      Enterprise-grade encryption. No sign-up required.
+    </p>
+
+    <div class="hero-cta reveal reveal-delay-3">
+      <a href="#try" class="btn btn-glow">
+        Start scanning free
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#watch" class="btn btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Watch demo
+        <span class="text-muted mono" style="font-size:12px;margin-left:4px;">1:24</span>
+      </a>
+    </div>
+
+    <!-- Hero showcase: 3 variations toggled by tweaks -->
+    <div class="hero-showcase reveal reveal-delay-4" id="heroShowcase">
+      <!-- Variation A: Interactive drop-zone demo -->
+      <div class="showcase-variant" data-variant="A" data-active="true">
+        <div class="demo-frame">
+          <div class="demo-window">
+            <div class="demo-window-bar">
+              <div class="demo-dots"><span></span><span></span><span></span></div>
+              <div class="demo-url mono">snappdf.app/new</div>
+              <div class="demo-window-actions">
+                <div class="demo-icon-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+              </div>
+            </div>
+            <div class="demo-body">
+              <div class="demo-sidebar">
+                <div class="demo-side-item active">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
+                  <span>New scan</span>
+                </div>
+                <div class="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/></svg><span>Library</span></div>
+                <div class="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Recent</span></div>
+                <div class="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H4v12h12"/><path d="M8 4h8M16 16l4 4M20 20l-4-4"/></svg><span>Shared</span></div>
+                <div class="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>Team</span></div>
+                <div class="demo-sidebar-footer">
+                  <div class="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></svg><span>Encrypted</span></div>
+                </div>
+              </div>
+              <div class="demo-canvas" id="demoDropzone">
+                <div class="demo-toolbar">
+                  <div class="demo-tabs">
+                    <span class="demo-tab active">Upload</span>
+                    <span class="demo-tab">Camera</span>
+                    <span class="demo-tab">LAN sync</span>
+                  </div>
+                  <div class="demo-toolbar-right mono">72 dpi · A4</div>
+                </div>
+                <div class="dropzone" id="dropzone">
+                  <!-- Initial state -->
+                  <div class="dropzone-state" data-state="idle">
+                    <div class="dropzone-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                    </div>
+                    <h3 class="dropzone-title">Drop an image to make a PDF</h3>
+                    <p class="dropzone-hint">JPG, PNG, HEIC · Up to 50MB · No account needed</p>
+                    <button class="btn btn-primary dropzone-btn" id="tryBtn">
+                      <span>Try with a sample</span>
+                    </button>
+                  </div>
+                  <!-- Processing state -->
+                  <div class="dropzone-state" data-state="processing">
+                    <div class="scanning">
+                      <div class="scanning-doc">
+                        <div class="doc-line" style="width:60%"></div>
+                        <div class="doc-line" style="width:80%"></div>
+                        <div class="doc-line" style="width:70%"></div>
+                        <div class="doc-line" style="width:90%"></div>
+                        <div class="doc-line" style="width:50%"></div>
+                        <div class="doc-line" style="width:75%"></div>
+                        <div class="doc-line" style="width:65%"></div>
+                        <div class="scanning-beam"></div>
+                      </div>
+                    </div>
+                    <h3 class="dropzone-title">Enhancing scan…</h3>
+                    <p class="dropzone-hint mono" id="processStage">Detecting edges · Deskew · OCR</p>
+                  </div>
+                  <!-- Done state -->
+                  <div class="dropzone-state" data-state="done">
+                    <div class="done-preview">
+                      <div class="done-pdf">
+                        <div class="pdf-badge">PDF</div>
+                        <div class="pdf-lines">
+                          <div class="doc-line" style="width:70%"></div>
+                          <div class="doc-line" style="width:90%"></div>
+                          <div class="doc-line" style="width:55%"></div>
+                          <div class="doc-line" style="width:80%"></div>
+                          <div class="doc-line" style="width:65%"></div>
+                        </div>
+                      </div>
+                      <div class="done-check">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                    </div>
+                    <h3 class="dropzone-title">receipt-mar-2026.pdf</h3>
+                    <p class="dropzone-hint mono"><span id="doneSize">184 KB</span> · Encrypted · Ready</p>
+                    <div class="done-actions">
+                      <button class="btn btn-glow dropzone-btn" id="downloadBtn">Download</button>
+                      <button class="btn btn-ghost dropzone-btn" id="resetBtn">Scan another</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="demo-statusbar mono">
+                  <span><span class="status-dot"></span> Local processing · Zero uploads</span>
+                  <span id="statusRight">Ready</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variation B: Animated phone mockup -->
+      <div class="showcase-variant" data-variant="B">
+        <div class="phone-showcase">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-statusbar mono">
+                <span>9:41</span>
+                <span>◉ 5G ▮▮▮</span>
+              </div>
+              <div class="phone-header">
+                <div class="phone-title">Scan document</div>
+                <div class="phone-close">✕</div>
+              </div>
+              <div class="phone-viewfinder">
+                <div class="phone-doc">
+                  <div class="doc-line" style="width:60%"></div>
+                  <div class="doc-line" style="width:85%"></div>
+                  <div class="doc-line" style="width:70%"></div>
+                  <div class="doc-line" style="width:80%"></div>
+                  <div class="doc-line" style="width:55%"></div>
+                  <div class="doc-line" style="width:75%"></div>
+                  <div class="doc-line" style="width:65%"></div>
+                </div>
+                <div class="phone-corners">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <div class="phone-beam"></div>
+              </div>
+              <div class="phone-actions">
+                <div class="phone-btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/></svg>
+                </div>
+                <div class="phone-btn-lg"><div class="phone-btn-inner"></div></div>
+                <div class="phone-btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone-float phone-float-1">
+            <div class="pdf-icon">
+              <div class="pdf-badge">PDF</div>
+            </div>
+            <div class="phone-float-text">
+              <div class="mono" style="font-size:11px;color:var(--text-faint)">EXPORTED</div>
+              <div style="font-weight:600;font-size:13px">invoice-042.pdf</div>
+            </div>
+          </div>
+          <div class="phone-float phone-float-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+            <span style="font-size:13px;font-weight:600">AES-256 · End-to-end</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variation C: Floating document stack -->
+      <div class="showcase-variant" data-variant="C">
+        <div class="stack-showcase">
+          <div class="stack-doc stack-doc-3">
+            <div class="pdf-badge">PDF</div>
+            <div class="pdf-lines">
+              <div class="doc-line" style="width:80%"></div>
+              <div class="doc-line" style="width:60%"></div>
+              <div class="doc-line" style="width:75%"></div>
+              <div class="doc-line" style="width:90%"></div>
+              <div class="doc-line" style="width:65%"></div>
+              <div class="doc-line" style="width:70%"></div>
+            </div>
+            <div class="stack-doc-label mono">contract-final.pdf</div>
+          </div>
+          <div class="stack-doc stack-doc-2">
+            <div class="pdf-badge">PDF</div>
+            <div class="pdf-lines">
+              <div class="doc-line" style="width:70%"></div>
+              <div class="doc-line" style="width:85%"></div>
+              <div class="doc-line" style="width:60%"></div>
+              <div class="doc-line" style="width:80%"></div>
+              <div class="doc-line" style="width:55%"></div>
+              <div class="doc-line" style="width:75%"></div>
+            </div>
+            <div class="stack-doc-label mono">receipt-jan.pdf</div>
+          </div>
+          <div class="stack-doc stack-doc-1">
+            <div class="pdf-badge">PDF</div>
+            <div class="pdf-lines">
+              <div class="doc-line" style="width:60%"></div>
+              <div class="doc-line" style="width:80%"></div>
+              <div class="doc-line" style="width:70%"></div>
+              <div class="doc-line" style="width:90%"></div>
+              <div class="doc-line" style="width:50%"></div>
+              <div class="doc-line" style="width:75%"></div>
+              <div class="doc-line" style="width:65%"></div>
+            </div>
+            <div class="stack-doc-label mono">passport-scan.pdf</div>
+            <div class="stack-pulse"></div>
+          </div>
+          <div class="stack-metric stack-metric-1 mono">
+            <div style="font-size:11px;color:var(--text-faint)">SPEED</div>
+            <div style="font-size:22px;font-weight:600">0.4s</div>
+          </div>
+          <div class="stack-metric stack-metric-2 mono">
+            <div style="font-size:11px;color:var(--text-faint)">SIZE</div>
+            <div style="font-size:22px;font-weight:600">184 KB</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOGO STRIP ============ -->
+<section class="logos">
+  <div class="container">
+    <p class="logos-label mono reveal">Trusted by teams at</p>
+    <div class="logos-track reveal">
+      <div class="logos-inner">
+        <span class="logo-item">Northwind</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Acme Studios</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Lumen Health</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Vertex Labs</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Fold & Co</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Meridian</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Halcyon</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Fieldstone</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Palladium</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Ridgeline</span>
+        <span class="logo-sep">·</span>
+        <!-- duplicate for seamless scroll -->
+        <span class="logo-item">Northwind</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Acme Studios</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Lumen Health</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Vertex Labs</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Fold & Co</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Meridian</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Halcyon</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Fieldstone</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Palladium</span>
+        <span class="logo-sep">·</span>
+        <span class="logo-item">Ridgeline</span>
+        <span class="logo-sep">·</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow reveal">Feature set</p>
+      <h2 class="h1 reveal reveal-delay-1">Everything you need.<br><span class="text-muted">Nothing you don't.</span></h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card feature-card-lg reveal">
+        <div class="feature-visual feature-visual-scan">
+          <div class="scan-doc">
+            <div class="doc-line" style="width:60%"></div>
+            <div class="doc-line" style="width:80%"></div>
+            <div class="doc-line" style="width:70%"></div>
+            <div class="doc-line" style="width:85%"></div>
+            <div class="doc-line" style="width:55%"></div>
+            <div class="doc-line" style="width:75%"></div>
+          </div>
+          <div class="scan-beam-fx"></div>
+          <div class="scan-corners"><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-tag mono">01 · Capture</div>
+          <h3 class="h3">Real-time capture</h3>
+          <p class="text-muted">Auto-detect edges, deskew, and enhance in a single motion. Works with any camera — phone, webcam, or scanner.</p>
+        </div>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-visual feature-visual-lock">
+          <div class="lock-ring"></div>
+          <div class="lock-ring lock-ring-2"></div>
+          <svg class="lock-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="10" width="16" height="12" rx="2"/>
+            <path d="M8 10V7a4 4 0 018 0v3"/>
+          </svg>
+        </div>
+        <div class="feature-body">
+          <div class="feature-tag mono">02 · Secure</div>
+          <h3 class="h3">AES-256 encryption</h3>
+          <p class="text-muted">Every file, at rest and in transit. SOC 2 Type II. GDPR-ready.</p>
+        </div>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-visual feature-visual-compress">
+          <div class="compress-blocks">
+            <div class="compress-block b1"></div>
+            <div class="compress-block b2"></div>
+            <div class="compress-block b3"></div>
+            <div class="compress-arrow">→</div>
+            <div class="compress-out"></div>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-tag mono">03 · Compress</div>
+          <h3 class="h3">Smart compression</h3>
+          <p class="text-muted">6× smaller with no visible loss. Perfect for email, chat, and slow connections.</p>
+        </div>
+      </div>
+
+      <div class="feature-card feature-card-lg reveal reveal-delay-1">
+        <div class="feature-visual feature-visual-cloud">
+          <div class="cloud-nodes">
+            <div class="cloud-node cn-1"></div>
+            <div class="cloud-node cn-2"></div>
+            <div class="cloud-node cn-3"></div>
+            <div class="cloud-node cn-4"></div>
+            <div class="cloud-node cn-center"></div>
+            <svg class="cloud-lines" viewBox="0 0 200 140">
+              <line x1="100" y1="70" x2="40" y2="30" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+              <line x1="100" y1="70" x2="160" y2="30" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+              <line x1="100" y1="70" x2="40" y2="110" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+              <line x1="100" y1="70" x2="160" y2="110" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/>
+            </svg>
+          </div>
+        </div>
+        <div class="feature-body">
+          <div class="feature-tag mono">04 · Sync</div>
+          <h3 class="h3">Cloud storage, done right</h3>
+          <p class="text-muted">Instant sync across devices with LAN mode for offline teams. Your files, your keys.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-cta reveal">
+      <a href="features.html" class="btn btn-ghost">
+        See all features
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS (Dark section) ============ -->
+<section class="how section-dark">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow reveal">Workflow</p>
+      <h2 class="h1 reveal reveal-delay-1">Three taps.<br>One perfect PDF.</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num mono">01</div>
+        <div class="step-visual">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+        </div>
+        <h3 class="h3">Point & capture</h3>
+        <p class="text-muted">Aim at any document. Edges snap. Angles correct. Motion blur disappears.</p>
+      </div>
+
+      <div class="step-arrow reveal reveal-delay-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num mono">02</div>
+        <div class="step-visual">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
+            </svg>
+          </div>
+        </div>
+        <h3 class="h3">Auto-enhance</h3>
+        <p class="text-muted">Lighting balanced. Text sharpened. Background cleaned — in 400ms.</p>
+      </div>
+
+      <div class="step-arrow reveal reveal-delay-2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num mono">03</div>
+        <div class="step-visual">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </div>
+        </div>
+        <h3 class="h3">Export & share</h3>
+        <p class="text-muted">One tap — encrypted PDF ready for email, cloud, or QR handoff.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow reveal">Reviews</p>
+      <h2 class="h1 reveal reveal-delay-1">Loved by people who<br>hate scanners.</h2>
+    </div>
+
+    <div class="tm-grid">
+      <div class="tm-card tm-card-featured reveal">
+        <p class="tm-quote">"I used to keep a $400 scanner on my desk. SnapPDF made it worthless in a week. The auto-enhance is genuinely better than anything I've used."</p>
+        <div class="tm-author">
+          <div class="tm-avatar" style="background:linear-gradient(135deg,#5B4EE8,#FF6B4A)">SL</div>
+          <div>
+            <div class="tm-name">Sofia Lund</div>
+            <div class="tm-role">Head of Ops · Meridian</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-card reveal reveal-delay-1">
+        <p class="tm-quote">"Filed 60 receipts in one lunch. Never going back."</p>
+        <div class="tm-author">
+          <div class="tm-avatar" style="background:linear-gradient(135deg,#06B6D4,#5B4EE8)">MK</div>
+          <div>
+            <div class="tm-name">Marcus Klein</div>
+            <div class="tm-role">Freelance · Berlin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-card reveal reveal-delay-2">
+        <p class="tm-quote">"The LAN sync saved us during a client audit. Zero internet, zero problem."</p>
+        <div class="tm-author">
+          <div class="tm-avatar" style="background:linear-gradient(135deg,#FF6B4A,#7C3AED)">AR</div>
+          <div>
+            <div class="tm-name">Anika Rao</div>
+            <div class="tm-role">Legal · Fold & Co</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-card reveal reveal-delay-1">
+        <p class="tm-quote">"Compression is unreal. 8MB scans → 400KB with the text still crisp."</p>
+        <div class="tm-author">
+          <div class="tm-avatar" style="background:linear-gradient(135deg,#7C3AED,#06B6D4)">JW</div>
+          <div>
+            <div class="tm-name">James Wu</div>
+            <div class="tm-role">Engineer · Vertex Labs</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-card reveal reveal-delay-2">
+        <p class="tm-quote">"Onboarded our whole clinic in an afternoon. HIPAA-ready out of the box."</p>
+        <div class="tm-author">
+          <div class="tm-avatar" style="background:linear-gradient(135deg,#5B4EE8,#06B6D4)">DP</div>
+          <div>
+            <div class="tm-name">Dr. Priya Nair</div>
+            <div class="tm-role">Practice Lead · Lumen Health</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat reveal">
+        <div class="stat-num" data-count="12">12<span class="stat-suffix">M+</span></div>
+        <div class="stat-label">PDFs created<br>this year</div>
+      </div>
+      <div class="stat reveal reveal-delay-1">
+        <div class="stat-num" data-count="0.4">0.4<span class="stat-suffix">s</span></div>
+        <div class="stat-label">Average scan-to-PDF<br>time</div>
+      </div>
+      <div class="stat reveal reveal-delay-2">
+        <div class="stat-num" data-count="99.99">99.99<span class="stat-suffix">%</span></div>
+        <div class="stat-label">Uptime last<br>12 months</div>
+      </div>
+      <div class="stat reveal reveal-delay-3">
+        <div class="stat-num" data-count="0">0<span class="stat-suffix"></span></div>
+        <div class="stat-label">Files leaked.<br>Ever.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta-final" id="try">
+  <div class="container">
+    <div class="cta-card reveal">
+      <div class="cta-bg-mesh"></div>
+      <p class="eyebrow" style="color:rgba(255,255,255,0.7)">Ready in 8 seconds</p>
+      <h2 class="h1" style="color:#fff">Start scanning.<br>No sign-up required.</h2>
+      <p class="lede" style="color:rgba(255,255,255,0.7);max-width:520px;margin:0 auto;">Free forever for up to 10 pages a day. Upgrade only when you need teams and unlimited storage.</p>
+      <div class="hero-cta" style="justify-content:center;margin-top:32px;">
+        <a href="#" class="btn" style="background:#fff;color:#0A0A0F;">
+          Start scanning free
+          <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <a href="contact.html" class="btn" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);">
+          Talk to sales
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div data-footer></div>
+
+<!-- Tweaks panel gets injected here -->
+<div id="tweaksMount"></div>
+
+<script src="shared.js?v=2"></script>
+<script src="scripts-landing.js"></script>
+</body>
+</html>

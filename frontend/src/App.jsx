@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import useAuthStore from './store/authStore';
 import useThemeStore from './store/themeStore';
 
@@ -22,7 +22,7 @@ import Features from './pages/Features';
 import NotFound from './pages/NotFound';
 
 // Components
-import Navbar from './components/Navbar';
+import NewNavbar from './components/NewNavbar';
 import BottomNav from './components/BottomNav';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -40,6 +40,12 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const OldLayout = () => (
+  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 sm:pb-8">
+    <Outlet />
+  </div>
+);
+
 function App() {
   const { loadUser } = useAuthStore();
   const { theme } = useThemeStore();
@@ -51,48 +57,49 @@ function App() {
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, [theme]);
 
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-bg-light dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-300">
-        <Navbar />
+      <div className="min-h-screen flex flex-col transition-colors duration-300">
+        <NewNavbar />
 
         {/* pb-20 on mobile to avoid bottom nav overlap */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-24 sm:pb-8">
+        <main className="flex-1 w-full">
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute><Dashboard /></ProtectedRoute>
-            } />
-            <Route path="/create" element={
-              <ProtectedRoute><CreatePDF /></ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute><Profile /></ProtectedRoute>
-            } />
-            <Route path="/edit/:id" element={
-              <ProtectedRoute><EditPDF /></ProtectedRoute>
-            } />
-
-            {/* Public Pages */}
             <Route path="/about" element={<About />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/docs" element={<Documentation />} />
             <Route path="/mission" element={<Mission />} />
             <Route path="/security" element={<Security />} />
             <Route path="/features" element={<Features />} />
 
-            {/* Catch-all 404 Page */}
-            <Route path="*" element={<NotFound />} />
+            <Route element={<OldLayout />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute><Dashboard /></ProtectedRoute>
+              } />
+              <Route path="/create" element={
+                <ProtectedRoute><CreatePDF /></ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute><Profile /></ProtectedRoute>
+              } />
+              <Route path="/edit/:id" element={
+                <ProtectedRoute><EditPDF /></ProtectedRoute>
+              } />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/docs" element={<Documentation />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Routes>
         </main>
 

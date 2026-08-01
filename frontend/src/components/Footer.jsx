@@ -1,164 +1,71 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Github, Heart, Globe, Shield, Terminal, ChevronUp } from 'lucide-react';
-import logoLight from '../assets/SnapPDF Logo.png';
-import logoDark from '../assets/SnapPDF Logo Dark.png';
-import useThemeStore from '../store/themeStore';
 
 const Footer = () => {
-    const { theme } = useThemeStore();
-    const currentYear = new Date().getFullYear();
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    };
-
-    const footerLinks = {
-        product: [
-            { name: 'Dashboard', path: '/dashboard' },
-            { name: 'Create PDF', path: '/create' },
-            { name: 'Features', path: '/features' },
-            { name: 'Security', path: '/security' },
-        ],
-        company: [
-            { name: 'About Us', path: '/about' },
-            { name: 'Our Mission', path: '/mission' },
-            { name: 'Contact Us', path: '/contact' },
-        ],
-        support: [
-            { name: 'Privacy Policy', path: '/privacy' },
-            { name: 'Terms of Service', path: '/terms' },
-            { name: 'Documentation', path: '/docs' },
-        ]
-    };
-
-    return (
-        <footer className="relative mt-20 border-t border-slate-200 dark:border-slate-800 bg-bg-light/80 dark:bg-slate-900/50 backdrop-blur-xl transition-colors duration-300">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-                <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 mb-16">
-
-                    {/* Brand Section */}
-                    <div className="col-span-2 lg:col-span-4 space-y-6">
-                        <Link to="/" className="flex items-center gap-2 group w-fit">
-                            <img
-                                src={theme === 'dark' ? logoDark : logoLight}
-                                alt="SnapPDF"
-                                className={`${theme === 'dark' ? 'h-11' : 'h-10'} w-auto object-contain transition-transform group-hover:scale-105`}
-                            />
-                        </Link>
-                        <p className="text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-                            Empowering professionals worldwide with seamless document digitilization and PDF management tools. Create, scan, and store with confidence.
-                        </p>
-                        <div className="flex items-center gap-4">
-                            {[
-                                { icon: <Twitter className="w-5 h-5" />, href: '#' },
-                                { icon: <Github className="w-5 h-5" />, href: '#' },
-                                { icon: <Linkedin className="w-5 h-5" />, href: '#' },
-                                { icon: <Instagram className="w-5 h-5" />, href: '#' },
-                            ].map((social, i) => (
-                                <a
-                                    key={i}
-                                    href={social.href}
-                                    className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all duration-300"
-                                >
-                                    {social.icon}
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Links Sections */}
-                    <div className="col-span-1 lg:col-span-2">
-                        <h4 className="text-slate-900 dark:text-white font-bold mb-6">Product</h4>
-                        <ul className="space-y-4">
-                            {footerLinks.product.map((link, i) => (
-                                <li key={i}>
-                                    <Link to={link.path} className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="col-span-1 lg:col-span-2">
-                        <h4 className="text-slate-900 dark:text-white font-bold mb-6">Company</h4>
-                        <ul className="space-y-4">
-                            {footerLinks.company.map((link, i) => (
-                                <li key={i}>
-                                    <Link to={link.path} className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="col-span-1 lg:col-span-2">
-                        <h4 className="text-slate-900 dark:text-white font-bold mb-6">Support</h4>
-                        <ul className="space-y-4">
-                            {footerLinks.support.map((link, i) => (
-                                <li key={i}>
-                                    <Link to={link.path} className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Newsletter / Contact Section */}
-                    <div className="col-span-1 lg:col-span-2">
-                        <h4 className="text-slate-900 dark:text-white font-bold mb-6">Contact</h4>
-                        <div className="space-y-4">
-                            <a href="mailto:team.snappdf@gmail.com" className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
-                                <Mail className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-sm truncate sm:whitespace-normal">team.snappdf@gmail.com</span>
-                            </a>
-                            <div className="pt-2">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                                    <Shield className="w-3 h-3" /> System Operational
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Bottom Bar */}
-                <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 relative">
-                    <p className="text-slate-500 dark:text-slate-400 text-xs flex items-center gap-1">
-                        © {currentYear} SnapPDF. All rights reserved. Made with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> by Advanced SnapPDF Team.
-                    </p>
-                    
-                    {/* Compact Scroll to Top Button */}
-                    <button 
-                        onClick={scrollToTop}
-                        className="group flex flex-col items-center text-slate-400 hover:text-blue-600 transition-all duration-300 -mt-2"
-                        aria-label="Scroll to top"
-                    >
-                        <div className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center group-hover:border-blue-600 group-hover:-translate-y-1 transition-all duration-300 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-sm">
-                            <ChevronUp className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        </div>
-                    </button>
-
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
-                            <Terminal className="w-4 h-4" />
-                            <span>v1.2.0-stable</span>
-                        </div>
-                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
-                        <select className="bg-transparent border-none text-slate-500 dark:text-slate-400 text-sm focus:ring-0 cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors">
-                            <option>English (US)</option>
-                            <option>Hindi</option>
-                            <option>Spanish</option>
-                        </select>
-                    </div>
-                </div>
+  return (
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-grid" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '48px' }}>
+          <div className="footer-brand" style={{ maxWidth: '320px' }}>
+            <Link to="/" className="nav-brand">
+              <span className="nav-brand-mark">S</span>
+              <span>SnapPDF</span>
+            </Link>
+            <p>Instant PDFs from any camera, any device. Built for the modern desk.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '80px', flexWrap: 'wrap' }}>
+            <div className="footer-col">
+              <h4>PRODUCT</h4>
+              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/create">Create PDF</Link>
+              <Link to="/features">Features</Link>
+              <Link to="/security">Security</Link>
             </div>
-        </footer>
-    );
+            <div className="footer-col">
+              <h4>COMPANY</h4>
+              <Link to="/about">About</Link>
+              <Link to="/mission">Mission</Link>
+              <Link to="/contact">Contact</Link>
+            </div>
+            <div className="footer-col">
+              <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text)', marginBottom: '24px' }}>Contact</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                <a href="mailto:team.snappdf@gmail.com" style={{ color: 'var(--text-muted)', fontSize: '15px', textDecoration: 'none', margin: 0, padding: 0, display: 'inline' }}>team.snappdf@gmail.com</a>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#022c22', padding: '10px 16px', borderRadius: '100px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ color: '#10b981', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', lineHeight: 1.2 }}>SYSTEM</span>
+                  <span style={{ color: '#10b981', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em', lineHeight: 1.2 }}>OPERATIONAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <div style={{ color: 'var(--text-muted)' }}>© 2026 SnapPDF. All rights reserved. Made with ❤️ by SnapPDF Team.</div>
+          <div className="footer-social">
+            <a href="#" aria-label="Twitter">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a href="#" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-1.97c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.02 11.02 0 015.79 0c2.2-1.49 3.18-1.18 3.18-1.18.63 1.58.23 2.75.11 3.04.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56A11.5 11.5 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/>
+              </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.4v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.26 2.37 4.26 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

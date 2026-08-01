@@ -1,110 +1,212 @@
 import React from 'react';
-import { ShieldCheck, Lock, EyeOff, Server, Key, FileWarning, CheckCircle, RefreshCcw } from 'lucide-react';
+import useReveal from '../hooks/useReveal';
 
-const Security = () => {
+export default function Security() {
+  useReveal();
 
-    const standards = [
-        { icon: <Lock />, title: "AES-256 Encryption", desc: "All files at rest are encrypted using the same standards used by government agencies and banks." },
-        { icon: <ShieldCheck />, title: "TLS/SSL Transit", desc: "Data moving between your device and our servers is protected by high-grade 256-bit encryption." },
-        { icon: <EyeOff />, title: "Zero-Knowledge", desc: "Our team cannot view your documents. Encryption happens client-side before storage." },
-        { icon: <Key />, title: "JWT Auth", desc: "Secure token-based authentication ensures that only you can access your profile and files." }
-    ];
-
-    return (
-        <div className="max-w-7xl mx-auto px-4 py-20 overflow-hidden">
-            {/* Security Hero */}
-            <div className="text-center mb-32">
-                <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
-                    <ShieldCheck className="w-12 h-12" />
-                </div>
-                <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-6">Security & <span className="text-blue-600">Privacy</span></h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                    Your trust is our most valuable asset. We use enterprise-grade security to ensure your documents never fall into the wrong hands.
-                </p>
+  return (
+    <>
+      <section className="split-hero">
+        <div className="container split-hero-inner">
+          <div className="split-hero-text reveal">
+            <p className="eyebrow">Security</p>
+            <h1 className="h1">Your documents.<br/><span className="gradient-text">Fort Knox secure.</span></h1>
+            <p className="lede">Zero-knowledge architecture, on-device encryption, and audited compliance. Built so we couldn't read your files even if we tried.</p>
+            <div className="split-hero-cta">
+              <a href="#pillars" className="btn btn-glow">
+                Explore the pillars
+                <svg className="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </a>
+              <a href="#faq" className="btn btn-ghost">Read the FAQ</a>
             </div>
-
-            {/* Core Infrastructure Section */}
-            <section className="mb-40 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div className="space-y-8">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Built-in Protective Layers</h2>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Security isn't a feature we added later; it's the foundation we built SnapPDF upon. We implement a multi-layered defense strategy to protect your sensitive documentation.
-                    </p>
-                    <div className="space-y-4">
-                        {[
-                            "Automatic virus and malware scanning on all uploads.",
-                            "Redundant storage across multiple geographically diverse centers.",
-                            "24/7 infrastructure monitoring for suspicious activity.",
-                            "Regular third-party security audits and penetration tests."
-                        ].map((item, i) => (
-                            <div key={i} className="flex gap-3 items-center">
-                                <CheckCircle className="w-5 h-5 text-blue-500 shrink-0" />
-                                <span className="text-slate-700 dark:text-slate-300">{item}</span>
-                            </div>
-                        ))}
-                    </div>
+          </div>
+          <div className="split-hero-visual reveal reveal-delay-1">
+            <div className="anim-pillars">
+              <div className="pillar-doc-stack">
+                <div className="pillar-orbit">
+                  <div className="pillar-orbit-item item-1"><span className="dot"></span>SOC 2</div>
+                  <div className="pillar-orbit-item item-2"><span className="dot"></span>HIPAA</div>
+                  <div className="pillar-orbit-item item-3"><span className="dot"></span>GDPR</div>
+                  <div className="pillar-orbit-item item-4"><span className="dot"></span>ISO 27001</div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {standards.map((std, i) => (
-                        <div
-                            key={i}
-                            className="glass-panel p-8 text-center sm:text-left transition-all hover:-translate-y-2 hover:border-blue-600"
-                        >
-                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl w-fit sm:mb-6 mb-4 mx-auto sm:mx-0">
-                                {std.icon}
-                            </div>
-                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">{std.title}</h4>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{std.desc}</p>
-                        </div>
-                    ))}
+                <div className="pillar-orbit pillar-orbit-2">
+                  <div className="pillar-orbit-item item-1">TLS 1.3</div>
+                  <div className="pillar-orbit-item item-2">AES-256</div>
+                  <div className="pillar-orbit-item item-3">Argon2</div>
+                  <div className="pillar-orbit-item item-4">HKDF</div>
                 </div>
-            </section>
-
-            {/* Compliance Section */}
-            <section className="mb-40 bg-slate-50 dark:bg-slate-800/20 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
-                <div className="relative z-10">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-12">Global Compliance Standards</h2>
-                    <div className="flex flex-wrap justify-center gap-12 sm:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
-                        {/* Fake Compliance Badges */}
-                        <div className="flex flex-col items-center gap-2">
-                            <div className="w-16 h-16 rounded-full border-4 border-slate-400 flex items-center justify-center font-black text-xl">SOC2</div>
-                            <span className="text-xs font-bold uppercase tracking-tighter">Certified</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                            <div className="w-16 h-16 rounded-full border-4 border-slate-400 flex items-center justify-center font-black text-xl">GDPR</div>
-                            <span className="text-xs font-bold uppercase tracking-tighter">Compliant</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                            <div className="w-16 h-16 rounded-full border-4 border-slate-400 flex items-center justify-center font-black text-xl">HIPAA</div>
-                            <span className="text-xs font-bold uppercase tracking-tighter">Ready</span>
-                        </div>
-                    </div>
+                <div className="pillar-shield-core">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
                 </div>
-            </section>
-
-            {/* Emergency & Recovery */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-                <div className="glass-panel p-10 flex gap-6 items-start bg-rose-50/50 dark:bg-rose-900/10 border-rose-200/50 dark:border-rose-900/30">
-                    <FileWarning className="w-12 h-12 text-rose-500 shrink-0" />
-                    <div>
-                        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Lost Account?</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 italic">
-                            For security purposes, we cannot recover forgotten master keys. Please ensure your recovery phrase is stored in a safe, offline location.
-                        </p>
-                    </div>
-                </div>
-                <div className="glass-panel p-10 flex gap-6 items-start bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200/50 dark:border-emerald-900/30">
-                    <RefreshCcw className="w-12 h-12 text-emerald-500 shrink-0" />
-                    <div>
-                        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Backup Systems</h4>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 italic">
-                            All document databases are backed up every 4 hours to an encrypted, isolated secondary network to prevent total data loss in catastrophic events.
-                        </p>
-                    </div>
-                </div>
+              </div>
             </div>
+          </div>
         </div>
-    );
-};
+      </section>
 
-export default Security;
+      {/* Pillars */}
+      <section className="section" id="pillars">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Pillars</p>
+            <h2 className="h1 reveal reveal-delay-1">Three layers.<br/>One promise.</h2>
+          </div>
+
+          <div className="security-pillars">
+            <div className="pillar-card reveal">
+              <div className="pillar-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="10" width="16" height="12" rx="2"/>
+                  <path d="M8 10V7a4 4 0 018 0v3"/>
+                </svg>
+              </div>
+              <h3>Encryption everywhere</h3>
+              <p>AES-256-GCM at rest, TLS 1.3 in transit. Every byte encrypted on your device before it moves.</p>
+            </div>
+            <div className="pillar-card reveal reveal-delay-1">
+              <div className="pillar-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+              </div>
+              <h3>Compliance, audited</h3>
+              <p>SOC 2 Type II. GDPR. HIPAA-ready. CCPA. Annual pen tests by third-party auditors.</p>
+            </div>
+            <div className="pillar-card reveal reveal-delay-2">
+              <div className="pillar-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M2 12h20"/>
+                  <circle cx="12" cy="12" r="4"/>
+                </svg>
+              </div>
+              <h3>Data privacy, by design</h3>
+              <p>Zero-knowledge keys. Files auto-purge after export. We never see, sell, or share your documents.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Encryption diagram */}
+      <section className="section section-dark">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">How it flows</p>
+            <h2 className="h1 reveal reveal-delay-1">Your file's journey.</h2>
+          </div>
+          <div className="encryption-diagram reveal">
+            <div className="enc-node">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2"/>
+                <line x1="12" y1="18" x2="12.01" y2="18"/>
+              </svg>
+              <div className="enc-node-label">Your device</div>
+              <div className="enc-node-sub mono">PLAINTEXT</div>
+            </div>
+            <div className="enc-arrow">
+              <span>→</span>
+              <span className="enc-arrow-label">ENCRYPT</span>
+            </div>
+            <div className="enc-node enc-node-primary">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="4" y="10" width="16" height="12" rx="2"/>
+                <path d="M8 10V7a4 4 0 018 0v3"/>
+              </svg>
+              <div className="enc-node-label">SnapPDF cloud</div>
+              <div className="enc-node-sub mono">AES-256 CIPHERTEXT</div>
+            </div>
+            <div className="enc-arrow">
+              <span>→</span>
+              <span className="enc-arrow-label">DECRYPT</span>
+            </div>
+            <div className="enc-node">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <div className="enc-node-label">Recipient</div>
+              <div className="enc-node-sub mono">PLAINTEXT</div>
+            </div>
+          </div>
+          <p className="text-muted text-center reveal" style={{maxWidth:'520px', margin:'24px auto 0', fontSize:'14px'}}>
+            Keys live only on your devices. Our servers store encrypted blobs — even a full database dump would be worthless.
+          </p>
+        </div>
+      </section>
+
+      {/* Certifications */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Certified</p>
+            <h2 className="h1 reveal reveal-delay-1">Audited by people<br/>who don't take shortcuts.</h2>
+          </div>
+          <div className="badges-grid reveal">
+            <div className="badge-cert"><div><div className="badge-cert-name">SOC 2</div><div className="badge-cert-sub">TYPE II</div></div></div>
+            <div className="badge-cert"><div><div className="badge-cert-name">GDPR</div><div className="badge-cert-sub">COMPLIANT</div></div></div>
+            <div className="badge-cert"><div><div className="badge-cert-name">HIPAA</div><div className="badge-cert-sub">READY</div></div></div>
+            <div className="badge-cert"><div><div className="badge-cert-name">CCPA</div><div className="badge-cert-sub">COMPLIANT</div></div></div>
+            <div className="badge-cert"><div><div className="badge-cert-name">ISO 27001</div><div className="badge-cert-sub">CERTIFIED</div></div></div>
+            <div className="badge-cert"><div><div className="badge-cert-name">PCI DSS</div><div className="badge-cert-sub">LEVEL 1</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section section-dark" id="faq">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Deep dives</p>
+            <h2 className="h1 reveal reveal-delay-1">Questions people ask<br/>before signing up.</h2>
+          </div>
+
+          <div style={{maxWidth:'800px', margin:'0 auto', display:'flex', flexDirection:'column', gap:'14px'}}>
+            <details className="pillar-card reveal" style={{padding:'22px 28px'}}>
+              <summary style={{fontWeight:600, fontSize:'16px', cursor:'pointer', listStyle:'none', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                Where is my data physically stored?
+                <span style={{fontSize:'22px', color:'var(--text-muted)'}}>+</span>
+              </summary>
+              <p style={{marginTop:'14px', color:'var(--text-muted)', fontSize:'14px'}}>
+                Encrypted blobs live in ISO 27001–certified data centers in your chosen region: US-East, EU-Frankfurt, or AP-Singapore. Enterprise customers can pin data to a single region contractually.
+              </p>
+            </details>
+
+            <details className="pillar-card reveal reveal-delay-1" style={{padding:'22px 28px'}}>
+              <summary style={{fontWeight:600, fontSize:'16px', cursor:'pointer', listStyle:'none', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                What happens if I lose my device?
+                <span style={{fontSize:'22px', color:'var(--text-muted)'}}>+</span>
+              </summary>
+              <p style={{marginTop:'14px', color:'var(--text-muted)', fontSize:'14px'}}>
+                Your recovery kit (generated at signup) restores encrypted access on a new device. If both your device AND recovery kit are lost, files are unrecoverable — that's the trade-off for zero-knowledge encryption.
+              </p>
+            </details>
+
+            <details className="pillar-card reveal reveal-delay-2" style={{padding:'22px 28px'}}>
+              <summary style={{fontWeight:600, fontSize:'16px', cursor:'pointer', listStyle:'none', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                Can law enforcement request my files?
+                <span style={{fontSize:'22px', color:'var(--text-muted)'}}>+</span>
+              </summary>
+              <p style={{marginTop:'14px', color:'var(--text-muted)', fontSize:'14px'}}>
+                They can request encrypted blobs (which we're legally required to produce under valid subpoena), but the plaintext keys never leave your devices. We publish a transparency report every quarter.
+              </p>
+            </details>
+
+            <details className="pillar-card reveal reveal-delay-3" style={{padding:'22px 28px'}}>
+              <summary style={{fontWeight:600, fontSize:'16px', cursor:'pointer', listStyle:'none', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                Do you offer a bug bounty?
+                <span style={{fontSize:'22px', color:'var(--text-muted)'}}>+</span>
+              </summary>
+              <p style={{marginTop:'14px', color:'var(--text-muted)', fontSize:'14px'}}>
+                Yes — up to $50,000 for critical vulnerabilities. Managed through HackerOne. Every submission is triaged within 48 hours.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

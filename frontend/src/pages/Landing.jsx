@@ -1,605 +1,658 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Zap, Globe, Cpu, Users, ArrowRight, BarChart3, CheckCircle2, Target, Rocket, LayoutDashboard, FilePlus, ChevronLeft, ChevronRight } from 'lucide-react';
-import useAuthStore from '../store/authStore';
-import { FloatingPaths } from '../components/ui/background-paths';
+import useReveal from '../hooks/useReveal';
 
-/* ============================================================
-   KEY FEATURES — Mobile Horizontal Scroll Carousel
-   Animations removed.
-   ============================================================ */
-const featureCards = [
-    {
-        icon: <Zap className="w-7 h-7" />,
-        title: 'Real-time Capture',
-        desc: 'Proprietary camera algorithms optimize image clarity for text-heavy documents.',
-        glow: 'rgba(37,99,235,0.55)',        // blue
-        border: '#2563eb',
-        iconBg: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-        label: 'Speed',
-    },
-    {
-        icon: <ShieldCheck className="w-7 h-7" />,
-        title: 'Secure Encryption',
-        desc: 'All files are encrypted at rest and in transit, ensuring your data remains private.',
-        glow: 'rgba(124,58,237,0.55)',       // violet
-        border: '#7c3aed',
-        iconBg: 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400',
-        label: 'Security',
-    },
-    {
-        icon: <Globe className="w-7 h-7" />,
-        title: 'LAN Sync',
-        desc: 'Advanced network protocols allow for cross-device synchronization without cloud delays.',
-        glow: 'rgba(6,182,212,0.55)',        // cyan
-        border: '#06b6d4',
-        iconBg: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
-        label: 'Network',
-    },
-    {
-        icon: <Cpu className="w-7 h-7" />,
-        title: 'Smart Compression',
-        desc: 'Generate compact PDFs that maintain 100% legibility for professional use.',
-        glow: 'rgba(5,150,105,0.55)',        // emerald
-        border: '#059669',
-        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-        label: 'Efficiency',
-    },
-];
+export default function Landing() {
+  useReveal();
 
-const FeaturesCarousel = () => {
-    const trackRef = useRef(null);
-    const [activeIdx, setActiveIdx] = useState(0);
-    const TOTAL = featureCards.length;
-    const [cardStyles, setCardStyles] = useState(
-        featureCards.map((_, i) => ({ opacity: i === 0 ? 1 : 0.4, scale: i === 0 ? 1 : 0.88 }))
-    );
+  const [heroVariant, setHeroVariant] = useState('A');
+  const [demoState, setDemoState] = useState('idle');
+  const [processStage, setProcessStage] = useState('Detecting edges · Deskew · OCR');
+  const [doneSize, setDoneSize] = useState('184 KB');
+  const [statusRight, setStatusRight] = useState('Ready');
+  const [downloadBtnText, setDownloadBtnText] = useState('Download');
+  const [isDragOver, setIsDragOver] = useState(false);
 
-    const onScroll = useCallback(() => {
-        const el = trackRef.current;
-        if (!el || el.scrollWidth === 0) return;
-        const cardW = el.scrollWidth / TOTAL;
-        const scrollX = el.scrollLeft;
-        setActiveIdx(Math.min(Math.max(Math.round(scrollX / cardW), 0), TOTAL - 1));
-    }, [TOTAL]);
+  const processTimerRef = useRef(null);
 
-    useEffect(() => {
-        const el = trackRef.current;
-        if (!el) return;
-        el.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-        return () => el.removeEventListener('scroll', onScroll);
-    }, [onScroll]);
+  const stages = [
+    { label: 'Detecting edges…', duration: 500 },
+    { label: 'Deskewing image…', duration: 400 },
+    { label: 'Enhancing contrast…', duration: 400 },
+    { label: 'Running OCR…', duration: 500 },
+    { label: 'Encrypting file…', duration: 400 },
+  ];
 
-    const scrollTo = useCallback((idx) => {
-        const el = trackRef.current;
-        if (!el) return;
-        const cardW = el.scrollWidth / TOTAL;
-        el.scrollTo({ left: cardW * idx, behavior: 'smooth' });
-    }, [TOTAL]);
+  const runProcess = () => {
+    setDemoState('processing');
+    setStatusRight('Processing…');
+    let i = 0;
 
-    const activeCard = featureCards[activeIdx];
+    const step = () => {
+      if (i >= stages.length) {
+        const size = (120 + Math.floor(Math.random() * 200));
+        setDoneSize(size + ' KB');
+        setDemoState('done');
+        setStatusRight('Complete · ' + size + ' KB');
+        return;
+      }
+      const stage = stages[i];
+      setProcessStage(stage.label);
+      i++;
+      processTimerRef.current = setTimeout(step, stage.duration);
+    };
+    step();
+  };
 
-    return (
-        <div className="md:hidden relative">
-            {/* Scroll track */}
-            <div
-                ref={trackRef}
-                className="relative z-10 flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 -mx-4 px-4"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-                {featureCards.map((card, i) => (
-                    <div
-                        key={i}
-                        className="snap-center shrink-0 w-[78vw] max-w-xs glass-panel p-6 relative overflow-hidden"
-                        style={{
-                            borderTop: `3px solid ${card.border}`,
-                        }}
-                    >
+  const resetProcess = () => {
+    if (processTimerRef.current) {
+      clearTimeout(processTimerRef.current);
+      processTimerRef.current = null;
+    }
+    setDemoState('idle');
+    setStatusRight('Ready');
+  };
 
-                        {/* Label badge */}
-                        <span
-                            className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
-                            style={{
-                                color: card.border,
-                                background: `${card.glow?.replace('0.55','0.12')}`,
-                                border: `1px solid ${card.border}40`,
-                            }}
-                        >
-                            {card.label}
-                        </span>
+  const handleDownload = () => {
+    setDownloadBtnText('Downloaded ✓');
+    setTimeout(() => { setDownloadBtnText('Download'); }, 1400);
+  };
 
-                        {/* Icon */}
-                        <div className={`w-14 h-14 ${card.iconBg} rounded-2xl flex items-center justify-center mb-5 relative z-10`}>
-                            {card.icon}
-                        </div>
+  // Stats Animation
+  const [pdfCount, setPdfCount] = useState(0);
+  const [scanTime, setScanTime] = useState(0);
+  const [uptime, setUptime] = useState(0);
 
-                        <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2 relative z-10">{card.title}</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed relative z-10">{card.desc}</p>
-                    </div>
-                ))}
-            </div>
+  useEffect(() => {
+    const animateValue = (setFn, end, decimals, duration) => {
+      const start = performance.now();
+      const step = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = end * eased;
+        setFn(Number(val.toFixed(decimals)));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
 
-            {/* Controls row */}
-            <div className="relative z-10 mt-6 flex flex-col items-center gap-4">
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          animateValue(setPdfCount, 12, 0, 1400);
+          animateValue(setScanTime, 0.4, 1, 1400);
+          animateValue(setUptime, 99.99, 2, 1400);
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
 
-                {/* Progress bar */}
-                <div className="w-full max-w-xs h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                        className="h-full rounded-full"
-                        style={{
-                            width: `${(activeIdx / (TOTAL - 1)) * 100}%`,
-                            minWidth: activeIdx === 0 ? '0%' : '8%',
-                            background: `linear-gradient(90deg, ${featureCards[0].border}, ${activeCard.border})`,
-                        }}
-                    />
-                </div>
+    const statsSection = document.getElementById('stats-section');
+    if (statsSection) observer.observe(statsSection);
 
-                {/* Prev · Counter · Next */}
-                <div className="flex items-center gap-5">
-                    <button
-                        onClick={() => scrollTo(Math.max(activeIdx - 1, 0))}
-                        disabled={activeIdx === 0}
-                        aria-label="Previous feature"
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-25 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm shadow-sm"
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                    </button>
+    return () => observer.disconnect();
+  }, []);
 
-                    {/* Live counter badge */}
-                    <div
-                        className="px-4 py-1.5 rounded-full text-sm font-bold tabular-nums"
-                        style={{
-                            color: activeCard.border,
-                            background: activeCard.glow?.replace('0.55', '0.1'),
-                            border: `1px solid ${activeCard.border}40`,
-                            minWidth: '4.5rem',
-                            textAlign: 'center',
-                        }}
-                    >
-                        {activeIdx + 1} / {TOTAL}
-                    </div>
-
-                    <button
-                        onClick={() => scrollTo(Math.min(activeIdx + 1, TOTAL - 1))}
-                        disabled={activeIdx === TOTAL - 1}
-                        aria-label="Next feature"
-                        className="w-10 h-10 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-25 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm shadow-sm"
-                    >
-                        <ChevronRight className="w-4 h-4" />
-                    </button>
-                </div>
-            </div>
+  return (
+    <>
+      <section className="hero">
+        <div className="hero-bg">
+          <div className="hero-mesh"></div>
+          <div className="grid-lines"></div>
+          <div className="hero-orb hero-orb-1"></div>
+          <div className="hero-orb hero-orb-2"></div>
         </div>
-    );
-};
 
-/* ============================================================
+        <div className="container hero-inner">
+          <div className="hero-badge reveal">
+            <span className="dot"></span>
+            <span>Now with real-time OCR · v3.2</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          </div>
 
-   PROJECT OVERVIEW — Mobile Horizontal Scroll Carousel
-   ============================================================ */
-const overviewCards = [
-    {
-        icon: <Target className="w-6 h-6" />,
-        iconBg: 'bg-blue-600 shadow-blue-500/30',
-        title: 'Our Mission',
-        gradient: 'from-blue-600/10',
-        content: (
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                SnapPDF was founded on a simple yet powerful mission: to bridge the gap between physical
-                documentation and digital efficiency. We recognize that in an increasingly paperless world,
-                the transition from physical to digital should be instantaneous, secure, and accessible to everyone.
-            </p>
-        ),
-    },
-    {
-        icon: <Rocket className="w-6 h-6" />,
-        iconBg: 'bg-indigo-600 shadow-indigo-500/30',
-        title: 'Our Vision',
-        gradient: 'from-indigo-600/10',
-        content: (
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                Our vision is to become the primary global utility for on-the-go document transformation,
-                providing a seamless ecosystem where users can capture, organize, and store information
-                without the need for bulky hardware or complex software.
-            </p>
-        ),
-    },
-    {
-        icon: <BarChart3 className="w-6 h-6" />,
-        iconBg: 'bg-emerald-600 shadow-emerald-500/30',
-        title: 'Core Objectives',
-        gradient: 'from-emerald-600/10',
-        content: (
-            <ul className="space-y-3">
-                {[
-                    'Enable high-fidelity document scanning across all mobile device platforms.',
-                    'Implement zero-friction workflows for image-to-PDF conversion.',
-                    'Guarantee enterprise-grade security for document storage and retrieval.',
-                    'Optimize the digital footprint of generated files for easy sharing.',
-                ].map((obj, i) => (
-                    <li key={i} className="flex gap-2 text-slate-700 dark:text-slate-300 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{obj}</span>
-                    </li>
-                ))}
-            </ul>
-        ),
-    },
-];
+          <h1 className="display hero-title reveal reveal-delay-1">
+            Create PDFs<br/>
+            <span className="hero-title-accent">on the go.</span><br/>
+            Anywhere, instantly.
+          </h1>
 
-const ProjectOverviewCarousel = () => {
-    const trackRef = useRef(null);
-    const [activeIdx, setActiveIdx] = useState(0);
-    const TOTAL = overviewCards.length;
-    const [cardStyles, setCardStyles] = useState(
-        overviewCards.map((_, i) => ({ opacity: i === 0 ? 1 : 0.45, scale: i === 0 ? 1 : 0.92 }))
-    );
+          <p className="lede hero-lede reveal reveal-delay-2">
+            Turn any photo or camera scan into a crisp, shareable PDF in one tap.<br/>
+            Enterprise-grade encryption. No sign-up required.
+          </p>
 
-    const onScroll = useCallback(() => {
-        const el = trackRef.current;
-        if (!el || el.scrollWidth === 0) return;
-        const cardW = el.scrollWidth / TOTAL;
-        const scrollX = el.scrollLeft;
+          <div className="hero-cta reveal reveal-delay-3">
+            <a href="#try" className="btn btn-glow">
+              Start scanning free
+              <svg className="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#watch" className="btn btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Watch demo
+              <span className="text-muted mono" style={{fontSize:'12px', marginLeft:'4px'}}>1:24</span>
+            </a>
+          </div>
 
-        setActiveIdx(Math.min(Math.max(Math.round(scrollX / cardW), 0), TOTAL - 1));
-    }, [TOTAL]);
-
-    useEffect(() => {
-        const el = trackRef.current;
-        if (!el) return;
-        el.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-        return () => el.removeEventListener('scroll', onScroll);
-    }, [onScroll]);
-
-    const scrollTo = useCallback((idx) => {
-        const el = trackRef.current;
-        if (!el) return;
-        const cardW = el.scrollWidth / TOTAL;
-        el.scrollTo({ left: cardW * idx, behavior: 'smooth' });
-    }, [TOTAL]);
-
-    return (
-        <div className="lg:hidden relative">
-            {/* Scroll track — hidden scrollbar */}
-            <div
-                ref={trackRef}
-                className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-2 -mx-4 px-4"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-                {overviewCards.map((card, i) => (
-                    <div
-                        key={i}
-                        className={`snap-center shrink-0 w-[82vw] max-w-sm glass-panel p-7 bg-gradient-to-br ${card.gradient} to-transparent border-blue-500/20`}
-                    >
-                        <div className={`w-12 h-12 ${card.iconBg} rounded-xl flex items-center justify-center text-white mb-5 shadow-lg`}>
-                            {card.icon}
-                        </div>
-                        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{card.title}</h4>
-                        {card.content}
+          <div className="hero-showcase reveal reveal-delay-4" id="heroShowcase">
+            {/* Variation A: Interactive drop-zone demo */}
+            <div className="showcase-variant" data-variant="A" data-active={heroVariant === 'A' ? 'true' : 'false'}>
+              <div className="demo-frame">
+                <div className="demo-window">
+                  <div className="demo-window-bar">
+                    <div className="demo-dots"><span></span><span></span><span></span></div>
+                    <div className="demo-url mono">snappdf.app/new</div>
+                    <div className="demo-window-actions">
+                      <div className="demo-icon-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg></div>
                     </div>
-                ))}
+                  </div>
+                  <div className="demo-body">
+                    <div className="demo-sidebar">
+                      <div className="demo-side-item active">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
+                        <span>New scan</span>
+                      </div>
+                      <div className="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/></svg><span>Library</span></div>
+                      <div className="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Recent</span></div>
+                      <div className="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 12V8H4v12h12"/><path d="M8 4h8M16 16l4 4M20 20l-4-4"/></svg><span>Shared</span></div>
+                      <div className="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="3"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>Team</span></div>
+                      <div className="demo-sidebar-footer">
+                        <div className="demo-side-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l9 4v6c0 5-4 9-9 10-5-1-9-5-9-10V6z"/></svg><span>Encrypted</span></div>
+                      </div>
+                    </div>
+                    <div className="demo-canvas">
+                      <div className="demo-toolbar">
+                        <div className="demo-tabs">
+                          <span className="demo-tab active">Upload</span>
+                          <span className="demo-tab">Camera</span>
+                          <span className="demo-tab">LAN sync</span>
+                        </div>
+                        <div className="demo-toolbar-right mono">72 dpi · A4</div>
+                      </div>
+                      <div 
+                        className={`dropzone ${isDragOver ? 'drag-over' : ''}`}
+                        onDragEnter={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                        onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+                        onDrop={(e) => { e.preventDefault(); setIsDragOver(false); runProcess(); }}
+                      >
+                        <div className={`dropzone-state ${demoState === 'idle' ? 'active' : ''}`} data-state="idle">
+                          <div className="dropzone-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                              <polyline points="17 8 12 3 7 8"/>
+                              <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                          </div>
+                          <h3 className="dropzone-title">Drop an image to make a PDF</h3>
+                          <p className="dropzone-hint">JPG, PNG, HEIC · Up to 50MB · No account needed</p>
+                          <button className="btn btn-primary dropzone-btn" onClick={runProcess}>
+                            <span>Try with a sample</span>
+                          </button>
+                        </div>
+                        
+                        <div className={`dropzone-state ${demoState === 'processing' ? 'active' : ''}`} data-state="processing">
+                          <div className="scanning">
+                            <div className="scanning-doc">
+                              <div className="doc-line" style={{width:'60%'}}></div>
+                              <div className="doc-line" style={{width:'80%'}}></div>
+                              <div className="doc-line" style={{width:'70%'}}></div>
+                              <div className="doc-line" style={{width:'90%'}}></div>
+                              <div className="doc-line" style={{width:'50%'}}></div>
+                              <div className="doc-line" style={{width:'75%'}}></div>
+                              <div className="doc-line" style={{width:'65%'}}></div>
+                              <div className="scanning-beam"></div>
+                            </div>
+                          </div>
+                          <h3 className="dropzone-title">Enhancing scan…</h3>
+                          <p className="dropzone-hint mono">{processStage}</p>
+                        </div>
+
+                        <div className={`dropzone-state ${demoState === 'done' ? 'active' : ''}`} data-state="done">
+                          <div className="done-preview">
+                            <div className="done-pdf">
+                              <div className="pdf-badge">PDF</div>
+                              <div className="pdf-lines">
+                                <div className="doc-line" style={{width:'70%'}}></div>
+                                <div className="doc-line" style={{width:'90%'}}></div>
+                                <div className="doc-line" style={{width:'55%'}}></div>
+                                <div className="doc-line" style={{width:'80%'}}></div>
+                                <div className="doc-line" style={{width:'65%'}}></div>
+                              </div>
+                            </div>
+                            <div className="done-check">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                          </div>
+                          <h3 className="dropzone-title">receipt-mar-2026.pdf</h3>
+                          <p className="dropzone-hint mono"><span>{doneSize}</span> · Encrypted · Ready</p>
+                          <div className="done-actions">
+                            <button className="btn btn-glow dropzone-btn" onClick={handleDownload}>{downloadBtnText}</button>
+                            <button className="btn btn-ghost dropzone-btn" onClick={resetProcess}>Scan another</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="demo-statusbar mono">
+                        <span><span className="status-dot"></span> Local processing · Zero uploads</span>
+                        <span>{statusRight}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Nav row: Prev · dots · Next */}
-            <div className="flex items-center justify-center gap-4 mt-6">
-                <button
-                    onClick={() => scrollTo(Math.max(activeIdx - 1, 0))}
-                    disabled={activeIdx === 0}
-                    aria-label="Previous card"
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm"
-                >
-                    <ChevronLeft className="w-4 h-4" />
-                </button>
-
-                <div className="flex items-center gap-2">
-                    {overviewCards.map((_, i) => (
-                        <button key={i} onClick={() => scrollTo(i)} aria-label={`Card ${i + 1}`}>
-                            <span
-                                className={`block rounded-full ${
-                                    i === activeIdx
-                                        ? 'bg-blue-600'
-                                        : 'bg-slate-300 dark:bg-slate-600'
-                                }`}
-                                style={{
-                                    width: i === activeIdx ? '24px' : '10px',
-                                    height: '10px',
-                                }}
-                            />
-                        </button>
-                    ))}
+            {/* Variation B: Animated phone mockup */}
+            <div className="showcase-variant" data-variant="B" data-active={heroVariant === 'B' ? 'true' : 'false'}>
+              <div className="phone-showcase">
+                <div className="phone-frame">
+                  <div className="phone-notch"></div>
+                  <div className="phone-screen">
+                    <div className="phone-statusbar mono">
+                      <span>9:41</span>
+                      <span>◉ 5G ▮▮▮</span>
+                    </div>
+                    <div className="phone-header">
+                      <div className="phone-title">Scan document</div>
+                      <div className="phone-close">✕</div>
+                    </div>
+                    <div className="phone-viewfinder">
+                      <div className="phone-doc">
+                        <div className="doc-line" style={{width:'60%'}}></div>
+                        <div className="doc-line" style={{width:'85%'}}></div>
+                        <div className="doc-line" style={{width:'70%'}}></div>
+                        <div className="doc-line" style={{width:'80%'}}></div>
+                        <div className="doc-line" style={{width:'55%'}}></div>
+                        <div className="doc-line" style={{width:'75%'}}></div>
+                        <div className="doc-line" style={{width:'65%'}}></div>
+                      </div>
+                      <div className="phone-corners">
+                        <span></span><span></span><span></span><span></span>
+                      </div>
+                      <div className="phone-beam"></div>
+                    </div>
+                    <div className="phone-actions">
+                      <div className="phone-btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v16H4z"/></svg>
+                      </div>
+                      <div className="phone-btn-lg"><div className="phone-btn-inner"></div></div>
+                      <div className="phone-btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <button
-                    onClick={() => scrollTo(Math.min(activeIdx + 1, TOTAL - 1))}
-                    disabled={activeIdx === TOTAL - 1}
-                    aria-label="Next card"
-                    className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm"
-                >
-                    <ChevronRight className="w-4 h-4" />
-                </button>
+                <div className="phone-float phone-float-1">
+                  <div className="pdf-icon">
+                    <div className="pdf-badge">PDF</div>
+                  </div>
+                  <div className="phone-float-text">
+                    <div className="mono" style={{fontSize:'11px', color:'var(--text-faint)'}}>EXPORTED</div>
+                    <div style={{fontWeight:600, fontSize:'13px'}}>invoice-042.pdf</div>
+                  </div>
+                </div>
+                <div className="phone-float phone-float-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                  <span style={{fontSize:'13px', fontWeight:600}}>AES-256 · End-to-end</span>
+                </div>
+              </div>
             </div>
+
+            {/* Variation C: Floating document stack */}
+            <div className="showcase-variant" data-variant="C" data-active={heroVariant === 'C' ? 'true' : 'false'}>
+              <div className="stack-showcase">
+                <div className="stack-doc stack-doc-3">
+                  <div className="pdf-badge">PDF</div>
+                  <div className="pdf-lines">
+                    <div className="doc-line" style={{width:'80%'}}></div>
+                    <div className="doc-line" style={{width:'60%'}}></div>
+                    <div className="doc-line" style={{width:'75%'}}></div>
+                    <div className="doc-line" style={{width:'90%'}}></div>
+                    <div className="doc-line" style={{width:'65%'}}></div>
+                    <div className="doc-line" style={{width:'70%'}}></div>
+                  </div>
+                  <div className="stack-doc-label mono">contract-final.pdf</div>
+                </div>
+                <div className="stack-doc stack-doc-2">
+                  <div className="pdf-badge">PDF</div>
+                  <div className="pdf-lines">
+                    <div className="doc-line" style={{width:'70%'}}></div>
+                    <div className="doc-line" style={{width:'85%'}}></div>
+                    <div className="doc-line" style={{width:'60%'}}></div>
+                    <div className="doc-line" style={{width:'80%'}}></div>
+                    <div className="doc-line" style={{width:'55%'}}></div>
+                    <div className="doc-line" style={{width:'75%'}}></div>
+                  </div>
+                  <div className="stack-doc-label mono">receipt-jan.pdf</div>
+                </div>
+                <div className="stack-doc stack-doc-1">
+                  <div className="pdf-badge">PDF</div>
+                  <div className="pdf-lines">
+                    <div className="doc-line" style={{width:'60%'}}></div>
+                    <div className="doc-line" style={{width:'80%'}}></div>
+                    <div className="doc-line" style={{width:'70%'}}></div>
+                    <div className="doc-line" style={{width:'90%'}}></div>
+                    <div className="doc-line" style={{width:'50%'}}></div>
+                    <div className="doc-line" style={{width:'75%'}}></div>
+                    <div className="doc-line" style={{width:'65%'}}></div>
+                  </div>
+                  <div className="stack-doc-label mono">passport-scan.pdf</div>
+                  <div className="stack-pulse"></div>
+                </div>
+                <div className="stack-metric stack-metric-1 mono">
+                  <div style={{fontSize:'11px', color:'var(--text-faint)'}}>SPEED</div>
+                  <div style={{fontSize:'22px', fontWeight:600}}>0.4s</div>
+                </div>
+                <div className="stack-metric stack-metric-2 mono">
+                  <div style={{fontSize:'11px', color:'var(--text-faint)'}}>SIZE</div>
+                  <div style={{fontSize:'22px', fontWeight:600}}>184 KB</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    );
-};
+      </section>
 
-const Landing = () => {
-    return (
-        <div className="relative flex flex-col items-center py-20 px-4 overflow-x-hidden min-h-screen">
-            {/* Background Animation covering the top portion */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100vw] h-[100vh] pointer-events-none z-0 overflow-hidden">
-                <FloatingPaths position={1} />
-                <FloatingPaths position={-1} />
+      {/* LOGO STRIP */}
+      <section className="logos">
+        <div className="container">
+          <p className="logos-label mono reveal">Trusted by teams at</p>
+          <div className="logos-track reveal">
+            <div className="logos-inner">
+              <span className="logo-item">Northwind</span><span className="logo-sep">·</span>
+              <span className="logo-item">Acme Studios</span><span className="logo-sep">·</span>
+              <span className="logo-item">Lumen Health</span><span className="logo-sep">·</span>
+              <span className="logo-item">Vertex Labs</span><span className="logo-sep">·</span>
+              <span className="logo-item">Fold & Co</span><span className="logo-sep">·</span>
+              <span className="logo-item">Meridian</span><span className="logo-sep">·</span>
+              <span className="logo-item">Halcyon</span><span className="logo-sep">·</span>
+              <span className="logo-item">Fieldstone</span><span className="logo-sep">·</span>
+              <span className="logo-item">Palladium</span><span className="logo-sep">·</span>
+              <span className="logo-item">Ridgeline</span><span className="logo-sep">·</span>
+              {/* duplicate for seamless scroll */}
+              <span className="logo-item">Northwind</span><span className="logo-sep">·</span>
+              <span className="logo-item">Acme Studios</span><span className="logo-sep">·</span>
+              <span className="logo-item">Lumen Health</span><span className="logo-sep">·</span>
+              <span className="logo-item">Vertex Labs</span><span className="logo-sep">·</span>
+              <span className="logo-item">Fold & Co</span><span className="logo-sep">·</span>
+              <span className="logo-item">Meridian</span><span className="logo-sep">·</span>
+              <span className="logo-item">Halcyon</span><span className="logo-sep">·</span>
+              <span className="logo-item">Fieldstone</span><span className="logo-sep">·</span>
+              <span className="logo-item">Palladium</span><span className="logo-sep">·</span>
+              <span className="logo-item">Ridgeline</span><span className="logo-sep">·</span>
             </div>
-
-            {/* HERO SECTION - ADJUSTED LAYOUT */}
-            <div className="flex flex-col items-center justify-center text-center relative z-10 w-full min-h-[85vh] -mt-10 pb-20">
-                <div className="relative w-full flex justify-center">
-                    <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 relative z-10">
-                        Create PDFs on the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 inline-block">
-                            Go
-                        </span>
-                    </h1>
-                </div>
-
-                <p className="mt-4 text-xl text-slate-600 dark:text-slate-400 max-w-2xl mb-12">
-                    Upload images or scan documents directly from your camera to generate professional PDF files in seconds. Securely stored and easily accessible.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4">
-                    {useAuthStore.getState().isAuthenticated ? (
-                        <>
-                            <div>
-                                <Link to="/dashboard" className="btn-primary text-lg px-8 py-4 flex items-center gap-2">
-                                    <LayoutDashboard className="w-5 h-5" /> Go to Dashboard
-                                </Link>
-                            </div>
-                            <div>
-                                <Link to="/create" className="btn-secondary text-lg px-8 py-4 flex items-center gap-2">
-                                    <FilePlus className="w-5 h-5" /> Create New PDF
-                                </Link>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div>
-                                <Link to="/register" className="btn-primary text-lg px-8 py-4 inline-block">
-                                    Get Started for Free
-                                </Link>
-                            </div>
-                            <div>
-                                <Link to="/login" className="btn-secondary text-lg px-8 py-4 inline-block">
-                                    Log in to Dashboard
-                                </Link>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* Primary Feature Cards */}
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-5xl relative z-10">
-                    {[
-                        {
-                            icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>,
-                            title: "Upload Images",
-                            desc: "Select multiple images and arrange them effortlessly to create a single PDF document."
-                        },
-                        {
-                            icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>,
-                            title: "Scan Documents",
-                            desc: "Use your mobile camera to scan physical documents instantly into digital PDFs."
-                        },
-                        {
-                            icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>,
-                            title: "Secure Storage",
-                            desc: "Access your PDF library anytime. Your files are securely stored on our cloud infrastructure."
-                        }
-                    ].map((card, idx) => (
-                        <div
-                            key={idx}
-                            className="glass-panel p-8 flex flex-col items-center text-center transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl"
-                        >
-                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-6">
-                                {card.icon}
-                            </div>
-                            <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">{card.title}</h3>
-                            <p className="text-slate-600 dark:text-slate-400">{card.desc}</p>
-                        </div>
-                    ))}
-                </div>
-
-            {/* 1. Project Overview */}
-            <section className="mt-40 w-full max-w-6xl">
-                <div className="text-center mb-10">
-                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Project Overview</h2>
-                    <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full"></div>
-                </div>
-
-                {/* ── Desktop: 3-column grid (unchanged) ── */}
-                <div className="hidden lg:grid grid-cols-3 gap-8">
-                    <div
-                        className="glass-panel p-8 bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20"
-                    >
-                        <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-blue-500/30">
-                            <Target className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Our Mission</h4>
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                            SnapPDF was founded on a simple yet powerful mission: to bridge the gap between physical documentation and digital efficiency. We recognize that in an increasingly paperless world, the transition from physical to digital should be instantaneous, secure, and accessible to everyone.
-                        </p>
-                    </div>
-
-                    <div
-                        className="glass-panel p-8 bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20"
-                    >
-                        <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-indigo-500/30">
-                            <Rocket className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Our Vision</h4>
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                            Our vision is to become the primary global utility for on-the-go document transformation, providing a seamless ecosystem where users can capture, organize, and store information without the need for bulky hardware or complex software.
-                        </p>
-                    </div>
-
-                    <div
-                        className="glass-panel p-8 bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20"
-                    >
-                        <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-emerald-500/30">
-                            <BarChart3 className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Core Objectives</h4>
-                        <ul className="space-y-4">
-                            {[
-                                "Enable high-fidelity document scanning across all mobile device platforms.",
-                                "Implement zero-friction workflows for image-to-PDF conversion.",
-                                "Guarantee enterprise-grade security for document storage and retrieval.",
-                                "Optimize the digital footprint of generated files for easy sharing."
-                            ].map((obj, i) => (
-                                <li key={i} className="flex gap-3 text-slate-700 dark:text-slate-300 text-sm">
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
-                                    <span>{obj}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                {/* ── Mobile: horizontal scroll carousel ── */}
-                <ProjectOverviewCarousel />
-            </section>
-
-            {/* 2. Key Features & Capabilities */}
-            <section className="mt-40 w-full max-w-7xl px-4">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Key Features &amp; Capabilities</h2>
-                    <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Explore the sophisticated tools designed to streamline your document management experience.</p>
-                </div>
-
-                {/* ── Desktop: 4-column grid (unchanged) ── */}
-                <div
-                    className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6"
-                >
-                    {[
-                        { icon: <Zap />, title: "Real-time Capture", desc: "Proprietary camera algorithms optimize image clarity for text-heavy documents." },
-                        { icon: <ShieldCheck />, title: "Secure Encryption", desc: "All files are encrypted at rest and in transit, ensuring your data remains private." },
-                        { icon: <Globe />, title: "LAN Sync", desc: "Advanced network protocols allow for cross-device synchronization without cloud delays." },
-                        { icon: <Cpu />, title: "Smart Compression", desc: "Generate compact PDFs that maintain 100% legibility for professional use." }
-                    ].map((feature, i) => (
-                        <div
-                            key={i}
-                            className="glass-panel p-6 border-t-4 border-t-blue-600"
-                        >
-                            <div className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4">{feature.icon}</div>
-                            <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{feature.title}</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{feature.desc}</p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* ── Mobile: special effects carousel ── */}
-                <FeaturesCarousel />
-            </section>
-
-
-            {/* 3. Value Proposition - WITH GESTURES */}
-            <section className="mt-40 w-full bg-slate-900 dark:bg-slate-800/60 rounded-[2.5rem] p-12 relative">
-                <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">Why hundreds of professionals trust SnapPDF</h2>
-                        <div className="space-y-6">
-                            {[
-                                { t: "Time Efficiency", d: "Reduce document turnaround time by up to 70% with our automated processing." },
-                                { t: "Cost Reduction", d: "Eliminate the need for expensive physical scanners and cloud storage subscriptions." },
-                                { t: "Universal Access", d: "Your document hub is available on any device, anywhere in the world, 24/7." }
-                            ].map((v, i) => (
-                                <div
-                                    key={i}
-                                    className="flex gap-4 group cursor-default"
-                                >
-                                    <div className="w-1.5 h-auto bg-blue-500 rounded-full group-hover:bg-blue-400"></div>
-                                    <div>
-                                        <h5 className="font-bold text-blue-400 text-lg mb-1">{v.t}</h5>
-                                        <p className="text-slate-300 text-lg leading-relaxed opacity-80 group-hover:opacity-100">{v.d}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="hidden lg:flex justify-center">
-                        <div>
-                            <BarChart3 className="w-80 h-80 text-blue-500/10" />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* 4. Development Process - WITH FADE BLOCKS */}
-            <section className="mt-40 w-full max-w-5xl text-center">
-                <div
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-8"
-                >
-                    <Users className="w-4 h-4" /> The SnapPDF Story
-                </div>
-                <h2
-                    className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-8 text-center px-4"
-                >
-                    Engineered for Reliability
-                </h2>
-                <div className="max-w-3xl mx-auto">
-                    <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 font-medium italic opacity-80">
-                        "We didn't just want to build another PDF converter. We wanted to build a reliable companion for the modern worker."
-                    </p>
-                    <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed text-lg">
-                        SnapPDF was developed using an Agile-driven methodology, focusing on extreme performance and user interface clarity. Our development stack—leveraging React for UI fluidity and Node.js for backend stability—ensures that the application remains robust under heavy workloads. We conduct rigorous security audits to ensure that your private documents stay private.
-                    </p>
-                </div>
-            </section>
-
-            {/* 5. Call to Action (CTA) - WITH GLOW EFFECT */}
-            <section className="mt-40 mb-20 w-full max-w-5xl">
-                <div
-                    className="glass-panel p-12 md:p-16 text-center bg-gradient-to-r from-blue-600 to-cyan-500 border-none relative overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-
-                    <h2 className="text-3xl md:text-6xl font-extrabold text-white mb-6 relative z-10">Ready to Digitalize?</h2>
-                    <p className="text-blue-100 text-xl mb-10 max-w-2xl mx-auto relative z-10 opacity-90">Join the premium tier of productivity. Create your first professional PDF document today.</p>
-
-                    <div className="flex flex-col sm:flex-row justify-center gap-6 relative z-10">
-                        {useAuthStore.getState().isAuthenticated ? (
-                            <>
-                                <div>
-                                    <Link to="/dashboard" className="bg-white text-blue-600 font-extrabold px-12 py-5 rounded-2xl flex items-center justify-center gap-3 group">
-                                        Back to Dashboard <LayoutDashboard className="w-5 h-5 group-hover:translate-x-2" />
-                                    </Link>
-                                </div>
-                                <div>
-                                    <Link to="/create" className="bg-white/10 text-white border-2 border-white/20 backdrop-blur-md font-extrabold px-12 py-5 rounded-2xl flex items-center justify-center gap-3">
-                                        New Document
-                                    </Link>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    <Link to="/register" className="bg-white text-blue-600 font-extrabold px-12 py-5 rounded-2xl flex items-center justify-center gap-3 group">
-                                        Create Account <ArrowRight className="w-5 h-5 group-hover:translate-x-2" />
-                                    </Link>
-                                </div>
-                                <div>
-                                    <Link to="/login" className="bg-white/10 text-white border-2 border-white/20 backdrop-blur-md font-extrabold px-12 py-5 rounded-2xl flex items-center justify-center gap-3">
-                                        Access Dashboard
-                                    </Link>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </section>
+          </div>
         </div>
-    );
-};
+      </section>
 
-export default Landing;
+      {/* FEATURES */}
+      <section className="section" id="features">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Feature set</p>
+            <h2 className="h1 reveal reveal-delay-1">Everything you need.<br/><span className="text-muted">Nothing you don't.</span></h2>
+          </div>
+
+          <div className="features-grid">
+            <div className="feature-card feature-card-lg reveal">
+              <div className="feature-visual feature-visual-scan">
+                <div className="scan-doc">
+                  <div className="doc-line" style={{width:'60%'}}></div>
+                  <div className="doc-line" style={{width:'80%'}}></div>
+                  <div className="doc-line" style={{width:'70%'}}></div>
+                  <div className="doc-line" style={{width:'85%'}}></div>
+                  <div className="doc-line" style={{width:'55%'}}></div>
+                  <div className="doc-line" style={{width:'75%'}}></div>
+                </div>
+                <div className="scan-beam-fx"></div>
+                <div className="scan-corners"><span></span><span></span><span></span><span></span></div>
+              </div>
+              <div className="feature-body">
+                <div className="feature-tag mono">01 · Capture</div>
+                <h3 className="h3">Real-time capture</h3>
+                <p className="text-muted">Auto-detect edges, deskew, and enhance in a single motion. Works with any camera — phone, webcam, or scanner.</p>
+              </div>
+            </div>
+
+            <div className="feature-card reveal reveal-delay-1">
+              <div className="feature-visual feature-visual-lock">
+                <div className="lock-ring"></div>
+                <div className="lock-ring lock-ring-2"></div>
+                <svg className="lock-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="10" width="16" height="12" rx="2"/>
+                  <path d="M8 10V7a4 4 0 018 0v3"/>
+                </svg>
+              </div>
+              <div className="feature-body">
+                <div className="feature-tag mono">02 · Secure</div>
+                <h3 className="h3">AES-256 encryption</h3>
+                <p className="text-muted">Every file, at rest and in transit. SOC 2 Type II. GDPR-ready.</p>
+              </div>
+            </div>
+
+            <div className="feature-card reveal reveal-delay-2">
+              <div className="feature-visual feature-visual-compress">
+                <div className="compress-blocks">
+                  <div className="compress-block b1"></div>
+                  <div className="compress-block b2"></div>
+                  <div className="compress-block b3"></div>
+                  <div className="compress-arrow">→</div>
+                  <div className="compress-out"></div>
+                </div>
+              </div>
+              <div className="feature-body">
+                <div className="feature-tag mono">03 · Compress</div>
+                <h3 className="h3">Smart compression</h3>
+                <p className="text-muted">6× smaller with no visible loss. Perfect for email, chat, and slow connections.</p>
+              </div>
+            </div>
+
+            <div className="feature-card feature-card-lg reveal reveal-delay-1">
+              <div className="feature-visual feature-visual-cloud">
+                <div className="cloud-nodes">
+                  <div className="cloud-node cn-1"></div>
+                  <div className="cloud-node cn-2"></div>
+                  <div className="cloud-node cn-3"></div>
+                  <div className="cloud-node cn-4"></div>
+                  <div className="cloud-node cn-center"></div>
+                  <svg className="cloud-lines" viewBox="0 0 200 140">
+                    <line x1="100" y1="70" x2="40" y2="30" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3"/>
+                    <line x1="100" y1="70" x2="160" y2="30" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3"/>
+                    <line x1="100" y1="70" x2="40" y2="110" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3"/>
+                    <line x1="100" y1="70" x2="160" y2="110" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="feature-body">
+                <div className="feature-tag mono">04 · Sync</div>
+                <h3 className="h3">Cloud storage, done right</h3>
+                <p className="text-muted">Instant sync across devices with LAN mode for offline teams. Your files, your keys.</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="features-cta reveal">
+            <Link to="/features" className="btn btn-ghost">
+              See all features
+              <svg className="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="how section-dark">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Workflow</p>
+            <h2 className="h1 reveal reveal-delay-1">Three taps.<br/>One perfect PDF.</h2>
+          </div>
+
+          <div className="steps">
+            <div className="step reveal">
+              <div className="step-num mono">01</div>
+              <div className="step-visual">
+                <div className="step-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="h3">Point & capture</h3>
+              <p className="text-muted">Aim at any document. Edges snap. Angles correct. Motion blur disappears.</p>
+            </div>
+
+            <div className="step-arrow reveal reveal-delay-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+
+            <div className="step reveal reveal-delay-1">
+              <div className="step-num mono">02</div>
+              <div className="step-visual">
+                <div className="step-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="h3">Auto-enhance</h3>
+              <p className="text-muted">Lighting balanced. Text sharpened. Background cleaned — in 400ms.</p>
+            </div>
+
+            <div className="step-arrow reveal reveal-delay-2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></div>
+
+            <div className="step reveal reveal-delay-2">
+              <div className="step-num mono">03</div>
+              <div className="step-visual">
+                <div className="step-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="h3">Export & share</h3>
+              <p className="text-muted">One tap — encrypted PDF ready for email, cloud, or QR handoff.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">Reviews</p>
+            <h2 className="h1 reveal reveal-delay-1">Loved by people who<br/>hate scanners.</h2>
+          </div>
+
+          <div className="tm-grid">
+            <div className="tm-card tm-card-featured reveal">
+              <p className="tm-quote">"I used to keep a $400 scanner on my desk. SnapPDF made it worthless in a week. The auto-enhance is genuinely better than anything I've used."</p>
+              <div className="tm-author">
+                <div className="tm-avatar" style={{background:'linear-gradient(135deg,#5B4EE8,#FF6B4A)'}}>SL</div>
+                <div>
+                  <div className="tm-name">Sofia Lund</div>
+                  <div className="tm-role">Head of Ops · Meridian</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="tm-card reveal reveal-delay-1">
+              <p className="tm-quote">"Filed 60 receipts in one lunch. Never going back."</p>
+              <div className="tm-author">
+                <div className="tm-avatar" style={{background:'linear-gradient(135deg,#06B6D4,#5B4EE8)'}}>MK</div>
+                <div>
+                  <div className="tm-name">Marcus Klein</div>
+                  <div className="tm-role">Freelance · Berlin</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="tm-card reveal reveal-delay-2">
+              <p className="tm-quote">"The LAN sync saved us during a client audit. Zero internet, zero problem."</p>
+              <div className="tm-author">
+                <div className="tm-avatar" style={{background:'linear-gradient(135deg,#FF6B4A,#7C3AED)'}}>AR</div>
+                <div>
+                  <div className="tm-name">Anika Rao</div>
+                  <div className="tm-role">Legal · Fold & Co</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="tm-card reveal reveal-delay-1">
+              <p className="tm-quote">"Compression is unreal. 8MB scans → 400KB with the text still crisp."</p>
+              <div className="tm-author">
+                <div className="tm-avatar" style={{background:'linear-gradient(135deg,#7C3AED,#06B6D4)'}}>JW</div>
+                <div>
+                  <div className="tm-name">James Wu</div>
+                  <div className="tm-role">Engineer · Vertex Labs</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="tm-card reveal reveal-delay-2">
+              <p className="tm-quote">"Onboarded our whole clinic in an afternoon. HIPAA-ready out of the box."</p>
+              <div className="tm-author">
+                <div className="tm-avatar" style={{background:'linear-gradient(135deg,#5B4EE8,#06B6D4)'}}>DP</div>
+                <div>
+                  <div className="tm-name">Dr. Priya Nair</div>
+                  <div className="tm-role">Practice Lead · Lumen Health</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section className="stats" id="stats-section">
+        <div className="container">
+          <div className="stats-grid">
+            <div className="stat reveal">
+              <div className="stat-num">{pdfCount}<span className="stat-suffix">M+</span></div>
+              <div className="stat-label">PDFs created<br/>this year</div>
+            </div>
+            <div className="stat reveal reveal-delay-1">
+              <div className="stat-num">{scanTime}<span className="stat-suffix">s</span></div>
+              <div className="stat-label">Average scan-to-PDF<br/>time</div>
+            </div>
+            <div className="stat reveal reveal-delay-2">
+              <div className="stat-num">{uptime}<span className="stat-suffix">%</span></div>
+              <div className="stat-label">Uptime last<br/>12 months</div>
+            </div>
+            <div className="stat reveal reveal-delay-3">
+              <div className="stat-num">0<span className="stat-suffix"></span></div>
+              <div className="stat-label">Files leaked.<br/>Ever.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="cta-final" id="try">
+        <div className="container">
+          <div className="cta-card reveal">
+            <div className="cta-bg-mesh"></div>
+            <p className="eyebrow" style={{color:'rgba(255,255,255,0.7)'}}>Ready in 8 seconds</p>
+            <h2 className="h1" style={{color:'#fff'}}>Start scanning.<br/>No sign-up required.</h2>
+            <p className="lede" style={{color:'rgba(255,255,255,0.7)', maxWidth:'520px', margin:'0 auto'}}>Free forever for up to 10 pages a day. Upgrade only when you need teams and unlimited storage.</p>
+            <div className="hero-cta" style={{justifyContent:'center', marginTop:'32px'}}>
+              <a href="#" className="btn" style={{background:'#fff', color:'#0A0A0F'}}>
+                Start scanning free
+                <svg className="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </a>
+              <Link to="/contact" className="btn" style={{background:'rgba(255,255,255,0.1)', color:'#fff', border:'1px solid rgba(255,255,255,0.2)'}}>
+                Talk to sales
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </>
+  );
+}

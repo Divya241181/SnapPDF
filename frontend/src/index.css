@@ -1,4 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100;200;300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
+@import "./assets/new-frontend/shared.css";
+@import "./assets/new-frontend/pages.css";
+@import "./assets/new-frontend/styles-landing.css";
 
 /* Tailwind v4 Theme Configuration */
 @theme {
@@ -9,6 +13,8 @@
 
   --font-inter: "Inter", system-ui, sans-serif;
   --font-outfit: "Outfit", sans-serif;
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono", monospace;
 }
 
 /* Custom Variant for Dark Mode (v4 Syntax) */

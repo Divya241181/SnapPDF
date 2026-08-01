@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import useAuthStore from '../store/authStore';
+import useThemeStore from '../store/themeStore';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -9,12 +10,13 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
 
     const { login, googleLogin } = useAuthStore();
+    const { theme } = useThemeStore();
     const navigate = useNavigate();
     const [googleWidth, setGoogleWidth] = useState(384);
 
     useEffect(() => {
         const handleResize = () => {
-            const width = Math.min(window.innerWidth - 100, 320); // Match common input field widths
+            const width = Math.min(window.innerWidth - 64, 320); // 368 - 48 padding = 320
             setGoogleWidth(Math.max(width, 200)); 
         };
         handleResize();
@@ -54,70 +56,117 @@ const Login = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 transition-colors duration-300">
-            <div className="glass-panel w-full max-w-md p-8 md:p-10 transition-colors">
-                <div className="text-center mb-8">
-                    <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white transition-colors">Welcome Back</h2>
-                    <p className="text-slate-600 dark:text-slate-400 mt-2 transition-colors">Log in to access your PDFs</p>
+        <section style={{ 
+            minHeight: '100vh', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            padding: '12px',
+            background: 'var(--bg)'
+        }}>
+            <div className="hero-bg">
+              <div className="hero-mesh"></div>
+              <div className="grid-lines"></div>
+              <div className="hero-orb hero-orb-1"></div>
+              <div className="hero-orb hero-orb-2"></div>
+            </div>
+
+            <div style={{
+                position: 'relative',
+                zIndex: 10,
+                width: '100%',
+                maxWidth: '368px',
+                background: 'var(--surface)',
+                backdropFilter: 'saturate(180%) blur(24px)',
+                WebkitBackdropFilter: 'saturate(180%) blur(24px)',
+                border: '1px solid var(--border-strong)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '20px 24px',
+                boxShadow: 'var(--shadow-lg)'
+            }}>
+                <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                    <div style={{ 
+                        width: '32px', height: '32px', margin: '0 auto 8px auto', borderRadius: '8px',
+                        background: 'linear-gradient(135deg, var(--primary) 0%, #8B7FFF 100%)',
+                        display: 'grid', placeItems: 'center', color: '#fff', fontSize: '16px', fontWeight: '700',
+                        boxShadow: '0 4px 16px rgba(91,78,232,0.3)'
+                    }}>S</div>
+                    <h2 style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '2px' }}>Welcome back</h2>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Log in to your SnapPDF account</p>
                 </div>
 
                 {error && (
-                    <div className="bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400 p-3 rounded-lg mb-6 border border-rose-100 dark:border-rose-900/50 flex items-center font-medium transition-colors text-sm">
-                        <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path></svg>
+                    <div style={{ background: 'rgba(244, 63, 94, 0.1)', color: '#F43F5E', padding: '6px 10px', borderRadius: '6px', marginBottom: '12px', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20" style={{ marginRight: '4px', flexShrink: 0 }}>
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+                        </svg>
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={onSubmit} className="space-y-6">
+                <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Email Address</label>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, marginBottom: '2px', color: 'var(--text-muted)' }}>Email</label>
                         <input
                             type="email"
                             name="email"
                             value={email}
                             onChange={onChange}
                             required
-                            className="input-field"
                             placeholder="you@example.com"
+                            style={{
+                                width: '100%', padding: '6px 10px', fontSize: '12px',
+                                background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)',
+                                borderRadius: '6px', color: 'var(--text)', outline: 'none',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border-strong)'}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 transition-colors">Password</label>
+                        <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 500, marginBottom: '2px', color: 'var(--text-muted)' }}>
+                            Password
+                            <Link to="#" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Forgot?</Link>
+                        </label>
                         <input
                             type="password"
                             name="password"
                             value={password}
                             onChange={onChange}
                             required
-                            className="input-field"
                             placeholder="••••••••"
+                            style={{
+                                width: '100%', padding: '6px 10px', fontSize: '12px',
+                                background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)',
+                                borderRadius: '6px', color: 'var(--text)', outline: 'none',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border-strong)'}
                         />
                     </div>
 
-                    <div className="flex items-center justify-between mt-2">
-                        <Link to="#" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-50 dark:hover:text-blue-300 font-medium transition-colors">Forgot password?</Link>
-                    </div>
-
-                    <button type="submit" className="w-full btn-primary py-3 text-lg mt-8" disabled={loading}>
+                    <button type="submit" className="btn btn-glow" style={{ width: '100%', justifyContent: 'center', marginTop: '4px', padding: '6px 10px', fontSize: '13px', borderRadius: '6px' }} disabled={loading}>
                         {loading ? 'Logging in...' : 'Log In'}
+                        {!loading && <svg className="btn-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>}
                     </button>
                 </form>
 
-                <div className="relative my-8">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm uppercase">
-                        <span className="px-2 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400">Or continue with</span>
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', margin: '12px 0', opacity: 0.6 }}>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--text-faint)' }}></div>
+                    <span style={{ margin: '0 8px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.05em', color: 'var(--text-faint)' }}>OR</span>
+                    <div style={{ flex: 1, height: '1px', background: 'var(--text-faint)' }}></div>
                 </div>
 
-                <div className="flex justify-center w-full">
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                     <GoogleLogin 
                         onSuccess={handleGoogleSuccess}
                         onError={handleGoogleError}
-                        theme="filled_blue"
-                        shape="pill"
+                        theme={theme === 'dark' ? 'filled_black' : 'outline'}
+                        shape="rectangular"
                         size="large"
                         text="signin_with"
                         width={googleWidth}
@@ -125,11 +174,11 @@ const Login = () => {
                     />
                 </div>
 
-                <p className="mt-8 text-center text-slate-600 dark:text-slate-400 transition-colors">
-                    Don't have an account? <Link to="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-semibold transition-colors">Sign up</Link>
+                <p style={{ marginTop: '12px', textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)' }}>
+                    Don't have an account? <Link to="/register" style={{ color: 'var(--text)', fontWeight: 600 }}>Sign up</Link>
                 </p>
             </div>
-        </div>
+        </section>
     );
 };
 

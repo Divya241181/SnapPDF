@@ -1,157 +1,199 @@
 import React from 'react';
-import { Users, Target, Award, History, CheckCircle2, Cpu, Terminal } from 'lucide-react';
-import PrathamImg from '../assets/Pratham.jpeg';
-import DivyaImg from '../assets/Divya.jpg';
+import { Link } from 'react-router-dom';
+import useReveal from '../hooks/useReveal';
 
-const About = () => {
-    const values = [
-        { title: 'User Centricity', desc: 'Every feature we build starts with a simple question: How does this make our users lives easier?' },
-        { title: 'Security First', desc: 'We treat your documents like our own, implementing enterprise-grade encryption at every layer.' },
-        { title: 'Technical Excellence', desc: 'Our team of engineers is dedicated to push the boundaries of document processing technology.' },
-        { title: 'Global Accessibility', desc: 'We believe premium tools should be available to everyone, regardless of their location or device.' }
-    ];
+export default function About() {
+  useReveal();
 
-    return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 overflow-hidden">
-            {/* Mission Section */}
-            <section className="text-center mb-24">
-                <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 dark:text-white mb-8">
-                    Our Mission
-                </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                    To bridge the digital divide by providing an instantaneous, secure, and intuitive ecosystem for document transformation. We empower professionals to handle physical documentation with digital speed.
-                </p>
-                <div className="mt-12 group inline-block">
-                    <div className="p-4 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                        <Target className="w-12 h-12" />
-                    </div>
-                </div>
-            </section>
-
-            {/* History Section */}
-            <section className="mb-32">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    <div>
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
-                            <History className="w-8 h-8 text-blue-600" /> Company History
-                        </h2>
-                        <div className="space-y-6 text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
-                            <p>
-                                SnapPDF began as a small research project in 2024, born out of the frustration of managing physical paperwork in a remote-first world. Our founders saw the need for a tool that combined the high-fidelity scanning of a flatbed scanner with the portability of a smartphone.
-                            </p>
-                            <p>
-                                What started as a simple mobile-to-PDF utility quickly evolved into a comprehensive document management platform. Today, we serve thousands of professionals across legal, medical, and administrative sectors who rely on SnapPDF for their daily workflows.
-                            </p>
-                        </div>
-                    </div>
-                    <div
-                        className="glass-panel p-8 md:p-12 bg-gradient-to-br from-blue-600 to-indigo-700 text-white border-none shadow-2xl shadow-blue-500/20"
-                    >
-                        <h3 className="text-2xl font-bold mb-6">Milestones</h3>
-                        <div className="space-y-8">
-                            <div className="flex gap-4">
-                                <div className="text-xl font-black opacity-30">2024</div>
-                                <div>
-                                    <h5 className="font-bold">Alpha Launch</h5>
-                                    <p className="text-blue-100 text-sm">Initial release of the mobile scanning engine.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="text-xl font-black opacity-30">2025</div>
-                                <div>
-                                    <h5 className="font-bold">Global Presence</h5>
-                                    <p className="text-blue-100 text-sm">Reached 100k+ active monthly users across 50 countries.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <div className="text-xl font-black opacity-30">2026</div>
-                                <div>
-                                    <h5 className="font-bold">AI Integration</h5>
-                                    <p className="text-blue-100 text-sm">Launched smart-edge detection and automatic text enhancement.</p>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-            {/* Core Values */}
-            <section className="mb-32">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Core Values</h2>
-                    <p className="text-slate-600 dark:text-slate-400">The principles that guide every decision we make.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {values.map((v, i) => (
-                        <div
-                            key={i}
-                            className="glass-panel p-8 text-center bg-gradient-to-br from-blue-600/10 to-transparent border-blue-500/20 group transition-all duration-300 hover:-translate-y-2 hover:border-blue-500/50"
-                        >
-                            <div className="inline-flex p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6 transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-blue-500/10">
-                                <CheckCircle2 className="w-8 h-8" />
-                            </div>
-                            <h4 className="font-bold text-slate-900 dark:text-white mb-2">{v.title}</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{v.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Leadership Section */}
-            <section className="mb-20">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-center gap-3">
-                        <Users className="w-8 h-8 text-blue-600" /> Leadership & Team
-                    </h2>
-                    <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        SnapPDF is built by a dedicated team of experts focused on creating the best document management experience.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-                    {[
-                        {
-                            name: 'Prathamsinh Parmar',
-                            dept: 'Information Technology',
-                            role: 'Full Stack Developer',
-                            avatar: PrathamImg,
-                            color: 'from-blue-600/10 border-blue-500/20'
-                        },
-                        {
-                            name: 'Divya Patel',
-                            dept: 'Cyber Security',
-                            role: 'Security Engineer',
-                            avatar: DivyaImg,
-                            color: 'from-indigo-600/10 border-indigo-500/20'
-                        }
-                    ].map((person, i) => (
-                        <div
-                            key={i}
-                            className={`glass-panel p-6 sm:p-8 flex flex-col items-center text-center group bg-gradient-to-br ${person.color} border-2`}
-                        >
-                            <div className="relative mb-4">
-                                <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                                <img
-                                    src={person.avatar}
-                                    alt={person.name}
-                                    className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl relative z-10 object-cover"
-                                />
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                {person.name}
-                            </h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 font-medium italic">
-                                {person.dept}
-                            </p>
-                            <div className="px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-bold text-[10px] uppercase tracking-widest border border-blue-100 dark:border-blue-800">
-                                {person.role}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+  return (
+    <>
+      <section className="split-hero">
+        <div className="container split-hero-inner">
+          <div className="split-hero-text reveal">
+            <p className="eyebrow">About</p>
+            <h1 className="h1">The story behind<br/><span className="gradient-text">the snap.</span></h1>
+            <p className="lede">A small team obsessed with the moment a piece of paper becomes searchable, shareable, and safe.</p>
+            <div className="split-hero-cta">
+              <Link to="/mission" className="btn btn-glow">
+                Our mission
+                <svg className="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              </Link>
+              <Link to="/contact" className="btn btn-ghost">Get in touch</Link>
+            </div>
+          </div>
+          <div className="split-hero-visual reveal reveal-delay-1">
+            <div className="anim-pages-flow">
+              <div className="pages-flow-doc pf-1">
+                <div className="pdf-badge">PDF</div>
+                <div className="doc-line" style={{width:'70%'}}></div>
+                <div className="doc-line" style={{width:'85%'}}></div>
+                <div className="doc-line" style={{width:'60%'}}></div>
+                <div className="doc-line" style={{width:'75%'}}></div>
+                <div className="doc-line" style={{width:'55%'}}></div>
+              </div>
+              <div className="pages-flow-doc pf-2">
+                <div className="pdf-badge">PDF</div>
+                <div className="doc-line" style={{width:'80%'}}></div>
+                <div className="doc-line" style={{width:'65%'}}></div>
+                <div className="doc-line" style={{width:'75%'}}></div>
+                <div className="doc-line" style={{width:'55%'}}></div>
+              </div>
+              <div className="pages-flow-doc pf-3">
+                <div className="pdf-badge">PDF</div>
+                <div className="doc-line" style={{width:'65%'}}></div>
+                <div className="doc-line" style={{width:'80%'}}></div>
+                <div className="doc-line" style={{width:'70%'}}></div>
+                <div className="doc-line" style={{width:'60%'}}></div>
+              </div>
+              <div className="pages-flow-doc pf-4">
+                <div className="pdf-badge">PDF</div>
+                <div className="doc-line" style={{width:'75%'}}></div>
+                <div className="doc-line" style={{width:'60%'}}></div>
+                <div className="doc-line" style={{width:'80%'}}></div>
+                <div className="doc-line" style={{width:'65%'}}></div>
+              </div>
+              <div className="pages-flow-line pfl-1"></div>
+              <div className="pages-flow-line pfl-2"></div>
+              <div className="pages-flow-line pfl-3"></div>
+              <div className="pages-flow-line pfl-4"></div>
+              <div className="pages-flow-center">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-    );
-};
+      </section>
 
-export default About;
+      {/* Founder block */}
+      <section className="section">
+        <div className="container">
+          <div className="reveal" style={{maxWidth: '960px', margin: '0 auto', textAlign:'center'}}>
+            <p className="eyebrow" style={{marginBottom:'14px', display:'inline-block'}}>Founder note</p>
+            <h2 className="h2" style={{marginBottom:'24px'}}>"We built the tool we wished existed<br/>the day our clinic went paperless."</h2>
+            <p className="text-muted" style={{fontSize:'17px', lineHeight:1.7, maxWidth:'680px', margin:'0 auto'}}>
+              In 2019, my partner spent an entire weekend photographing 4,000 patient charts, then another week wrestling them into a PDF workflow that half-worked. There had to be something faster — and there wasn't. So we made SnapPDF. Six years later, it's used in 82 countries, and we still ship features driven by the same question: <em>what would make this an eight-second job instead of a two-hour one?</em>
+            </p>
+            <div style={{marginTop:'32px', display:'flex', justifyContent:'center', alignItems:'center', gap:'14px'}}>
+              <div className="team-avatar" style={{width:'52px', height:'52px', background:'linear-gradient(135deg,#5B4EE8,#FF6B4A)', borderRadius:'50%', fontSize:'18px', fontWeight:500}}>
+                <span>KM</span>
+              </div>
+              <div style={{textAlign:'left'}}>
+                <p style={{fontWeight:600}}>Kalyani Menon</p>
+                <p className="text-muted" style={{fontSize:'13px'}}>Co-founder & CEO</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Values */}
+      <section className="section section-dark">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">What we believe</p>
+            <h2 className="h1 reveal reveal-delay-1">Four values.<br/>Non-negotiable.</h2>
+          </div>
+          <div className="values-grid">
+            <div className="value-card reveal">
+              <div className="value-num mono">01</div>
+              <div className="value-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>
+                </svg>
+              </div>
+              <h3>Speed as respect</h3>
+              <p>Every millisecond we save is time you spend on something that matters.</p>
+            </div>
+            <div className="value-card reveal reveal-delay-1">
+              <div className="value-num mono">02</div>
+              <div className="value-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <h3>Trust, not trade</h3>
+              <p>Your files aren't a product. We don't scan, sell, or train on them. Ever.</p>
+            </div>
+            <div className="value-card reveal reveal-delay-2">
+              <div className="value-num mono">03</div>
+              <div className="value-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
+                </svg>
+              </div>
+              <h3>Simplicity wins</h3>
+              <p>Two-tap workflows beat ten-tap perfection. We add features slowly, on purpose.</p>
+            </div>
+            <div className="value-card reveal reveal-delay-3">
+              <div className="value-num mono">04</div>
+              <div className="value-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <h3>Ship weekly</h3>
+              <p>New builds every Thursday for six straight years. Small changes, compounding.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="section">
+        <div className="container">
+          <div className="section-head">
+            <p className="eyebrow reveal">People</p>
+            <h2 className="h1 reveal reveal-delay-1">Small team.<br/>Big surface area.</h2>
+          </div>
+          <div className="team-grid">
+            <div className="team-member reveal">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#5B4EE8,#8B7FFF)'}}><span>K</span></div>
+              <div className="team-name">Kalyani Menon</div>
+              <div className="team-role">Co-founder & CEO</div>
+            </div>
+            <div className="team-member reveal reveal-delay-1">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#FF6B4A,#F43F5E)'}}><span>D</span></div>
+              <div className="team-name">Diego Salas</div>
+              <div className="team-role">Co-founder & CTO</div>
+            </div>
+            <div className="team-member reveal reveal-delay-2">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#06B6D4,#5B4EE8)'}}><span>N</span></div>
+              <div className="team-name">Nadia Osei</div>
+              <div className="team-role">Head of Design</div>
+            </div>
+            <div className="team-member reveal reveal-delay-3">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#7C3AED,#06B6D4)'}}><span>Y</span></div>
+              <div className="team-name">Yuki Tanaka</div>
+              <div className="team-role">Head of Security</div>
+            </div>
+            <div className="team-member reveal">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#F43F5E,#5B4EE8)'}}><span>M</span></div>
+              <div className="team-name">Marcus Reid</div>
+              <div className="team-role">Engineering</div>
+            </div>
+            <div className="team-member reveal reveal-delay-1">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#5B4EE8,#F43F5E)'}}><span>L</span></div>
+              <div className="team-name">Lena Björk</div>
+              <div className="team-role">Engineering</div>
+            </div>
+            <div className="team-member reveal reveal-delay-2">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#06B6D4,#FF6B4A)'}}><span>R</span></div>
+              <div className="team-name">Ravi Chandra</div>
+              <div className="team-role">Support Lead</div>
+            </div>
+            <div className="team-member reveal reveal-delay-3">
+              <div className="team-avatar" style={{background:'linear-gradient(135deg,#8B7FFF,#06B6D4)'}}><span>+</span></div>
+              <div className="team-name">You?</div>
+              <div className="team-role"><Link to="/contact" style={{color:'var(--primary)'}}>We're hiring →</Link></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
