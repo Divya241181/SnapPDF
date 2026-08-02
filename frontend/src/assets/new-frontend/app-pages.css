@@ -1,0 +1,562 @@
+/* ==========================================================================
+   SnapPDF — Internal App Pages Design System
+   Premium dark/light UI for Dashboard, CreatePDF, EditPDF, Profile,
+   Login, Register — all authenticated / functional pages.
+
+   Color Theme: Deep Indigo + Violet + Warm Neutrals
+   Font: Geist (already loaded in shared.css) + Plus Jakarta Sans
+   ========================================================================== */
+
+/* ────────────────────────────────────────────────────────────────────────────
+   APP CSS VARIABLE OVERRIDES — Light + Dark
+   These extend the shared.css variables specifically for the app shell.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  /* App shell */
+  --app-bg: #f2f2f8;
+  --app-bg-elevated: #ffffff;
+  --app-surface: rgba(255, 255, 255, 0.82);
+  --app-surface-hover: rgba(255, 255, 255, 0.97);
+  --app-border: rgba(91, 78, 232, 0.10);
+  --app-border-strong: rgba(91, 78, 232, 0.16);
+
+  /* Indigo-Violet brand */
+  --app-primary: #5b4ee8;
+  --app-primary-light: #7c6fef;
+  --app-primary-glow: rgba(91, 78, 232, 0.25);
+  --app-primary-soft: rgba(91, 78, 232, 0.08);
+  --app-accent: #8b5cf6;
+  --app-accent-soft: rgba(139, 92, 246, 0.10);
+
+  --app-success: #10b981;
+  --app-success-soft: rgba(16, 185, 129, 0.10);
+  --app-danger: #ef4444;
+  --app-danger-soft: rgba(239, 68, 68, 0.08);
+  --app-warning: #f59e0b;
+  --app-warning-soft: rgba(245, 158, 11, 0.10);
+
+  --app-text: #0f0f1a;
+  --app-text-muted: #52526b;
+  --app-text-faint: #8e8ea5;
+
+  --app-shadow-sm: 0 1px 3px rgba(15,15,26,0.06), 0 1px 2px rgba(15,15,26,0.04);
+  --app-shadow: 0 4px 16px rgba(15,15,26,0.08), 0 1px 3px rgba(15,15,26,0.05);
+  --app-shadow-lg: 0 16px 48px rgba(15,15,26,0.10), 0 4px 12px rgba(15,15,26,0.06);
+  --app-shadow-glow: 0 0 0 1px rgba(91,78,232,0.15), 0 8px 32px rgba(91,78,232,0.20);
+
+  --app-radius-sm: 8px;
+  --app-radius: 12px;
+  --app-radius-lg: 18px;
+  --app-radius-xl: 24px;
+}
+
+[data-theme="dark"] {
+  --app-bg: #09090f;
+  --app-bg-elevated: #111118;
+  --app-surface: rgba(17, 17, 26, 0.88);
+  --app-surface-hover: rgba(22, 22, 34, 0.97);
+  --app-border: rgba(139, 92, 246, 0.10);
+  --app-border-strong: rgba(139, 92, 246, 0.18);
+
+  --app-primary: #7c6fef;
+  --app-primary-light: #9d93f5;
+  --app-primary-glow: rgba(124, 111, 239, 0.30);
+  --app-primary-soft: rgba(124, 111, 239, 0.12);
+  --app-accent: #a78bfa;
+  --app-accent-soft: rgba(167, 139, 250, 0.12);
+
+  --app-success: #34d399;
+  --app-success-soft: rgba(52, 211, 153, 0.10);
+  --app-danger: #f87171;
+  --app-danger-soft: rgba(248, 113, 113, 0.10);
+  --app-warning: #fbbf24;
+  --app-warning-soft: rgba(251, 191, 36, 0.10);
+
+  --app-text: #f0f0fa;
+  --app-text-muted: #a0a0be;
+  --app-text-faint: #60607a;
+
+  --app-shadow-sm: 0 1px 3px rgba(0,0,0,0.40);
+  --app-shadow: 0 4px 16px rgba(0,0,0,0.40), 0 1px 3px rgba(0,0,0,0.30);
+  --app-shadow-lg: 0 16px 48px rgba(0,0,0,0.50), 0 4px 12px rgba(0,0,0,0.35);
+  --app-shadow-glow: 0 0 0 1px rgba(124,111,239,0.25), 0 8px 32px rgba(124,111,239,0.30);
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   BODY & GLOBAL OVERRIDES
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Dark mode body background — consistent deep dark */
+.dark body,
+[data-theme="dark"] body {
+  background-color: var(--app-bg) !important;
+}
+
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--app-border-strong);
+  border-radius: 100px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--app-primary); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--app-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   GLASS PANEL — primary card / section container
+   ──────────────────────────────────────────────────────────────────────────── */
+.glass-panel {
+  background: var(--app-surface) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+  border: 1px solid var(--app-border-strong) !important;
+  border-radius: var(--app-radius-lg) !important;
+  box-shadow: var(--app-shadow) !important;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.glass-panel:hover {
+  box-shadow: var(--app-shadow-lg) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   BUTTONS
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Primary CTA — Indigo to Violet gradient */
+.btn-primary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  font-family: 'Plus Jakarta Sans', 'Geist', sans-serif !important;
+  letter-spacing: -0.01em !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-accent) 100%) !important;
+  border: none !important;
+  border-radius: var(--app-radius) !important;
+  box-shadow: 0 4px 16px var(--app-primary-glow), 0 1px 3px rgba(0,0,0,0.10) !important;
+  cursor: pointer !important;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.25s cubic-bezier(0.16,1,0.3,1) !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 28px var(--app-primary-glow), 0 2px 6px rgba(0,0,0,0.14) !important;
+}
+.btn-primary:hover::before { opacity: 1; }
+.btn-primary:active {
+  transform: translateY(0) scale(0.97) !important;
+  box-shadow: 0 2px 8px var(--app-primary-glow) !important;
+}
+.btn-primary:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Secondary / ghost button */
+.btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--app-text) !important;
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-border-strong) !important;
+  border-radius: var(--app-radius) !important;
+  box-shadow: var(--app-shadow-sm) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+.btn-secondary:hover {
+  background: var(--app-surface-hover) !important;
+  border-color: var(--app-primary) !important;
+  box-shadow: var(--app-shadow) !important;
+}
+.btn-secondary:active { transform: scale(0.97) !important; }
+
+/* Danger button */
+.btn-danger {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  background: var(--app-danger) !important;
+  border: none !important;
+  border-radius: var(--app-radius) !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+.btn-danger:hover {
+  filter: brightness(1.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Hard-target: Any bg-blue-600 or btn/link with that class → use gradient */
+button.bg-blue-600,
+a.bg-blue-600 {
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-accent) 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px var(--app-primary-glow) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+button.bg-blue-600:hover,
+a.bg-blue-600:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px var(--app-primary-glow) !important;
+}
+
+/* Emerald buttons (Dashboard/CreatePDF "Go to Dashboard") */
+button.bg-emerald-600,
+a.bg-emerald-600 {
+  background: var(--app-success) !important;
+  box-shadow: 0 4px 14px rgba(16,185,129,0.25) !important;
+  border: none !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   INPUT FIELDS
+   ──────────────────────────────────────────────────────────────────────────── */
+.input-field {
+  display: block !important;
+  width: 100% !important;
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  font-family: 'Geist', 'Plus Jakarta Sans', sans-serif !important;
+  color: var(--app-text) !important;
+  background: var(--app-bg-elevated) !important;
+  border: 1.5px solid var(--app-border-strong) !important;
+  border-radius: var(--app-radius-sm) !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.input-field:focus {
+  border-color: var(--app-primary) !important;
+  box-shadow: 0 0 0 3px var(--app-primary-soft), 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+.input-field::placeholder { color: var(--app-text-faint) !important; }
+
+/* Inline search / form inputs (tailwind-built) in dark mode */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark textarea {
+  background-color: var(--app-bg-elevated) !important;
+  border-color: var(--app-border-strong) !important;
+  color: var(--app-text) !important;
+}
+.dark input[type="text"]:focus,
+.dark input[type="email"]:focus,
+.dark input[type="password"]:focus,
+.dark textarea:focus {
+  border-color: var(--app-primary) !important;
+  box-shadow: 0 0 0 3px var(--app-primary-soft) !important;
+  outline: none !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   DARK MODE: Tailwind bg-* overrides for internal pages
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Card / panel backgrounds */
+.dark .bg-white { background-color: var(--app-bg-elevated) !important; }
+.dark .bg-slate-900 { background-color: #13131f !important; }
+.dark .bg-slate-800 { background-color: #1a1a2e !important; }
+.dark .bg-slate-700 { background-color: #1e1e34 !important; }
+.dark .bg-slate-950 { background-color: var(--app-bg) !important; }
+.dark .bg-slate-100 { background-color: #1a1a2e !important; }
+
+/* Borders */
+.dark .border-slate-800 { border-color: var(--app-border-strong) !important; }
+.dark .border-slate-700 { border-color: rgba(139, 92, 246, 0.22) !important; }
+.dark .border-slate-200 { border-color: var(--app-border-strong) !important; }
+.dark .border-slate-100 { border-color: var(--app-border) !important; }
+
+/* Text */
+.dark .text-slate-900 { color: var(--app-text) !important; }
+.dark .text-white { color: var(--app-text) !important; }
+.dark .text-slate-600 { color: var(--app-text-muted) !important; }
+.dark .text-slate-500 { color: var(--app-text-muted) !important; }
+.dark .text-slate-400 { color: var(--app-text-faint) !important; }
+.dark .text-slate-300 { color: var(--app-text-muted) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   LIGHT MODE: Tailwind bg-* overrides
+   ──────────────────────────────────────────────────────────────────────────── */
+.bg-slate-50 { background-color: var(--app-bg) !important; }
+.bg-slate-100 { background-color: rgba(91, 78, 232, 0.04) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   BLUE → INDIGO COLOR REMAPPING (global within app pages)
+   ──────────────────────────────────────────────────────────────────────────── */
+.text-blue-500 { color: var(--app-primary) !important; }
+.text-blue-600 { color: var(--app-primary) !important; }
+.dark .text-blue-400 { color: var(--app-primary-light) !important; }
+.dark .text-blue-500 { color: var(--app-primary-light) !important; }
+
+.border-blue-500 { border-color: var(--app-primary) !important; }
+.border-blue-300 { border-color: rgba(91, 78, 232, 0.35) !important; }
+.dark .border-blue-700 { border-color: rgba(124, 111, 239, 0.35) !important; }
+
+/* Ring utilities — override Tailwind ring-blue-500 */
+.ring-blue-500 {
+  --tw-ring-color: var(--app-primary) !important;
+  box-shadow:
+    0 0 0 2px var(--app-primary),
+    0 8px 32px var(--app-primary-glow) !important;
+}
+
+/* Focus ring override */
+.focus\:ring-blue-500\/50:focus { --tw-ring-color: var(--app-primary-soft) !important; }
+.focus\:border-blue-500:focus { border-color: var(--app-primary) !important; }
+.focus\:ring-2:focus { --tw-ring-color: var(--app-primary-soft) !important; }
+
+/* BG blue overrides */
+.bg-blue-500\/10 { background: var(--app-primary-soft) !important; }
+.bg-blue-600\/20 { background: var(--app-primary-soft) !important; }
+.dark .bg-blue-950\/20 { background: var(--app-primary-soft) !important; }
+
+/* Status alert bg overrides */
+.bg-blue-50 { background: rgba(91, 78, 232, 0.07) !important; }
+.dark .bg-blue-950\/20 { background: rgba(124, 111, 239, 0.10) !important; }
+
+/* Spinner border color */
+.border-b-2.border-blue-500,
+.border-b-2.border-blue-600 {
+  border-bottom-color: var(--app-primary) !important;
+}
+
+/* Animate pulse (webcam page counter) */
+.bg-blue-400.animate-pulse { background-color: var(--app-primary-light) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   DASHBOARD — PDF Cards
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Card base */
+.dark .rounded-xl.overflow-hidden {
+  background-color: #13131f !important;
+  border-color: var(--app-border-strong) !important;
+}
+
+/* Card hover */
+.dark .hover\:border-blue-700:hover { border-color: rgba(124, 111, 239, 0.40) !important; }
+.hover\:border-blue-300:hover { border-color: rgba(91, 78, 232, 0.35) !important; }
+
+/* Page count badge */
+.dark .bg-slate-900\/90 { background-color: rgba(17, 17, 26, 0.92) !important; }
+.dark .border-slate-800.bg-white\/90 { background-color: rgba(255,255,255,0.92) !important; }
+
+/* Selected card glow */
+.shadow-blue-500\/20 {
+  box-shadow: 0 8px 32px var(--app-primary-glow) !important;
+}
+
+/* "Double-tap to open" hint */
+.bg-black\/50 { background-color: rgba(9, 9, 15, 0.55) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   CREATEPDF / EDITPDF — Mode Toggle, Dropzone, Filters
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Mode toggle pill background */
+.bg-slate-100.p-1.rounded-xl,
+.dark .bg-slate-800.p-1.rounded-xl {
+  background: var(--app-bg-elevated) !important;
+  border: 1px solid var(--app-border-strong);
+  box-shadow: var(--app-shadow-sm);
+}
+
+/* Active mode tab */
+.dark .bg-slate-700 { background-color: rgba(124, 111, 239, 0.15) !important; }
+
+/* Upload drop zone */
+.border-2.border-dashed {
+  border-color: var(--app-border-strong) !important;
+  background: var(--app-primary-soft) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Drop zone dragging */
+.bg-blue-500\/10.backdrop-blur-\[2px\] {
+  background: rgba(91, 78, 232, 0.10) !important;
+}
+
+/* Filter badge — active ORIGINAL (blue background) */
+.bg-blue-500 { background-color: var(--app-primary) !important; }
+.shadow-blue-600\/20 { box-shadow: 0 4px 14px var(--app-primary-glow) !important; }
+
+/* Status / alert cards */
+.bg-blue-50.border.border-blue-200 {
+  background: rgba(91, 78, 232, 0.06) !important;
+  border-color: rgba(91, 78, 232, 0.20) !important;
+}
+.dark .bg-blue-950\/20 {
+  background: rgba(124, 111, 239, 0.10) !important;
+}
+.dark .border-blue-800\/50 { border-color: rgba(124, 111, 239, 0.25) !important; }
+
+.text-blue-700 { color: var(--app-primary) !important; }
+.dark .text-blue-400 { color: var(--app-primary-light) !important; }
+
+/* Success alert */
+.bg-emerald-50 { background: rgba(16, 185, 129, 0.06) !important; }
+.dark .bg-emerald-950\/20 { background: rgba(52, 211, 153, 0.08) !important; }
+
+/* Error alert */
+.bg-rose-50 { background: rgba(239, 68, 68, 0.06) !important; }
+.dark .bg-rose-950\/30 { background: rgba(248, 113, 113, 0.08) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   PROFILE PAGE
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Profile photo ring */
+.border-blue-500\/30 { border-color: rgba(91, 78, 232, 0.25) !important; }
+
+/* Profile photo hover ring */
+.group:hover .group-hover\:border-blue-500 {
+  border-color: var(--app-primary) !important;
+}
+
+/* Profile card backgrounds (dark) */
+.dark .rounded-2xl.shadow-2xl { background-color: #13131f !important; }
+
+/* Delete danger zone */
+.border-rose-200 { border-color: rgba(239, 68, 68, 0.25) !important; }
+.dark .border-rose-900\/40 { border-color: rgba(248, 113, 113, 0.18) !important; }
+.border-rose-300 { border-color: rgba(239, 68, 68, 0.40) !important; }
+.dark .border-rose-800 { border-color: rgba(248, 113, 113, 0.25) !important; }
+
+/* Delete modal */
+.bg-rose-100 { background-color: rgba(239, 68, 68, 0.10) !important; }
+.dark .bg-rose-950 { background-color: rgba(248, 113, 113, 0.10) !important; }
+.bg-emerald-100 { background-color: rgba(16, 185, 129, 0.10) !important; }
+.dark .bg-emerald-900\/30 { background-color: rgba(52, 211, 153, 0.10) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   LOADING SPINNER
+   ──────────────────────────────────────────────────────────────────────────── */
+.animate-spin.border-b-2.border-blue-500,
+.animate-spin.border-b-2.border-blue-600,
+.animate-spin.rounded-full.border-b-2 {
+  border-bottom-color: var(--app-primary) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   ANIMATION KEYFRAMES
+   ──────────────────────────────────────────────────────────────────────────── */
+@keyframes app-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: app-fade-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   UTILITY CLASSES — app-specific
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Gradient text */
+.app-gradient-text {
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Eyebrow / section label */
+.app-eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--app-primary);
+}
+
+/* Inline badge */
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+.app-badge-primary { background: var(--app-primary-soft); color: var(--app-primary); }
+.app-badge-success { background: var(--app-success-soft); color: var(--app-success); }
+.app-badge-danger  { background: var(--app-danger-soft);  color: var(--app-danger);  }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   CARD HOVER ANIMATION
+   ──────────────────────────────────────────────────────────────────────────── */
+.cursor-pointer.rounded-xl {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease !important;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   SHADOW UTILITIES — map to app theme
+   ──────────────────────────────────────────────────────────────────────────── */
+.shadow-sm  { box-shadow: var(--app-shadow-sm) !important; }
+.shadow-md  { box-shadow: var(--app-shadow) !important; }
+.shadow-xl  { box-shadow: var(--app-shadow-lg) !important; }
+.shadow-2xl { box-shadow: var(--app-shadow-lg) !important; }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .glass-panel { border-radius: var(--app-radius) !important; }
+  .btn-primary { padding: 9px 16px !important; font-size: 13px !important; }
+  .input-field { padding: 9px 12px !important; }
+}

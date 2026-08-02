@@ -3,6 +3,7 @@
 @import "./assets/new-frontend/shared.css";
 @import "./assets/new-frontend/pages.css";
 @import "./assets/new-frontend/styles-landing.css";
+@import "./assets/new-frontend/app-pages.css";
 
 /* Tailwind v4 Theme Configuration */
 @theme {
@@ -31,7 +32,9 @@
   body {
     font-weight: 300;        /* Light — comfortable body text reading */
     line-height: 1.65;
-    @apply transition-colors duration-300 antialiased text-slate-900 dark:text-slate-100 bg-bg-light dark:bg-slate-950;
+    @apply transition-colors duration-300 antialiased text-slate-900 dark:text-slate-100;
+    background-color: var(--bg);
+    background-color: var(--app-bg, var(--bg));
   }
 
   /* ── Headings ─────────────────────────────────────────── */
@@ -101,61 +104,104 @@
    ============================================================ */
 @layer components {
 
-  /* Glass Panel */
+  /* ── Glass Panel — app card container ── */
   .glass-panel {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 shadow-xl rounded-2xl;
+    background: var(--app-surface, rgba(255,255,255,0.80));
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid var(--app-border-strong, rgba(91,78,232,0.16));
+    border-radius: var(--app-radius-lg, 18px);
+    box-shadow: var(--app-shadow, 0 4px 16px rgba(15,15,26,0.08));
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .glass-panel:hover {
+    box-shadow: var(--app-shadow-lg, 0 16px 48px rgba(15,15,26,0.10));
   }
 
   /* ─── Buttons ─────────────────────────────────────────── */
 
-  /* Primary CTA — Semi-Bold (600) for strong visual hierarchy */
+  /* Primary CTA — Indigo → Violet gradient */
   .btn-primary {
     font-weight: 600;
-    background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
-    @apply text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-sm shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 border-none;
+    font-family: 'Plus Jakarta Sans', 'Geist', sans-serif;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--app-primary, #5b4ee8) 0%, var(--app-accent, #8b5cf6) 100%);
+    box-shadow: 0 4px 16px var(--app-primary-glow, rgba(91,78,232,0.25));
+    border-radius: var(--app-radius, 12px);
+    @apply py-2 px-4 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border-none;
   }
-
   .btn-primary:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #0891b2 100%);
-    @apply shadow-lg shadow-blue-600/40 -translate-y-0.5;
+    background: linear-gradient(135deg, var(--app-primary-light, #7c6fef) 0%, var(--app-accent, #8b5cf6) 100%);
+    box-shadow: 0 8px 28px var(--app-primary-glow, rgba(91,78,232,0.30));
+    @apply -translate-y-0.5;
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
 
-  /* Hard-target blue buttons throughout the app */
+  /* Hard-target: bg-blue-600 buttons → indigo gradient */
   button.bg-blue-600,
   a.bg-blue-600 {
     font-weight: 600;
-    background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%) !important;
-    @apply border-none shadow-md transition-all duration-200;
+    background: linear-gradient(135deg, var(--app-primary, #5b4ee8) 0%, var(--app-accent, #8b5cf6) 100%) !important;
+    box-shadow: 0 4px 14px var(--app-primary-glow, rgba(91,78,232,0.25)) !important;
+    @apply border-none transition-all duration-200;
   }
-
   button.bg-blue-600:hover,
   a.bg-blue-600:hover {
-    filter: brightness(1.1);
-    @apply -translate-y-0.5 shadow-lg;
+    filter: brightness(1.08);
+    @apply -translate-y-0.5;
   }
 
   /* Secondary — Regular (400) */
   .btn-secondary {
     font-weight: 400;
-    @apply bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 py-2 px-4 rounded-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+    background: var(--app-surface, rgba(255,255,255,0.80));
+    border: 1px solid var(--app-border-strong, rgba(91,78,232,0.16));
+    color: var(--app-text, #0f0f1a);
+    border-radius: var(--app-radius, 12px);
+    @apply py-2 px-4 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+  .btn-secondary:hover {
+    border-color: var(--app-primary, #5b4ee8);
   }
 
   /* Danger — Semi-Bold (600) */
   .btn-danger {
     font-weight: 600;
-    @apply bg-rose-500 hover:bg-rose-600 text-white py-2 px-4 rounded-lg transition-all duration-200 shadow-sm shadow-rose-500/20 active:scale-95 flex items-center justify-center gap-2;
+    background: var(--app-danger, #ef4444);
+    box-shadow: 0 4px 16px rgba(239,68,68,0.25);
+    border-radius: var(--app-radius, 12px);
+    @apply text-white py-2 px-4 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border-none;
   }
+  .btn-danger:hover { filter: brightness(1.08); @apply -translate-y-0.5; }
 
-  /* ─── Form inputs — Regular (400) ────────────────────── */
+  /* ─── Form inputs ────────────────────── */
   .input-field {
     font-weight: 400;
-    @apply w-full border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 bg-white/50 dark:bg-slate-800/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200;
+    font-family: 'Geist', sans-serif;
+    color: var(--app-text, #0f0f1a);
+    background: var(--app-bg-elevated, #ffffff);
+    border: 1.5px solid var(--app-border-strong, rgba(91,78,232,0.16));
+    border-radius: var(--app-radius-sm, 8px);
+    @apply w-full px-4 py-2 transition-all duration-200;
   }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--app-primary, #5b4ee8);
+    box-shadow: 0 0 0 3px var(--app-primary-soft, rgba(91,78,232,0.08));
+  }
+  .input-field::placeholder { color: var(--app-text-faint, #8e8ea5); }
 
-  /* ─── Nav links — Regular (400) ──────────────────────── */
+  /* ─── Nav links ──────────────────────── */
   .nav-link {
     font-weight: 400;
-    @apply text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md transition-colors flex items-center gap-1.5;
+    @apply text-slate-600 dark:text-slate-400 px-3 py-2 rounded-md transition-colors flex items-center gap-1.5;
+  }
+  .nav-link:hover {
+    color: var(--app-primary, #5b4ee8);
   }
 
   /* ─── Premium typography utility ─────────────────────── */
@@ -164,7 +210,7 @@
     letter-spacing: -0.03em;
   }
 
-  /* ─── Explicit weight utilities for JSX overrides ─────── */
+  /* ─── Weight utilities ─────── */
   .figtree-light    { font-weight: 300 !important; }
   .figtree-regular  { font-weight: 400 !important; }
   .figtree-medium   { font-weight: 500 !important; }
