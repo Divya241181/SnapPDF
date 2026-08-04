@@ -465,7 +465,7 @@ const Dashboard = () => {
                                                     title="Share"
                                                     style={{
                                                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                                                        padding: '6px 4px', borderRadius: 'var(--app-radius-sm)', border: 'none',
+                                                        padding: '6px 4px', borderRadius: 'var(--app-radius-sm)',
                                                         background: 'var(--app-bg-elevated)', border: '1px solid var(--app-border-strong)',
                                                         color: 'var(--app-text-muted)', fontSize: 10, fontWeight: 700, cursor: 'pointer',
                                                     }}
