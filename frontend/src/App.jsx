@@ -52,10 +52,10 @@ const AppLayout = () => (
   <div
     className="w-full max-w-7xl mx-auto"
     style={{
-      paddingLeft: 'clamp(12px, 3vw, 32px)',
-      paddingRight: 'clamp(12px, 3vw, 32px)',
-      paddingTop: 'clamp(88px, 10vw, 112px)',
-      paddingBottom: 'clamp(96px, 5vw, 32px)',
+      paddingLeft: 'clamp(20px, 4vw, 48px)',
+      paddingRight: 'clamp(20px, 4vw, 48px)',
+      paddingTop: '96px',
+      paddingBottom: '80px',
     }}
   >
     <Outlet />

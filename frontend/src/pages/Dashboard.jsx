@@ -136,7 +136,7 @@ const Dashboard = () => {
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
     return (
-        <div className="pb-8">
+        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
 
             {/* ── Welcome Header ────────────────────────────── */}
             <div style={{
@@ -167,78 +167,87 @@ const Dashboard = () => {
                 </Link>
             </div>
 
-            {/* ── Stats Row ─────────────────────────────────── */}
+            {/* ── Stats Row ────────────────────── */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: 12, marginBottom: 24,
+                gap: 14, marginBottom: 28,
             }}>
                 {[
-                    { Icon: LayoutGrid, label: 'Total PDFs',   value: pdfs.length,        color: 'var(--app-primary)'  },
-                    { Icon: FileText,   label: 'Total Pages',  value: totalPages,           color: 'var(--app-accent)'   },
-                    { Icon: Clock,      label: 'Storage Used', value: formatBytes(totalSize), color: 'var(--app-success)' },
-                ].map(({ Icon, label, value, color }) => (
-                    <div key={label} className="glass-panel" style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{
-                                width: 34, height: 34, borderRadius: 'var(--app-radius-sm)',
-                                background: `color-mix(in srgb, ${color} 12%, transparent)`,
-                                display: 'grid', placeItems: 'center', flexShrink: 0,
-                            }}>
-                                <Icon style={{ width: 16, height: 16, color }} />
-                            </div>
-                            <div>
-                                <p style={{ fontSize: 18, fontWeight: 800, color: 'var(--app-text)', lineHeight: 1 }}>
-                                    {loading ? '—' : value}
-                                </p>
-                                <p style={{ fontSize: 11, color: 'var(--app-text-faint)', marginTop: 2 }}>{label}</p>
-                            </div>
+                    { Icon: LayoutGrid, label: 'Total PDFs',   value: pdfs.length,           color: 'var(--app-primary)', glow: 'var(--app-primary-glow)' },
+                    { Icon: FileText,   label: 'Total Pages',  value: totalPages,             color: 'var(--app-accent)',  glow: 'rgba(139,92,246,0.25)'   },
+                    { Icon: Clock,      label: 'Storage Used', value: formatBytes(totalSize), color: 'var(--app-success)', glow: 'rgba(16,185,129,0.20)'   },
+                ].map(({ Icon, label, value, color, glow }) => (
+                    <div key={label} className="glass-panel" style={{ padding: '18px 20px' }}>
+                        <div style={{
+                            width: 40, height: 40, borderRadius: 'var(--app-radius-sm)',
+                            background: `color-mix(in srgb, ${color} 14%, transparent)`,
+                            border: `1px solid color-mix(in srgb, ${color} 22%, transparent)`,
+                            display: 'grid', placeItems: 'center', marginBottom: 12,
+                        }}>
+                            <Icon style={{ width: 18, height: 18, color }} />
                         </div>
+                        <p style={{ fontSize: 26, fontWeight: 800, color: 'var(--app-text)', lineHeight: 1, letterSpacing: '-0.03em', marginBottom: 4 }}>
+                            {loading ? (
+                                <span style={{ display: 'inline-block', width: 40, height: 20, borderRadius: 6, background: 'var(--app-border-strong)' }} />
+                            ) : value}
+                        </p>
+                        <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--app-text-faint)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            {label}
+                        </p>
                     </div>
                 ))}
-            </div>
-
-            {/* ── Documents Panel ───────────────────────────── */}
-            <div className="glass-panel" style={{ padding: '16px 16px 20px' }}>
+            </div>              {/* ── Documents Panel ────────────────── */}
+            <div className="glass-panel" style={{ padding: '20px 20px 24px' }}>
 
                 {/* Toolbar */}
-                <div style={{
-                    display: 'flex', flexWrap: 'wrap', alignItems: 'center',
-                    justifyContent: 'space-between', gap: 12, marginBottom: 20,
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{
-                            width: 28, height: 28, borderRadius: 'var(--app-radius-sm)',
-                            background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
-                            display: 'grid', placeItems: 'center',
-                        }}>
-                            <FileText style={{ width: 13, height: 13, color: 'var(--app-primary)' }} />
+                <div style={{ marginBottom: 20 }}>
+                    <div style={{
+                        display: 'flex', alignItems: 'center',
+                        justifyContent: 'space-between', gap: 12, marginBottom: 14,
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{
+                                width: 30, height: 30, borderRadius: 'var(--app-radius-sm)',
+                                background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                                border: '1px solid var(--app-border-strong)',
+                                display: 'grid', placeItems: 'center',
+                            }}>
+                                <FileText style={{ width: 14, height: 14, color: 'var(--app-primary)' }} />
+                            </div>
+                            <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.02em' }}>
+                                My Documents
+                            </h2>
+                            {!loading && pdfs.length > 0 && (
+                                <span style={{
+                                    fontSize: 11, fontWeight: 700, color: 'var(--app-primary)',
+                                    background: 'var(--app-primary-soft)',
+                                    padding: '2px 8px', borderRadius: 100,
+                                }}>{pdfs.length}</span>
+                            )}
                         </div>
-                        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.01em' }}>
-                            My Documents
-                        </h2>
-                        {!loading && pdfs.length > 0 && (
-                            <span style={{
-                                fontSize: 11, fontWeight: 700, color: 'var(--app-primary)',
-                                background: 'var(--app-primary-soft)',
-                                padding: '2px 8px', borderRadius: 100,
-                            }}>{pdfs.length}</span>
-                        )}
+                        <Link
+                            to="/create"
+                            className="btn-primary"
+                            style={{ fontSize: 12, padding: '7px 14px', textDecoration: 'none' }}
+                        >
+                            <Plus style={{ width: 13, height: 13 }} /> New PDF
+                        </Link>
                     </div>
 
                     {/* Search */}
-                    <div style={{ position: 'relative', width: '100%', maxWidth: 240 }}>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: 320 }}>
                         <Search style={{
-                            position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+                            position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
                             width: 14, height: 14, color: 'var(--app-text-faint)', pointerEvents: 'none',
                         }} />
                         <input
                             type="text"
-                            placeholder="Search PDFs…"
+                            placeholder="Search by filename…"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             className="input-field"
-                            style={{ paddingLeft: 32, fontSize: 12, height: 36 }}
+                            style={{ paddingLeft: 36, fontSize: 13, height: 38 }}
                         />
                     </div>
                 </div>

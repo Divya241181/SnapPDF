@@ -559,7 +559,7 @@ const CreatePDF = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto pb-8">
+        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
 
             {/* ── Page Header ────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
@@ -669,8 +669,8 @@ const CreatePDF = () => {
                 </div>
             )}
 
-            {/* ── Main 2-Column Grid ───────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+            {/* ── Main 2-Column Grid ───────────────── */}
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-5" style={{ alignItems: 'flex-start' }}>
 
                 {/* ── LEFT: Upload Zone or Camera ────────────── */}
                 <div
@@ -687,7 +687,10 @@ const CreatePDF = () => {
                             style={{
                                 border: `2px dashed ${isDragging ? 'var(--app-primary)' : 'var(--app-border-strong)'}`,
                                 borderRadius: 'var(--app-radius)',
-                                padding: '52px 28px',
+                                minHeight: 340,
+                                display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', justifyContent: 'center',
+                                padding: '40px 28px',
                                 textAlign: 'center',
                                 cursor: 'pointer',
                                 userSelect: 'none',
