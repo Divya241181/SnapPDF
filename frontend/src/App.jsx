@@ -49,7 +49,7 @@ const AuthLayout = () => (
 
 /** AppLayout — for authenticated pages: Dashboard, CreatePDF, Profile, EditPDF */
 const AppLayout = () => (
-  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-24 sm:pb-8">
+  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-24 sm:pb-8">
     <Outlet />
   </div>
 );

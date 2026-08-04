@@ -2,18 +2,18 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
-import { FileText, Download, Trash2, Plus, Search, Share2, Edit2 } from 'lucide-react';
+import { FileText, Download, Trash2, Plus, Search, Share2, Edit2, FilePlus, LayoutGrid, Clock } from 'lucide-react';
 
 const Dashboard = () => {
     const { user } = useAuthStore();
     const [pdfs, setPdfs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [selectedPdfId, setSelectedPdfId] = useState(null); // ← which card is selected
+    const [selectedPdfId, setSelectedPdfId] = useState(null);
 
     // Deselect when clicking outside any card
     const gridRef = useRef(null);
-    const clickTimerRef = useRef(null); // for single vs double click
+    const clickTimerRef = useRef(null);
     const handleOutsideClick = useCallback((e) => {
         if (gridRef.current && !gridRef.current.contains(e.target)) {
             setSelectedPdfId(null);
@@ -24,23 +24,21 @@ const Dashboard = () => {
         return () => document.removeEventListener('pointerdown', handleOutsideClick);
     }, [handleOutsideClick]);
 
-    // ── URL helper — handles both Cloudinary (https) and legacy /uploads paths ─
+    // URL helper
     const getFullUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
         return `${axios.defaults.baseURL}${url}`;
     };
 
-    // Single click = select/deselect  |  Double click/tap = open PDF in new tab
+    // Single click = select/deselect | Double click = open PDF
     const handleCardClick = useCallback((pdf, e) => {
         if (e.detail === 2) {
-            // Double click / double tap
             clearTimeout(clickTimerRef.current);
             const url = getFullUrl(pdf.fileUrl);
             if (url) window.open(url, '_blank', 'noopener,noreferrer');
             return;
         }
-        // Single click — short timer so it doesn't race with double click
         clearTimeout(clickTimerRef.current);
         clickTimerRef.current = setTimeout(() => {
             setSelectedPdfId(prev => prev === pdf._id ? null : pdf._id);
@@ -76,17 +74,11 @@ const Dashboard = () => {
     const handleShare = async (pdf, e) => {
         e.stopPropagation();
         const fullUrl = getFullUrl(pdf.fileUrl);
-        const shareData = {
-            title: pdf.filename,
-            text: `Check out this PDF: ${pdf.filename}`,
-            url: fullUrl,
-        };
-
+        const shareData = { title: pdf.filename, text: `Check out this PDF: ${pdf.filename}`, url: fullUrl };
         if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
             try { await navigator.share(shareData); return; }
             catch (err) { if (err.name !== 'AbortError') console.error('Share failed:', err); else return; }
         }
-
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(fullUrl);
@@ -107,7 +99,6 @@ const Dashboard = () => {
     const handleDownload = async (pdf, e) => {
         e.stopPropagation();
         const url = getFullUrl(pdf.fileUrl);
-        
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Network response was not ok');
@@ -122,7 +113,6 @@ const Dashboard = () => {
             window.URL.revokeObjectURL(blobUrl);
         } catch (error) {
             console.error('Download failed:', error);
-            // Fallback: Just open in new tab if fetch fails (CORS etc)
             window.open(url, '_blank', 'noopener,noreferrer');
         }
     };
@@ -131,171 +121,361 @@ const Dashboard = () => {
         pdf.filename.toLowerCase().includes(search.toLowerCase())
     );
 
-    const formatBytes = (bytes, decimals = 2) => {
-        if (!+bytes) return '0 Bytes';
-        const k = 1024, dm = decimals < 0 ? 0 : decimals, sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const formatBytes = (bytes, decimals = 1) => {
+        if (!+bytes) return '0 B';
+        const k = 1024, dm = decimals < 0 ? 0 : decimals, sizes = ['B', 'KB', 'MB', 'GB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     };
 
+    const totalPages = pdfs.reduce((sum, p) => sum + (p.pageCount || 0), 0);
+    const totalSize = pdfs.reduce((sum, p) => sum + (p.fileSize || 0), 0);
+
+    // ─── Greeting based on time of day ───────────────────────────────────────────
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
     return (
-        <div className="pb-4 sm:pb-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
+        <div className="pb-8">
+
+            {/* ── Welcome Header ────────────────────────────── */}
+            <div style={{
+                display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+                justifyContent: 'space-between', gap: 16, marginBottom: 24,
+            }}>
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white transition-colors">Welcome, {user?.username}</h1>
-                    <p className="text-slate-600 dark:text-slate-400 mt-0.5 text-xs sm:text-sm">Manage all your generated PDFs here.</p>
+                    <span className="app-eyebrow" style={{ display: 'block', marginBottom: 4 }}>
+                        {greeting}
+                    </span>
+                    <h1 style={{
+                        fontSize: 'clamp(22px,4vw,30px)', fontWeight: 700,
+                        color: 'var(--app-text)', letterSpacing: '-0.03em', lineHeight: 1.1,
+                    }}>
+                        {user?.username || 'Welcome back'}
+                    </h1>
+                    <p style={{ fontSize: 13, color: 'var(--app-text-muted)', marginTop: 4 }}>
+                        Manage all your generated PDFs here.
+                    </p>
                 </div>
-                <Link to="/create" className="btn-primary w-full sm:w-auto justify-center py-2 text-sm">
-                    <Plus className="w-5 h-5" /> Create New PDF
+                <Link
+                    to="/create"
+                    className="btn-primary"
+                    style={{ fontSize: 13, textDecoration: 'none' }}
+                >
+                    <Plus style={{ width: 16, height: 16 }} />
+                    Create New PDF
                 </Link>
             </div>
 
-            <div className="glass-panel p-2.5 sm:p-5 transition-colors">
+            {/* ── Stats Row ─────────────────────────────────── */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 12, marginBottom: 24,
+            }}>
+                {[
+                    { Icon: LayoutGrid, label: 'Total PDFs',   value: pdfs.length,        color: 'var(--app-primary)'  },
+                    { Icon: FileText,   label: 'Total Pages',  value: totalPages,           color: 'var(--app-accent)'   },
+                    { Icon: Clock,      label: 'Storage Used', value: formatBytes(totalSize), color: 'var(--app-success)' },
+                ].map(({ Icon, label, value, color }) => (
+                    <div key={label} className="glass-panel" style={{ padding: '14px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{
+                                width: 34, height: 34, borderRadius: 'var(--app-radius-sm)',
+                                background: `color-mix(in srgb, ${color} 12%, transparent)`,
+                                display: 'grid', placeItems: 'center', flexShrink: 0,
+                            }}>
+                                <Icon style={{ width: 16, height: 16, color }} />
+                            </div>
+                            <div>
+                                <p style={{ fontSize: 18, fontWeight: 800, color: 'var(--app-text)', lineHeight: 1 }}>
+                                    {loading ? '—' : value}
+                                </p>
+                                <p style={{ fontSize: 11, color: 'var(--app-text-faint)', marginTop: 2 }}>{label}</p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* ── Documents Panel ───────────────────────────── */}
+            <div className="glass-panel" style={{ padding: '16px 16px 20px' }}>
+
                 {/* Toolbar */}
-                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mb-4 sm:mb-6 gap-3">
-                    <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                        <FileText className="text-blue-500 w-5 h-5" /> My Documents
-                    </h2>
-                    <div className="relative w-full sm:w-60">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <div style={{
+                    display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+                    justifyContent: 'space-between', gap: 12, marginBottom: 20,
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{
+                            width: 28, height: 28, borderRadius: 'var(--app-radius-sm)',
+                            background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                            display: 'grid', placeItems: 'center',
+                        }}>
+                            <FileText style={{ width: 13, height: 13, color: 'var(--app-primary)' }} />
+                        </div>
+                        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.01em' }}>
+                            My Documents
+                        </h2>
+                        {!loading && pdfs.length > 0 && (
+                            <span style={{
+                                fontSize: 11, fontWeight: 700, color: 'var(--app-primary)',
+                                background: 'var(--app-primary-soft)',
+                                padding: '2px 8px', borderRadius: 100,
+                            }}>{pdfs.length}</span>
+                        )}
+                    </div>
+
+                    {/* Search */}
+                    <div style={{ position: 'relative', width: '100%', maxWidth: 240 }}>
+                        <Search style={{
+                            position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+                            width: 14, height: 14, color: 'var(--app-text-faint)', pointerEvents: 'none',
+                        }} />
                         <input
                             type="text"
-                            placeholder="Search PDFs..."
+                            placeholder="Search PDFs…"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-slate-900 dark:text-white text-xs sm:text-sm transition-all"
+                            onChange={e => setSearch(e.target.value)}
+                            className="input-field"
+                            style={{ paddingLeft: 32, fontSize: 12, height: 36 }}
                         />
                     </div>
                 </div>
 
+                {/* ── Content states ── */}
                 {loading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                    /* Loading spinner */
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+                        <div
+                            className="animate-spin"
+                            style={{
+                                width: 36, height: 36, borderRadius: '50%',
+                                border: '3px solid var(--app-border-strong)',
+                                borderTopColor: 'var(--app-primary)',
+                            }}
+                        />
                     </div>
                 ) : filteredPdfs.length === 0 ? (
-                    <div className="text-center py-12 px-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950/50">
-                        <FileText className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">No PDFs found</h3>
-                        <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-                            {search ? 'Try adjusting your search.' : "You haven't created any PDFs yet. Get started now!"}
+                    /* Empty state */
+                    <div style={{
+                        textAlign: 'center', padding: '52px 24px',
+                        border: '2px dashed var(--app-border-strong)',
+                        borderRadius: 'var(--app-radius)', background: 'var(--app-bg-elevated)',
+                    }}>
+                        <div style={{
+                            width: 72, height: 72, borderRadius: 'var(--app-radius-lg)',
+                            background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                            border: '1px solid var(--app-border-strong)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 20px auto',
+                        }}>
+                            <FilePlus style={{ width: 30, height: 30, color: 'var(--app-primary)' }} />
+                        </div>
+                        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--app-text)', marginBottom: 6 }}>
+                            {search ? 'No results found' : 'No PDFs yet'}
+                        </h3>
+                        <p style={{ fontSize: 13, color: 'var(--app-text-muted)', marginBottom: 24 }}>
+                            {search
+                                ? `No documents match "${search}". Try a different keyword.`
+                                : "You haven't created any PDFs yet. Get started now!"
+                            }
                         </p>
                         {!search && (
-                            <Link to="/create" className="btn-primary inline-flex">
-                                <Plus className="w-4 h-4" /> Create First PDF
+                            <Link
+                                to="/create"
+                                className="btn-primary"
+                                style={{ textDecoration: 'none', display: 'inline-flex', margin: '0 auto' }}
+                            >
+                                <Plus style={{ width: 15, height: 15 }} /> Create First PDF
                             </Link>
                         )}
                     </div>
                 ) : (
-                    <div ref={gridRef} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                    /* PDF Grid */
+                    <div
+                        ref={gridRef}
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))',
+                            gap: 14,
+                        }}
+                    >
                         {filteredPdfs.map(pdf => {
                             const isSelected = selectedPdfId === pdf._id;
                             return (
                                 <div
                                     key={pdf._id}
-                                    onClick={(e) => handleCardClick(pdf, e)}
-                                    className={`relative rounded-xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 cursor-pointer select-none
-                                        ${isSelected
-                                            ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/20 scale-[1.02]'
-                                            : 'border border-slate-200 dark:border-slate-800 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700'
-                                        }`}
+                                    onClick={e => handleCardClick(pdf, e)}
+                                    style={{
+                                        position: 'relative', borderRadius: 'var(--app-radius)',
+                                        overflow: 'hidden', cursor: 'pointer', userSelect: 'none',
+                                        background: 'var(--app-bg-elevated)',
+                                        border: `1.5px solid ${isSelected ? 'var(--app-primary)' : 'var(--app-border-strong)'}`,
+                                        boxShadow: isSelected
+                                            ? '0 0 0 3px var(--app-primary-soft), var(--app-shadow)'
+                                            : 'var(--app-shadow-sm)',
+                                        transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+                                        transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
+                                    }}
                                 >
                                     {/* Thumbnail */}
-                                    <div className="aspect-square sm:aspect-[4/3] bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative overflow-hidden group/thumb">
+                                    <div style={{
+                                        aspectRatio: '3/4', background: '#09090f',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        position: 'relative', overflow: 'hidden',
+                                    }}>
                                         {pdf.thumbnailUrl ? (
-                                            <>
-                                                <img
-                                                    src={getFullUrl(pdf.thumbnailUrl)}
-                                                    alt={pdf.filename}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover/thumb:scale-105"
-                                                />
-                                            </>
+                                            <img
+                                                src={getFullUrl(pdf.thumbnailUrl)}
+                                                alt={pdf.filename}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.5s ease' }}
+                                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                            />
                                         ) : (
-                                            <div className="flex flex-col items-center gap-2">
-                                                <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-slate-300 dark:text-slate-600" />
-                                                <span className="text-[8px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">No Preview</span>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                                                <FileText style={{ width: 32, height: 32, color: 'var(--app-text-faint)' }} />
+                                                <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--app-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>No Preview</span>
                                             </div>
                                         )}
 
                                         {/* Page count badge */}
-                                        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm shadow-sm border border-slate-200 dark:border-slate-800 flex items-center gap-1 pointer-events-none">
-                                            <FileText className="w-2.5 h-2.5 text-blue-500" />
-                                            <span className="text-[9px] sm:text-[10px] font-bold text-slate-700 dark:text-slate-300">{pdf.pageCount} pg</span>
+                                        <div style={{
+                                            position: 'absolute', top: 8, right: 8,
+                                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+                                            color: '#fff', fontSize: 9, fontWeight: 700,
+                                            padding: '3px 7px', borderRadius: 100,
+                                            display: 'flex', alignItems: 'center', gap: 4,
+                                            pointerEvents: 'none',
+                                        }}>
+                                            <FileText style={{ width: 9, height: 9 }} />
+                                            {pdf.pageCount}p
                                         </div>
 
                                         {/* Selection tick */}
                                         {isSelected && (
-                                            <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
-                                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div style={{
+                                                position: 'absolute', top: 8, left: 8,
+                                                width: 20, height: 20, borderRadius: '50%',
+                                                background: 'var(--app-primary)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 2px 8px var(--app-primary-glow)',
+                                            }}>
+                                                <svg style={{ width: 10, height: 10 }} fill="none" stroke="#fff" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
                                         )}
-                                        {/* Double-tap hint overlay when selected */}
+
+                                        {/* Double-tap hint */}
                                         {isSelected && (
-                                            <div className="absolute inset-0 flex items-end justify-center pb-2 pointer-events-none">
-                                                <span className="text-[9px] font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                                            <div style={{
+                                                position: 'absolute', bottom: 6, left: 0, right: 0,
+                                                display: 'flex', justifyContent: 'center',
+                                                pointerEvents: 'none',
+                                            }}>
+                                                <span style={{
+                                                    fontSize: 9, fontWeight: 600, color: '#fff',
+                                                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
+                                                    padding: '2px 8px', borderRadius: 100,
+                                                }}>
                                                     Double-tap to open
                                                 </span>
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Info section */}
-                                    <div className="p-2 sm:p-3 border-t border-slate-100 dark:border-slate-800">
-                                        <h4 className="font-semibold text-slate-900 dark:text-white truncate text-xs sm:text-sm" title={pdf.filename}>
+                                    {/* Info row */}
+                                    <div style={{
+                                        padding: '10px 10px 8px',
+                                        borderTop: '1px solid var(--app-border)',
+                                    }}>
+                                        <h4 style={{
+                                            fontSize: 12, fontWeight: 600,
+                                            color: 'var(--app-text)', overflow: 'hidden',
+                                            textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                            marginBottom: 3,
+                                        }} title={pdf.filename}>
                                             {pdf.filename}
                                         </h4>
-                                        <div className="flex justify-between items-center text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                            <span className="truncate mr-1">{new Date(pdf.createdAt).toLocaleDateString()}</span>
-                                            <span className="shrink-0">{pdf.pageCount} pg • {formatBytes(pdf.fileSize)}</span>
+                                        <div style={{
+                                            display: 'flex', justifyContent: 'space-between',
+                                            fontSize: 10, color: 'var(--app-text-faint)',
+                                        }}>
+                                            <span>{new Date(pdf.createdAt).toLocaleDateString()}</span>
+                                            <span>{formatBytes(pdf.fileSize)}</span>
                                         </div>
 
-                                        {/* ── Action buttons — slide in only when selected ── */}
-                                        <div
-                                            className="overflow-hidden transition-all duration-300 ease-in-out"
-                                            style={{
-                                                maxHeight: isSelected ? '56px' : '0px',
-                                                opacity: isSelected ? 1 : 0,
-                                                marginTop: isSelected ? '8px' : '0px',
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                                {/* Open / View */}
+                                        {/* Action buttons — expand when selected */}
+                                        <div style={{
+                                            overflow: 'hidden', transition: 'all 0.28s cubic-bezier(0.16,1,0.3,1)',
+                                            maxHeight: isSelected ? 52 : 0,
+                                            opacity: isSelected ? 1 : 0,
+                                            marginTop: isSelected ? 10 : 0,
+                                        }}>
+                                            <div style={{
+                                                display: 'flex', alignItems: 'center', gap: 5,
+                                                paddingTop: 8,
+                                                borderTop: '1px solid var(--app-border)',
+                                            }}>
+                                                {/* Download */}
                                                 <button
-                                                    onClick={(e) => handleDownload(pdf, e)}
-                                                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] sm:text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-sm active:scale-95"
+                                                    onClick={e => handleDownload(pdf, e)}
                                                     title="Download PDF"
+                                                    style={{
+                                                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                                        padding: '6px 4px', borderRadius: 'var(--app-radius-sm)', border: 'none',
+                                                        background: 'linear-gradient(135deg, var(--app-primary), var(--app-accent))',
+                                                        color: '#fff', fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                                                        boxShadow: '0 2px 8px var(--app-primary-glow)',
+                                                    }}
                                                 >
-                                                    <Download className="w-3.5 h-3.5" />
+                                                    <Download style={{ width: 11, height: 11 }} />
                                                     <span className="hidden sm:inline">Save</span>
                                                 </button>
                                                 {/* Edit */}
                                                 <Link
                                                     to={`/edit/${pdf._id}`}
                                                     onClick={e => e.stopPropagation()}
-                                                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all"
                                                     title="Edit PDF"
+                                                    style={{
+                                                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                                        padding: '6px 4px', borderRadius: 'var(--app-radius-sm)',
+                                                        background: 'var(--app-bg-elevated)', border: '1px solid var(--app-border-strong)',
+                                                        color: 'var(--app-text-muted)', fontSize: 10, fontWeight: 700,
+                                                        textDecoration: 'none', cursor: 'pointer',
+                                                    }}
                                                 >
-                                                    <Edit2 className="w-3.5 h-3.5" />
+                                                    <Edit2 style={{ width: 11, height: 11 }} />
                                                     <span className="hidden sm:inline">Edit</span>
                                                 </Link>
                                                 {/* Share */}
                                                 <button
-                                                    onClick={(e) => handleShare(pdf, e)}
-                                                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all"
+                                                    onClick={e => handleShare(pdf, e)}
                                                     title="Share"
+                                                    style={{
+                                                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                                                        padding: '6px 4px', borderRadius: 'var(--app-radius-sm)', border: 'none',
+                                                        background: 'var(--app-bg-elevated)', border: '1px solid var(--app-border-strong)',
+                                                        color: 'var(--app-text-muted)', fontSize: 10, fontWeight: 700, cursor: 'pointer',
+                                                    }}
                                                 >
-                                                    <Share2 className="w-3.5 h-3.5" />
+                                                    <Share2 style={{ width: 11, height: 11 }} />
                                                     <span className="hidden sm:inline">Share</span>
                                                 </button>
                                                 {/* Delete */}
                                                 <button
-                                                    onClick={(e) => handleDelete(pdf._id, e)}
-                                                    className="flex items-center justify-center p-1.5 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
+                                                    onClick={e => handleDelete(pdf._id, e)}
                                                     title="Delete"
+                                                    style={{
+                                                        width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        borderRadius: 'var(--app-radius-sm)', border: 'none',
+                                                        background: 'var(--app-danger-soft)', color: 'var(--app-danger)', cursor: 'pointer',
+                                                        flexShrink: 0,
+                                                    }}
                                                 >
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <Trash2 style={{ width: 11, height: 11 }} />
                                                 </button>
                                             </div>
                                         </div>
@@ -303,6 +483,24 @@ const Dashboard = () => {
                                 </div>
                             );
                         })}
+
+                        {/* "Create new" tile at the end of the grid */}
+                        <Link
+                            to="/create"
+                            style={{
+                                borderRadius: 'var(--app-radius)', aspectRatio: '3/4',
+                                border: '2px dashed var(--app-border-strong)',
+                                background: 'var(--app-bg-elevated)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                gap: 8, textDecoration: 'none', color: 'var(--app-text-faint)',
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--app-primary)'; e.currentTarget.style.color = 'var(--app-primary)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--app-border-strong)'; e.currentTarget.style.color = 'var(--app-text-faint)'; }}
+                        >
+                            <FilePlus style={{ width: 24, height: 24 }} />
+                            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>New PDF</span>
+                        </Link>
                     </div>
                 )}
             </div>
