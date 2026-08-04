@@ -559,54 +559,17 @@ const CreatePDF = () => {
     };
 
     return (
-        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
+        <div className="w-full">
 
             {/* ── Page Header ────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                <div>
-                    <span className="app-eyebrow" style={{ display: 'block', marginBottom: 4 }}>New Document</span>
-                    <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-                        Create PDF
-                    </h1>
-                </div>
-
-                {/* Mode Toggle Pill */}
-                <div style={{
-                    display: 'flex',
-                    background: 'var(--app-bg-elevated)',
-                    border: '1px solid var(--app-border-strong)',
-                    borderRadius: 'var(--app-radius)',
-                    padding: 4,
-                    gap: 4,
-                    boxShadow: 'var(--app-shadow-sm)',
-                }}>
-                    {[
-                        { id: 'upload', label: 'Upload',  Icon: UploadCloud },
-                        { id: 'camera', label: 'Scan',    Icon: Camera      },
-                    ].map(({ id, label, Icon }) => (
-                        <button
-                            key={id}
-                            onClick={() => setMode(id)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: 6,
-                                padding: '8px 18px',
-                                borderRadius: 'calc(var(--app-radius) - 4px)',
-                                fontSize: 13, fontWeight: 600,
-                                background: mode === id
-                                    ? 'linear-gradient(135deg, var(--app-primary), var(--app-accent))'
-                                    : 'transparent',
-                                color: mode === id ? '#fff' : 'var(--app-text-muted)',
-                                boxShadow: mode === id ? '0 4px 14px var(--app-primary-glow)' : 'none',
-                                border: 'none', cursor: 'pointer',
-                                transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            <Icon style={{ width: 14, height: 14 }} />
-                            {label}
-                        </button>
-                    ))}
-                </div>
+            <div style={{ marginBottom: 24 }}>
+                <span className="app-eyebrow" style={{ display: 'block', marginBottom: 4 }}>Document Studio</span>
+                <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                    Create PDF
+                </h1>
+                <p style={{ fontSize: 13, color: 'var(--app-text-muted)', marginTop: 4 }}>
+                    Upload images or scan pages with your camera to build high-quality PDF documents.
+                </p>
             </div>
 
             {/* ── Error Banner ──────────────────────────────── */}
@@ -670,9 +633,9 @@ const CreatePDF = () => {
             )}
 
             {/* ── Main 2-Column Grid ───────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-5" style={{ alignItems: 'flex-start' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6" style={{ alignItems: 'flex-start' }}>
 
-                {/* ── LEFT: Upload Zone or Camera ────────────── */}
+                {/* ── LEFT: Upload Zone or Camera Workspace ────────────── */}
                 <div
                     className="glass-panel p-5 transition-all duration-300"
                     style={isDragging ? {
@@ -681,6 +644,62 @@ const CreatePDF = () => {
                         transform: 'scale(1.005)',
                     } : {}}
                 >
+                    {/* Workspace Panel Header with Integrated Mode Switcher */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        paddingBottom: 14, marginBottom: 16,
+                        borderBottom: '1px solid var(--app-border-strong)', gap: 12, flexWrap: 'wrap',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{
+                                width: 28, height: 28, borderRadius: 'var(--app-radius-sm)',
+                                background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                                border: '1px solid var(--app-border-strong)',
+                                display: 'grid', placeItems: 'center',
+                            }}>
+                                {mode === 'upload' ? <UploadCloud style={{ width: 14, height: 14, color: 'var(--app-primary)' }} /> : <Camera style={{ width: 14, height: 14, color: 'var(--app-primary)' }} />}
+                            </div>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.01em' }}>
+                                {mode === 'upload' ? 'Upload Files' : 'Camera Scanner'}
+                            </span>
+                        </div>
+
+                        {/* Mode Toggle Switcher Pill */}
+                        <div style={{
+                            display: 'flex',
+                            background: 'var(--app-bg-elevated)',
+                            border: '1px solid var(--app-border-strong)',
+                            borderRadius: 'var(--app-radius-sm)',
+                            padding: 3, gap: 3,
+                        }}>
+                            {[
+                                { id: 'upload', label: 'Upload',  Icon: UploadCloud },
+                                { id: 'camera', label: 'Scan',    Icon: Camera      },
+                            ].map(({ id, label, Icon }) => (
+                                <button
+                                    key={id}
+                                    onClick={() => setMode(id)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 5,
+                                        padding: '5px 12px',
+                                        borderRadius: 'calc(var(--app-radius-sm) - 2px)',
+                                        fontSize: 12, fontWeight: 600,
+                                        background: mode === id
+                                            ? 'linear-gradient(135deg, var(--app-primary), var(--app-accent))'
+                                            : 'transparent',
+                                        color: mode === id ? '#fff' : 'var(--app-text-muted)',
+                                        boxShadow: mode === id ? '0 2px 10px var(--app-primary-glow)' : 'none',
+                                        border: 'none', cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    <Icon style={{ width: 13, height: 13 }} />
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     {mode === 'upload' ? (
                         /* ── Upload Drop Zone ── */
                         <div

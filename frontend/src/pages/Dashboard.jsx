@@ -136,7 +136,7 @@ const Dashboard = () => {
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
     return (
-        <div style={{ maxWidth: 1040, margin: '0 auto' }}>
+        <div className="w-full">
 
             {/* ── Welcome Header ────────────────────────────── */}
             <div style={{
