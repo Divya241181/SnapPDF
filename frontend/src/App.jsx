@@ -49,7 +49,15 @@ const AuthLayout = () => (
 
 /** AppLayout — for authenticated pages: Dashboard, CreatePDF, Profile, EditPDF */
 const AppLayout = () => (
-  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-24 sm:pb-8">
+  <div
+    className="w-full max-w-7xl mx-auto"
+    style={{
+      paddingLeft: 'clamp(12px, 3vw, 32px)',
+      paddingRight: 'clamp(12px, 3vw, 32px)',
+      paddingTop: 'clamp(88px, 10vw, 112px)',
+      paddingBottom: 'clamp(96px, 5vw, 32px)',
+    }}
+  >
     <Outlet />
   </div>
 );
