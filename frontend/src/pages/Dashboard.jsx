@@ -139,7 +139,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="py-4 sm:py-6">
+        <div className="pb-4 sm:pb-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
                 <div>

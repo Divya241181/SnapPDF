@@ -559,7 +559,7 @@ const CreatePDF = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-4 sm:py-8 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto pb-6 transition-colors duration-300">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white transition-colors">Create New PDF</h1>

@@ -104,7 +104,7 @@ const Profile = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-6 px-4">
+        <div className="max-w-4xl mx-auto pb-6 px-4">
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Left Side - Profile Photo Card */}
                 <div className="w-full md:w-1/3">

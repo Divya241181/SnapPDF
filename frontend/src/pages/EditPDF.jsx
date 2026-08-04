@@ -431,7 +431,7 @@ const EditPDF = () => {
     );
 
     return (
-        <div className="max-w-5xl mx-auto py-6">
+        <div className="max-w-5xl mx-auto pb-6">
             {/* ── Page Header ── */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">

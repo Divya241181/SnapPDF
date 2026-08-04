@@ -40,8 +40,16 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-const OldLayout = () => (
-  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-24 sm:pb-8">
+/** AuthLayout — for Login & Register (centered form, hero-bg contained) */
+const AuthLayout = () => (
+  <div style={{ position: 'relative', overflow: 'hidden' }}>
+    <Outlet />
+  </div>
+);
+
+/** AppLayout — for authenticated pages: Dashboard, CreatePDF, Profile, EditPDF */
+const AppLayout = () => (
+  <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-24 sm:pb-8">
     <Outlet />
   </div>
 );
@@ -80,9 +88,14 @@ function App() {
             <Route path="/security" element={<Security />} />
             <Route path="/features" element={<Features />} />
 
-            <Route element={<OldLayout />}>
+            {/* Auth pages — self-contained full-screen layouts (hero-bg isolated) */}
+            <Route element={<AuthLayout />}>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+            </Route>
+
+            {/* Authenticated app pages — shared constrained-width layout */}
+            <Route element={<AppLayout />}>
               <Route path="/dashboard" element={
                 <ProtectedRoute><Dashboard /></ProtectedRoute>
               } />
