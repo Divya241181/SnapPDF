@@ -559,416 +559,682 @@ const CreatePDF = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto pb-6 transition-colors duration-300">
+        <div className="max-w-5xl mx-auto pb-8">
+
+            {/* ── Page Header ────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white transition-colors">Create New PDF</h1>
-                    <p className="text-slate-600 dark:text-slate-400 mt-1 text-sm sm:text-base">Upload images or use your camera.</p>
+                    <span className="app-eyebrow" style={{ display: 'block', marginBottom: 4 }}>New Document</span>
+                    <h1 style={{ fontSize: 'clamp(22px,4vw,30px)', fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                        Create PDF
+                    </h1>
                 </div>
-                <div className="flex w-full sm:w-auto bg-slate-100 dark:bg-slate-800 p-1 rounded-xl gap-1 transition-colors">
-                    <button
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'upload' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-                        onClick={() => setMode('upload')}
-                    >
-                        <UploadCloud className="w-4 h-4" /> Upload
-                    </button>
-                    <button
-                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${mode === 'camera' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-                        onClick={() => setMode('camera')}
-                    >
-                        <Camera className="w-4 h-4" /> Scan
-                    </button>
+
+                {/* Mode Toggle Pill */}
+                <div style={{
+                    display: 'flex',
+                    background: 'var(--app-bg-elevated)',
+                    border: '1px solid var(--app-border-strong)',
+                    borderRadius: 'var(--app-radius)',
+                    padding: 4,
+                    gap: 4,
+                    boxShadow: 'var(--app-shadow-sm)',
+                }}>
+                    {[
+                        { id: 'upload', label: 'Upload',  Icon: UploadCloud },
+                        { id: 'camera', label: 'Scan',    Icon: Camera      },
+                    ].map(({ id, label, Icon }) => (
+                        <button
+                            key={id}
+                            onClick={() => setMode(id)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '8px 18px',
+                                borderRadius: 'calc(var(--app-radius) - 4px)',
+                                fontSize: 13, fontWeight: 600,
+                                background: mode === id
+                                    ? 'linear-gradient(135deg, var(--app-primary), var(--app-accent))'
+                                    : 'transparent',
+                                color: mode === id ? '#fff' : 'var(--app-text-muted)',
+                                boxShadow: mode === id ? '0 4px 14px var(--app-primary-glow)' : 'none',
+                                border: 'none', cursor: 'pointer',
+                                transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            <Icon style={{ width: 14, height: 14 }} />
+                            {label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
+            {/* ── Error Banner ──────────────────────────────── */}
             {error && (
-                <div className="mb-4 flex items-start gap-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-400 px-4 py-3 rounded-xl text-sm font-medium transition-colors">
-                    <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                <div style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                    background: 'var(--app-danger-soft)',
+                    border: '1px solid rgba(239,68,68,0.28)',
+                    borderRadius: 'var(--app-radius)', padding: '12px 16px',
+                    marginBottom: 20, fontSize: 13, color: 'var(--app-danger)',
+                }}>
+                    <AlertCircle style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1 }} />
                     <span>{error}</span>
                 </div>
             )}
 
-<div className={`glass-panel p-4 sm:p-6 mb-6 transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-4 ring-blue-500/50 border-blue-500 scale-[1.01] shadow-2xl' : ''}`}>
-                {mode === 'upload' ? (
-                    <div
-                        className={`border-2 border-dashed rounded-xl p-8 sm:p-14 text-center transition-all cursor-pointer select-none relative ${isDragging
-                            ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-900/40 scale-95'
-                            : 'border-blue-300 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20'
-                            }`}
-                        onClick={() => fileInputRef.current?.click()}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        {isDragging && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-blue-500/10 backdrop-blur-[2px] rounded-xl pointer-events-none z-10">
-                                <UploadCloud className="w-20 h-20 text-blue-600 animate-bounce" />
-                                <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-400 mt-2">Drop to Upload</h2>
-                            </div>
-                        )}
-                        <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            className="hidden"
-                            ref={fileInputRef}
-                            onChange={handleImageUpload}
-                        />
-                        <UploadCloud className={`w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 transition-transform duration-300 ${isDragging ? 'scale-110 opacity-0' : 'text-blue-400 dark:text-blue-600'}`} />
-                        <h3 className={`text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1 transition-opacity ${isDragging ? 'opacity-0' : ''}`}>
-                            {loading ? 'Processing…' : 'Tap or Drag & Drop images'}
-                        </h3>
-                        <p className={`text-sm text-slate-500 dark:text-slate-400 transition-opacity ${isDragging ? 'opacity-0' : ''}`}>JPG, PNG, WebP — all supported</p>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center gap-3 sm:gap-4">
-
-                        {/* ─ Viewfinder ─ */}
-                        <div className="relative rounded-2xl overflow-hidden shadow-xl border-4 border-slate-800 dark:border-slate-700 bg-black w-full max-w-sm sm:max-w-lg aspect-[3/4] sm:aspect-[3/4]">
-                            <Webcam
-                                audio={false}
-                                ref={webcamRef}
-                                screenshotFormat="image/jpeg"
-                                screenshotQuality={1.00}
-                                videoConstraints={{ facingMode: "environment" }}
-                                onUserMediaError={handleWebcamError}
-                                className="w-full h-full object-cover"
-                            />
-
-                            {/* Document guide corners */}
-                            <div className="absolute inset-4 pointer-events-none">
-                                <div className="absolute top-0    left-0  w-6 h-6 border-t-2 border-l-2 border-white/60 rounded-tl-md" />
-                                <div className="absolute top-0    right-0 w-6 h-6 border-t-2 border-r-2 border-white/60 rounded-tr-md" />
-                                <div className="absolute bottom-0 left-0  w-6 h-6 border-b-2 border-l-2 border-white/60 rounded-bl-md" />
-                                <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/60 rounded-br-md" />
-                            </div>
-
-                            {/* Shutter flash overlay */}
-                            <div
-                                className="absolute inset-0 bg-white pointer-events-none transition-opacity duration-150"
-                                style={{ opacity: isFlashing ? 0.85 : 0 }}
-                            />
-
-                            {/* Page counter badge — top-left of viewfinder */}
-                            {images.length > 0 && (
-                                <div
-                                    className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1.5 rounded-full shadow-lg"
-                                    style={{ transition: 'transform 0.2s', transform: isFlashing ? 'scale(1.2)' : 'scale(1)' }}
-                                >
-                                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse inline-block" />
-                                    {images.length} {images.length === 1 ? 'page' : 'pages'}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* ─ Capture controls row ─ */}
-                        <div className="flex items-center justify-center gap-5 sm:gap-6 w-full">
-
-                            {/* Page counter pill — left of button on larger screens */}
-                            <div className="flex flex-col items-center gap-0.5 min-w-[44px]">
-                                <span
-                                    className="text-2xl sm:text-3xl font-black tabular-nums leading-none"
-                                    style={{
-                                        background: 'linear-gradient(135deg,#60a5fa,#818cf8)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent',
-                                        transition: 'transform 0.15s',
-                                        transform: isFlashing ? 'scale(1.3)' : 'scale(1)',
-                                    }}
-                                >
-                                    {images.length}
-                                </span>
-                                <span className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                                    {images.length === 1 ? 'PAGE' : 'PAGES'}
-                                </span>
-                            </div>
-
-                            {/* Capture button */}
-                            <button
-                                onClick={capture}
-                                className="w-16 h-16 sm:w-20 sm:h-20 bg-white dark:bg-slate-800 rounded-full border-4 border-slate-300 dark:border-slate-600 flex items-center justify-center shadow-2xl active:scale-90 transition-all"
-                                aria-label="Capture photo"
-                                style={{ boxShadow: isFlashing ? '0 0 0 8px rgba(59,130,246,0.35)' : '' }}
-                            >
-                                <div className="w-11 h-11 sm:w-14 sm:h-14 bg-blue-600 rounded-full border-2 border-white dark:border-slate-800 flex items-center justify-center transition-transform"
-                                    style={{ transform: isFlashing ? 'scale(0.88)' : 'scale(1)' }}>
-                                    <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                                </div>
-                            </button>
-
-                            {/* Spacer to balance the layout */}
-                            <div className="min-w-[44px]" />
-                        </div>
-
-                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center">
-                            Tap to capture a page
-                        </p>
-                    </div>
-                )}
-            </div>
-
+            {/* ── Progress Toast ────────────────────────────── */}
             {loading && status && (
-                <div className="mb-6 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 px-4 py-3 rounded-xl text-sm font-medium transition-all shadow-sm">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 flex-shrink-0"></div>
-                    <span>{status}</span>
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: 'var(--app-primary-soft)',
+                    border: '1px solid var(--app-border-strong)',
+                    borderRadius: 'var(--app-radius)', padding: '12px 16px',
+                    marginBottom: 20, fontSize: 13, color: 'var(--app-primary)',
+                }}>
+                    <div className="animate-spin rounded-full border-b-2 border-blue-500" style={{ width: 16, height: 16, flexShrink: 0 }} />
+                    <span style={{ fontWeight: 500 }}>{status}</span>
                 </div>
             )}
 
+            {/* ── Success Card ──────────────────────────────── */}
             {isGenerated && !loading && status && (
-                <div 
-                    className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400 px-4 py-4 rounded-xl text-sm font-medium transition-all shadow-md"
-                >
-                    <div className="flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 flex-shrink-0 text-emerald-500" />
-                        <div>
-                            <p className="font-bold">{status}</p>
-                            <p className="text-[10px] opacity-80 uppercase tracking-wider mt-0.5">You can now view it in your dashboard library.</p>
-                        </div>
+                <div style={{
+                    display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14,
+                    background: 'var(--app-success-soft)',
+                    border: '1px solid rgba(16,185,129,0.25)',
+                    borderRadius: 'var(--app-radius)', padding: '16px 20px', marginBottom: 20,
+                }}>
+                    <div style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        background: 'var(--app-success)', display: 'grid', placeItems: 'center', flexShrink: 0,
+                    }}>
+                        <CheckCircle style={{ width: 18, height: 18, color: '#fff' }} />
                     </div>
-                    <Link to="/dashboard" className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-emerald-600/20 text-center whitespace-nowrap">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--app-success)' }}>{status}</p>
+                        <p style={{ fontSize: 11, color: 'var(--app-text-muted)', marginTop: 2 }}>Saved to your dashboard library.</p>
+                    </div>
+                    <Link
+                        to="/dashboard"
+                        style={{
+                            padding: '9px 18px', borderRadius: 'var(--app-radius-sm)',
+                            background: 'var(--app-success)', color: '#fff',
+                            fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap',
+                            boxShadow: '0 4px 14px rgba(16,185,129,0.30)',
+                        }}
+                    >
                         Go to Dashboard →
                     </Link>
                 </div>
             )}
 
-            {images.length > 0 && (
-                <div className="glass-panel py-3 px-4 sm:p-5 transition-colors">
-                    <div className="flex flex-col gap-3 mb-5">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2.5 h-10">
-                                <div className="bg-blue-600 text-white min-w-[32px] h-8 rounded-lg flex items-center justify-center text-[11px] font-black shadow-lg shadow-blue-600/20">
-                                    {images.length}
+            {/* ── Main 2-Column Grid ───────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+
+                {/* ── LEFT: Upload Zone or Camera ────────────── */}
+                <div
+                    className="glass-panel p-5 transition-all duration-300"
+                    style={isDragging ? {
+                        boxShadow: '0 0 0 3px var(--app-primary-soft), var(--app-shadow-lg)',
+                        borderColor: 'var(--app-primary)',
+                        transform: 'scale(1.005)',
+                    } : {}}
+                >
+                    {mode === 'upload' ? (
+                        /* ── Upload Drop Zone ── */
+                        <div
+                            style={{
+                                border: `2px dashed ${isDragging ? 'var(--app-primary)' : 'var(--app-border-strong)'}`,
+                                borderRadius: 'var(--app-radius)',
+                                padding: '52px 28px',
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                userSelect: 'none',
+                                background: isDragging ? 'var(--app-primary-soft)' : 'var(--app-bg-elevated)',
+                                transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
+                                transform: isDragging ? 'scale(0.98)' : 'scale(1)',
+                                position: 'relative',
+                            }}
+                            onClick={() => fileInputRef.current?.click()}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                        >
+                            {/* Dragging overlay */}
+                            {isDragging && (
+                                <div style={{
+                                    position: 'absolute', inset: 0, borderRadius: 'inherit',
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                    background: 'var(--app-primary-soft)', backdropFilter: 'blur(6px)',
+                                    pointerEvents: 'none', zIndex: 10,
+                                }}>
+                                    <UploadCloud style={{ width: 60, height: 60, color: 'var(--app-primary)' }} />
+                                    <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--app-primary)', marginTop: 12 }}>Drop to Upload</p>
                                 </div>
-                                <div className="hidden xs:block">
-                                    <h2 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Pages</h2>
+                            )}
+
+                            <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+
+                            {/* Icon */}
+                            <div style={{
+                                width: 76, height: 76, borderRadius: 'var(--app-radius-lg)',
+                                background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                                border: '1px solid var(--app-border-strong)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 20px auto',
+                            }}>
+                                <UploadCloud style={{ width: 32, height: 32, color: 'var(--app-primary)' }} />
+                            </div>
+
+                            <h3 style={{ fontSize: 17, fontWeight: 600, color: 'var(--app-text)', marginBottom: 6, letterSpacing: '-0.01em' }}>
+                                {loading ? 'Processing images…' : 'Tap or Drag & Drop images'}
+                            </h3>
+                            <p style={{ fontSize: 13, color: 'var(--app-text-muted)', marginBottom: 24 }}>
+                                JPG, PNG, WebP — all supported
+                            </p>
+
+                            <button
+                                className="btn-primary"
+                                onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                                style={{ fontSize: 13, margin: '0 auto' }}
+                            >
+                                <FilePlus style={{ width: 15, height: 15 }} /> Browse Files
+                            </button>
+                        </div>
+                    ) : (
+                        /* ── Camera / Scan Mode ── */
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
+
+                            {/* Viewfinder */}
+                            <div style={{
+                                position: 'relative', borderRadius: 'var(--app-radius-lg)',
+                                overflow: 'hidden', background: '#000',
+                                border: '2px solid var(--app-border-strong)',
+                                width: '100%', aspectRatio: '3/4', maxWidth: 400,
+                                boxShadow: '0 24px 64px rgba(0,0,0,0.55)',
+                            }}>
+                                <Webcam
+                                    audio={false} ref={webcamRef}
+                                    screenshotFormat="image/jpeg" screenshotQuality={1.00}
+                                    videoConstraints={{ facingMode: "environment" }}
+                                    onUserMediaError={handleWebcamError}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                />
+
+                                {/* Corner guide markers */}
+                                {[[0,0,'tl'],[0,1,'tr'],[1,0,'bl'],[1,1,'br']].map(([row,col,k]) => (
+                                    <div key={k} style={{
+                                        position: 'absolute',
+                                        top: row === 0 ? 16 : undefined, bottom: row === 1 ? 16 : undefined,
+                                        left: col === 0 ? 16 : undefined, right: col === 1 ? 16 : undefined,
+                                        width: 22, height: 22,
+                                        borderTop:    row === 0 ? '2px solid rgba(255,255,255,0.65)' : undefined,
+                                        borderBottom: row === 1 ? '2px solid rgba(255,255,255,0.65)' : undefined,
+                                        borderLeft:   col === 0 ? '2px solid rgba(255,255,255,0.65)' : undefined,
+                                        borderRight:  col === 1 ? '2px solid rgba(255,255,255,0.65)' : undefined,
+                                        borderTopLeftRadius:     k === 'tl' ? 5 : undefined,
+                                        borderTopRightRadius:    k === 'tr' ? 5 : undefined,
+                                        borderBottomLeftRadius:  k === 'bl' ? 5 : undefined,
+                                        borderBottomRightRadius: k === 'br' ? 5 : undefined,
+                                        pointerEvents: 'none',
+                                    }} />
+                                ))}
+
+                                {/* Flash overlay */}
+                                <div style={{
+                                    position: 'absolute', inset: 0, background: '#fff',
+                                    opacity: isFlashing ? 0.85 : 0, transition: 'opacity 0.15s', pointerEvents: 'none',
+                                }} />
+
+                                {/* Page count badge */}
+                                {images.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute', top: 12, left: 12,
+                                        display: 'flex', alignItems: 'center', gap: 6,
+                                        background: 'rgba(0,0,0,0.62)', backdropFilter: 'blur(8px)',
+                                        color: '#fff', fontSize: 11, fontWeight: 700,
+                                        padding: '5px 10px', borderRadius: 100,
+                                    }}>
+                                        <span style={{
+                                            width: 6, height: 6, borderRadius: '50%',
+                                            background: 'var(--app-primary-light)', display: 'inline-block',
+                                            animation: 'pulse 2s ease-in-out infinite',
+                                        }} />
+                                        {images.length} {images.length === 1 ? 'page' : 'pages'}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Capture controls */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 36 }}>
+                                {/* Count display */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, minWidth: 44 }}>
+                                    <span style={{
+                                        fontSize: 30, fontWeight: 900, lineHeight: 1,
+                                        background: 'linear-gradient(135deg, var(--app-primary), var(--app-accent))',
+                                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                                        transition: 'transform 0.15s',
+                                        transform: isFlashing ? 'scale(1.3)' : 'scale(1)',
+                                    }}>{images.length}</span>
+                                    <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--app-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                        {images.length === 1 ? 'PAGE' : 'PAGES'}
+                                    </span>
+                                </div>
+
+                                {/* Shutter button */}
+                                <button
+                                    onClick={capture}
+                                    aria-label="Capture photo"
+                                    style={{
+                                        width: 74, height: 74, borderRadius: '50%',
+                                        background: 'var(--app-bg-elevated)',
+                                        border: '3px solid var(--app-border-strong)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: isFlashing
+                                            ? '0 0 0 8px var(--app-primary-soft), 0 20px 40px rgba(0,0,0,0.4)'
+                                            : '0 8px 32px rgba(0,0,0,0.30)',
+                                        cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0,
+                                    }}
+                                >
+                                    <div style={{
+                                        width: 54, height: 54, borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, var(--app-primary), var(--app-accent))',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: '0 4px 16px var(--app-primary-glow)',
+                                        transition: 'transform 0.15s',
+                                        transform: isFlashing ? 'scale(0.87)' : 'scale(1)',
+                                    }}>
+                                        <Camera style={{ width: 22, height: 22, color: '#fff' }} />
+                                    </div>
+                                </button>
+
+                                <div style={{ minWidth: 44 }} />
+                            </div>
+                            <p style={{ fontSize: 12, color: 'var(--app-text-muted)' }}>Tap the button to capture a page</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* ── RIGHT: Vision Lab + PDF Actions ────────── */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                    {/* Vision Lab — only when images exist */}
+                    {images.length > 0 && (
+                        <div className="glass-panel p-4">
+                            {/* Header */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                                <div style={{
+                                    width: 28, height: 28, borderRadius: 'var(--app-radius-sm)',
+                                    background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                                    display: 'grid', placeItems: 'center', flexShrink: 0,
+                                }}>
+                                    <Sparkles style={{ width: 13, height: 13, color: 'var(--app-primary)' }} />
+                                </div>
+                                <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.01em', flex: 1 }}>
+                                    Vision Lab
+                                </h3>
+                                <span style={{ fontSize: 11, color: 'var(--app-text-faint)' }}>
+                                    {selectedPageIndex + 1} / {images.length}
+                                </span>
+                            </div>
+
+                            {/* Page Preview */}
+                            <div style={{
+                                position: 'relative', aspectRatio: '4/5', borderRadius: 'var(--app-radius)',
+                                background: '#09090f', overflow: 'hidden',
+                                border: '1px solid var(--app-border)', marginBottom: 12,
+                            }}>
+                                <img
+                                    src={images[selectedPageIndex].preview}
+                                    alt={`Page ${selectedPageIndex + 1}`}
+                                    style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 8 }}
+                                    className={
+                                        images[selectedPageIndex].filter === 'grayscale'     ? 'grayscale' :
+                                        images[selectedPageIndex].filter === 'high-contrast' ? 'contrast-150 grayscale' :
+                                        images[selectedPageIndex].filter === 'threshold'     ? 'contrast-[200] grayscale' :
+                                        images[selectedPageIndex].filter === 'brighten'      ? 'brightness-125' :
+                                        images[selectedPageIndex].filter === 'sharpen'       ? 'contrast-125 saturate-0' :
+                                        images[selectedPageIndex].filter === 'magic-color'   ? 'saturate-[1.8] contrast-[1.2] brightness-110' :
+                                        images[selectedPageIndex].filter === 'no-shadow'     ? 'contrast-[1.15] brightness-110' : ''
+                                    }
+                                />
+
+                                {/* Apply All */}
+                                <button
+                                    onClick={() => applyFilter(images[selectedPageIndex].filter, true)}
+                                    style={{
+                                        position: 'absolute', top: 8, right: 8,
+                                        padding: '3px 8px', borderRadius: 6,
+                                        background: 'var(--app-primary)', color: '#fff',
+                                        fontSize: 10, fontWeight: 700, border: 'none', cursor: 'pointer',
+                                        boxShadow: '0 2px 8px var(--app-primary-glow)',
+                                    }}
+                                >
+                                    Apply All
+                                </button>
+
+                                {/* Prev/Next nav */}
+                                <div style={{
+                                    position: 'absolute', bottom: 8, left: 0, right: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                }}>
+                                    {[
+                                        { dir: -1, Icon: ChevronLeft,  disabled: selectedPageIndex === 0 },
+                                        { dir:  1, Icon: ChevronRight, disabled: selectedPageIndex === images.length - 1 },
+                                    ].map(({ dir, Icon, disabled }, i) => (
+                                        <React.Fragment key={i}>
+                                            {i === 1 && (
+                                                <span style={{
+                                                    fontSize: 10, fontWeight: 700, color: '#fff',
+                                                    background: 'rgba(0,0,0,0.6)', padding: '3px 8px', borderRadius: 100,
+                                                }}>
+                                                    {selectedPageIndex + 1}/{images.length}
+                                                </span>
+                                            )}
+                                            <button
+                                                onClick={() => setSelectedPageIndex(p => Math.max(0, Math.min(images.length - 1, p + dir)))}
+                                                disabled={disabled}
+                                                style={{
+                                                    padding: '3px 8px', borderRadius: 100, border: 'none', cursor: 'pointer',
+                                                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                                                    color: '#fff', opacity: disabled ? 0.3 : 1,
+                                                    display: 'flex', alignItems: 'center',
+                                                }}
+                                            >
+                                                <Icon style={{ width: 13, height: 13 }} />
+                                            </button>
+                                        </React.Fragment>
+                                    ))}
                                 </div>
                             </div>
-                            <div className="flex-1 flex items-center justify-end gap-1.5 h-10">
+
+                            {/* Filters Grid */}
+                            <p className="app-eyebrow" style={{ marginBottom: 8 }}>Filters</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
+                                {VISION_FILTERS.map(f => {
+                                    const active = images[selectedPageIndex].filter === f.id;
+                                    return (
+                                        <button
+                                            key={f.id}
+                                            onClick={() => applyFilter(f.id)}
+                                            style={{
+                                                display: 'flex', alignItems: 'center', gap: 7,
+                                                padding: '8px 10px', borderRadius: 'var(--app-radius-sm)',
+                                                background: active
+                                                    ? 'linear-gradient(135deg, var(--app-primary), var(--app-accent))'
+                                                    : 'var(--app-bg-elevated)',
+                                                border: `1px solid ${active ? 'transparent' : 'var(--app-border-strong)'}`,
+                                                color: active ? '#fff' : 'var(--app-text-muted)',
+                                                fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                                                boxShadow: active ? '0 4px 12px var(--app-primary-glow)' : 'none',
+                                                transition: 'all 0.2s ease',
+                                                textAlign: 'left',
+                                            }}
+                                        >
+                                            <div style={{
+                                                padding: 4, borderRadius: 6, flexShrink: 0,
+                                                background: active ? 'rgba(255,255,255,0.18)' : 'var(--app-primary-soft)',
+                                            }}>
+                                                {React.cloneElement(f.icon, {
+                                                    style: { width: 11, height: 11, color: active ? '#fff' : 'var(--app-primary)' }
+                                                })}
+                                            </div>
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {f.label}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Smart Tools */}
+                            <p className="app-eyebrow" style={{ marginBottom: 8 }}>Smart Tools</p>
+                            <div style={{ display: 'flex', gap: 8 }}>
                                 <button
-                                    onClick={handleGenerate}
-                                    disabled={loading}
-                                    className="flex-1 sm:flex-none btn-primary py-2 px-3 text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 h-8 min-w-[90px]"
+                                    onClick={handleAutoCrop}
+                                    disabled={isAutoCropping}
+                                    className="btn-primary"
+                                    style={{ flex: 1, fontSize: 11, padding: '9px 10px', justifyContent: 'center' }}
                                 >
-                                    {loading
-                                        ? <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                                        : <><div className="hidden sm:block"><FilePlus className="w-3.5 h-3.5" /></div> Generate</>
-                                    }
+                                    <Sparkles style={{
+                                        width: 13, height: 13,
+                                        ...(isAutoCropping ? { animation: 'spin 1s linear infinite' } : {}),
+                                    }} />
+                                    Auto-Clean
                                 </button>
                                 <button
-                                    onClick={handleDownload}
-                                    disabled={!isGenerated || loading}
-                                    className={`flex-1 sm:flex-none py-2 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300 h-8 min-w-[70px] ${isGenerated
-                                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg active:scale-95'
-                                        : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-slate-100 dark:border-slate-800'
-                                        }`}
+                                    onClick={() => setIsCropModalOpen(true)}
+                                    className="btn-secondary"
+                                    style={{ flex: 1, fontSize: 11, padding: '9px 10px', justifyContent: 'center' }}
                                 >
-                                    <div className="hidden sm:block">
-                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                    </div>
-                                    Save
+                                    <Crop style={{ width: 13, height: 13 }} />
+                                    Manual Crop
                                 </button>
                             </div>
                         </div>
+                    )}
+
+                    {/* PDF Settings Card */}
+                    <div className="glass-panel p-4">
+                        {/* Card header */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                            <div style={{
+                                width: 28, height: 28, borderRadius: 'var(--app-radius-sm)',
+                                background: 'linear-gradient(135deg, var(--app-primary-soft), var(--app-accent-soft))',
+                                display: 'grid', placeItems: 'center', flexShrink: 0,
+                            }}>
+                                <FilePlus style={{ width: 13, height: 13, color: 'var(--app-primary)' }} />
+                            </div>
+                            <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--app-text)', letterSpacing: '-0.01em' }}>
+                                PDF Settings
+                            </h3>
+                        </div>
+
+                        {/* File name */}
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--app-text-muted)', marginBottom: 6 }}>
+                            File Name
+                        </label>
                         <input
                             type="text"
                             value={filename}
-                            onChange={(e) => setFilename(e.target.value)}
-                            className="input-field py-2 text-sm"
-                            placeholder="Enter PDF filename…"
+                            onChange={e => setFilename(e.target.value)}
+                            className="input-field"
+                            placeholder="My_Document.pdf"
+                            style={{ marginBottom: 14, fontSize: 13 }}
                         />
-                    </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                        {images.map((img, index) => (
-                            <div key={img.id} className="group relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 aspect-[3/4] bg-slate-100 dark:bg-slate-800 transition-colors">
-                                <img src={img.preview} alt={`Page ${index + 1}`} className="w-full h-full object-cover" />
-                                <div className="absolute top-1 left-1 bg-black/60 text-white text-xs font-bold px-1.5 py-0.5 rounded backdrop-blur-md">
-                                    {index + 1}
-                                </div>
-                                <div
-                                    className="absolute inset-0 cursor-pointer z-10"
-                                    onClick={() => setSelectedPageIndex(index)}
-                                />
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeImage(img.id);
-                                    }}
-                                    className={`absolute top-1 right-1 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 active:scale-90 transition-all shadow-md z-30 ${selectedPageIndex === index ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}
-                                    aria-label="Remove page"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                </button>
-
-                                {/* Reordering Controls */}
-                                <div className={`absolute bottom-0 inset-x-0 h-8 bg-black/40 backdrop-blur-sm flex items-center justify-around transition-opacity z-30 ${selectedPageIndex === index ? 'opacity-100' : 'opacity-0 sm:group-hover:opacity-100'}`}>
-                                    <button
-                                        disabled={index === 0}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            movePage(index, -1);
-                                        }}
-                                        className="text-white hover:text-blue-300 disabled:opacity-30"
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        disabled={index === images.length - 1}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            movePage(index, 1);
-                                        }}
-                                        className="text-white hover:text-blue-300 disabled:opacity-30"
-                                    >
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
-                                {selectedPageIndex === index && (
-                                    <div className="absolute inset-0 ring-4 ring-blue-500 ring-inset pointer-events-none z-20" />
-                                )}
-                                {img.filter !== 'none' && (
-                                    <div className="absolute top-1 right-8 bg-blue-600 text-white text-[8px] font-bold px-1 rounded flex items-center gap-1 backdrop-blur-sm z-30">
-                                        <Sparkles className="w-2 h-2" /> ENHANCED
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Vision Lab Control Panel */}
-                    <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800 premium-typography">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Vision Lab</h3>
+                        {/* Pages count pill */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 14px', borderRadius: 'var(--app-radius-sm)',
+                            background: 'var(--app-bg-elevated)', border: '1px solid var(--app-border)',
+                            marginBottom: 16,
+                        }}>
+                            <span style={{ fontSize: 12, color: 'var(--app-text-muted)' }}>Pages</span>
+                            <span style={{
+                                fontSize: 14, fontWeight: 700,
+                                color: images.length > 0 ? 'var(--app-primary)' : 'var(--app-text-faint)',
+                            }}>
+                                {images.length === 0 ? 'None added yet' : `${images.length} page${images.length !== 1 ? 's' : ''}`}
+                            </span>
                         </div>
 
-                        <div className="flex flex-col md:flex-row gap-4">
-                            {/* Preview Area - Compact but clear */}
-                            <div className="md:w-1/2 lg:w-2/5">
-                                <div className="relative group aspect-[4/5] w-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
+                        {/* Action buttons */}
+                        <button
+                            onClick={handleGenerate}
+                            disabled={loading || images.length === 0}
+                            className="btn-primary"
+                            style={{ width: '100%', justifyContent: 'center', marginBottom: 10 }}
+                        >
+                            {loading
+                                ? <><div className="animate-spin rounded-full border-b-2 border-white/50" style={{ width: 14, height: 14, borderColor: 'rgba(255,255,255,0.4)', borderTopColor: '#fff' }} /> Generating…</>
+                                : <><FilePlus style={{ width: 15, height: 15 }} /> Generate PDF</>
+                            }
+                        </button>
+
+                        <button
+                            onClick={handleDownload}
+                            disabled={!isGenerated || loading}
+                            className="btn-secondary"
+                            style={{
+                                width: '100%', justifyContent: 'center',
+                                opacity: (!isGenerated || loading) ? 0.4 : 1,
+                                cursor: (!isGenerated || loading) ? 'not-allowed' : 'pointer',
+                            }}
+                        >
+                            <svg style={{ width: 15, height: 15 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Pages Filmstrip ─────────────────────────── */}
+            {images.length > 0 && (
+                <div className="glass-panel mt-5 p-4">
+                    {/* Strip header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div style={{
+                                minWidth: 28, height: 28, borderRadius: 'var(--app-radius-sm)', padding: '0 8px',
+                                background: 'linear-gradient(135deg, var(--app-primary), var(--app-accent))',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 12, fontWeight: 800, color: '#fff',
+                            }}>
+                                {images.length}
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--app-text)' }}>Pages</span>
+                        </div>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="btn-secondary"
+                            style={{ fontSize: 11, padding: '6px 14px' }}
+                        >
+                            <FilePlus style={{ width: 13, height: 13 }} /> Add More
+                        </button>
+                    </div>
+
+                    {/* Scrollable filmstrip */}
+                    <div style={{
+                        display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6,
+                        scrollbarWidth: 'thin', scrollbarColor: 'var(--app-border-strong) transparent',
+                    }}>
+                        {images.map((img, index) => {
+                            const isSelected = selectedPageIndex === index;
+                            return (
+                                <div
+                                    key={img.id}
+                                    onClick={() => setSelectedPageIndex(index)}
+                                    style={{
+                                        flexShrink: 0, width: 86, aspectRatio: '3/4',
+                                        borderRadius: 'var(--app-radius-sm)', overflow: 'hidden', cursor: 'pointer',
+                                        position: 'relative',
+                                        border: `2px solid ${isSelected ? 'var(--app-primary)' : 'var(--app-border-strong)'}`,
+                                        boxShadow: isSelected
+                                            ? '0 0 0 3px var(--app-primary-soft), var(--app-shadow)'
+                                            : 'var(--app-shadow-sm)',
+                                        background: 'var(--app-bg-elevated)',
+                                        transform: isSelected ? 'translateY(-4px) scale(1.05)' : 'translateY(0) scale(1)',
+                                        transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
+                                    }}
+                                >
                                     <img
-                                        src={images[selectedPageIndex].preview}
-                                        alt="Current Page"
-                                        className={`w-full h-full object-contain p-2 sm:p-4 transition-all duration-300 ${
-                                            images[selectedPageIndex].filter === 'grayscale'     ? 'grayscale' :
-                                            images[selectedPageIndex].filter === 'high-contrast' ? 'contrast-150 grayscale' :
-                                            images[selectedPageIndex].filter === 'threshold'     ? 'contrast-[200] grayscale' :
-                                            images[selectedPageIndex].filter === 'brighten'      ? 'brightness-125' :
-                                            images[selectedPageIndex].filter === 'sharpen'       ? 'contrast-125 saturate-0' :
-                                            images[selectedPageIndex].filter === 'magic-color'   ? 'saturate-[1.8] contrast-[1.2] brightness-110' :
-                                            images[selectedPageIndex].filter === 'no-shadow'     ? 'contrast-[1.15] brightness-110' : ''
-                                        }`}
+                                        src={img.preview} alt={`Page ${index + 1}`}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                     />
-                                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">
-                                        Page {selectedPageIndex + 1}
-                                    </div>
-                                    <button
-                                        onClick={() => applyFilter(images[selectedPageIndex].filter, true)}
-                                        className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter shadow-lg"
-                                    >
-                                        Apply All
-                                    </button>
-                                </div>
 
-                                {/* ── Page Navigation Bar ───────────────────── */}
-                                <div className="flex items-center justify-between mt-2.5 px-1">
-                                    {/* Prev */}
-                                    <button
-                                        onClick={() => setSelectedPageIndex(i => Math.max(0, i - 1))}
-                                        disabled={selectedPageIndex === 0}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl shadow"
-                                        aria-label="Previous page"
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Prev</span>
-                                    </button>
-
-                                    {/* Page X of Y */}
-                                    <div
-                                        key={selectedPageIndex}
-                                        className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl shadow"
-                                    >
-                                        <span className="text-blue-400 font-black text-sm tabular-nums">
-                                            {selectedPageIndex + 1}
-                                        </span>
-                                        <span className="text-slate-500 text-[10px] font-semibold">of</span>
-                                        <span className="text-slate-300 font-black text-sm tabular-nums">
-                                            {images.length}
-                                        </span>
+                                    {/* Page number badge */}
+                                    <div style={{
+                                        position: 'absolute', top: 5, left: 5,
+                                        background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
+                                        color: '#fff', fontSize: 10, fontWeight: 800,
+                                        padding: '2px 6px', borderRadius: 5,
+                                    }}>
+                                        {index + 1}
                                     </div>
 
-                                    {/* Next */}
-                                    <button
-                                        onClick={() => setSelectedPageIndex(i => Math.min(images.length - 1, i + 1))}
-                                        disabled={selectedPageIndex === images.length - 1}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl shadow"
-                                        aria-label="Next page"
-                                    >
-                                        <span className="text-[10px] font-black uppercase tracking-wide hidden sm:block">Next</span>
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
+                                    {/* Filter badge */}
+                                    {img.filter !== 'none' && (
+                                        <div style={{
+                                            position: 'absolute', top: 5, right: 5,
+                                            background: 'var(--app-primary)', color: '#fff',
+                                            padding: '2px 4px', borderRadius: 4,
+                                            display: 'flex', alignItems: 'center',
+                                        }}>
+                                            <Sparkles style={{ width: 8, height: 8 }} />
+                                        </div>
+                                    )}
 
-                            {/* Controls Area - Highly Compact Grid */}
-                            <div className="flex-1 flex flex-col gap-4">
-                                {/* Enhancement Filters Grid */}
-                                <div>
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Filters</p>
-                                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                                        {VISION_FILTERS.map((f) => (
-                                            <button
-                                                key={f.id}
-                                                onClick={() => applyFilter(f.id)}
-                                                className={`flex items-center gap-2 p-2 rounded-xl border ${
-                                                    images[selectedPageIndex].filter === f.id
-                                                    ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                                                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                                                }`}
-                                            >
-                                                <div className={`p-1.5 rounded-lg ${images[selectedPageIndex].filter === f.id ? 'bg-white/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
-                                                    {React.cloneElement(f.icon, { className: "w-3 h-3" })}
-                                                </div>
-                                                <span className="text-[10px] font-black uppercase leading-none truncate">{f.label}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Smart Formatting Tools */}
-                                <div className="mt-auto">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-2">Smart Tools</p>
-                                    <div className="flex gap-2">
+                                    {/* Hover/selected controls overlay */}
+                                    <div style={{
+                                        position: 'absolute', bottom: 0, left: 0, right: 0,
+                                        background: 'linear-gradient(to top, rgba(0,0,0,0.75), transparent)',
+                                        padding: '14px 4px 5px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+                                        opacity: isSelected ? 1 : 0,
+                                        transition: 'opacity 0.2s',
+                                    }}>
                                         <button
-                                            onClick={handleAutoCrop}
-                                            disabled={isAutoCropping}
-                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 disabled:opacity-50"
+                                            onClick={e => { e.stopPropagation(); movePage(index, -1); }}
+                                            disabled={index === 0}
+                                            style={{
+                                                background: 'none', border: 'none', color: '#fff', cursor: 'pointer',
+                                                opacity: index === 0 ? 0.3 : 1, padding: 2, display: 'flex',
+                                            }}
                                         >
-                                            <Sparkles className={`w-3.5 h-3.5 ${isAutoCropping ? 'animate-spin' : ''}`} />
-                                            <span className="text-[10px] font-black uppercase tracking-wider">Auto-Clean</span>
+                                            <ChevronLeft style={{ width: 13, height: 13 }} />
                                         </button>
                                         <button
-                                            onClick={() => setIsCropModalOpen(true)}
-                                            className="flex-1 flex items-center justify-center gap-2 p-3 bg-slate-800 dark:bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-900 dark:hover:bg-slate-600 border border-slate-700 dark:border-slate-600"
+                                            onClick={e => { e.stopPropagation(); removeImage(img.id); }}
+                                            style={{
+                                                width: 18, height: 18, borderRadius: '50%', border: 'none',
+                                                background: 'var(--app-danger)', color: '#fff', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            }}
                                         >
-                                            <Crop className="w-3.5 h-3.5" />
-                                            <span className="text-[10px] font-black uppercase tracking-wider">Manual Crop</span>
+                                            <X style={{ width: 10, height: 10 }} />
+                                        </button>
+                                        <button
+                                            onClick={e => { e.stopPropagation(); movePage(index, 1); }}
+                                            disabled={index === images.length - 1}
+                                            style={{
+                                                background: 'none', border: 'none', color: '#fff', cursor: 'pointer',
+                                                opacity: index === images.length - 1 ? 0.3 : 1, padding: 2, display: 'flex',
+                                            }}
+                                        >
+                                            <ChevronRight style={{ width: 13, height: 13 }} />
                                         </button>
                                     </div>
                                 </div>
+                            );
+                        })}
 
-                                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl flex items-center gap-2">
-                                    <div className="p-1 bg-emerald-500 rounded-full">
-                                        <CheckCircle className="w-2.5 h-2.5 text-white" />
-                                    </div>
-                                    <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-tight">Ready for PDF</p>
-                                </div>
-                            </div>
+                        {/* "Add page" placeholder card */}
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                                flexShrink: 0, width: 86, aspectRatio: '3/4',
+                                borderRadius: 'var(--app-radius-sm)',
+                                border: '2px dashed var(--app-border-strong)',
+                                background: 'var(--app-bg-elevated)',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', color: 'var(--app-text-faint)', gap: 4,
+                                transition: 'all 0.2s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--app-primary)'; e.currentTarget.style.color = 'var(--app-primary)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--app-border-strong)'; e.currentTarget.style.color = 'var(--app-text-faint)'; }}
+                        >
+                            <FilePlus style={{ width: 20, height: 20 }} />
+                            <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Add</span>
                         </div>
                     </div>
                 </div>
             )}
 
+            {/* ── Crop Modal ───────────────────────────────── */}
             {isCropModalOpen && images[selectedPageIndex] && (
                 <ManualCropModal
                     isOpen={isCropModalOpen}
@@ -981,4 +1247,4 @@ const CreatePDF = () => {
     );
 };
 
-export default CreatePDF;
+export default CreatePDF;
